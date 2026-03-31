@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Commons</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --bg: #0c0c10;
+    --surface: #141418;
+    --surface2: #1e1e24;
+    --border: rgba(255,255,255,0.08);
+    --accent: #7c6cff;
+    --accent2: #ff6c9d;
+    --text: #efefef;
+    --muted: #666678;
+    --earn: #5ef0c0;
+    --spend: #ff6c9d;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content:''; position:fixed;
+    top:-150px; left:-80px;
+    width:350px; height:350px;
+    background: radial-gradient(circle, rgba(124,108,255,0.1) 0%, transparent 70%);
+    pointer-events:none; z-index:0;
+  }
+
+  .screen { display:none; flex-direction:column; min-height:100vh; position:relative; z-index:1; }
+  .screen.active { display:flex; }
+
+  /* SPLASH */
+  #screen-splash { justify-content:center; align-items:center; }
+  .splash-logo {
+    font-family: 'Lora', serif;
+    font-size: 48px; font-weight: 700;
+    color: var(--text);
+    letter-spacing: -1px;
+    opacity: 0;
+    animation: splashIn 0.8s ease 0.3s forwards;
+  }
+  @keyframes splashIn {
+    0%   { opacity:0; transform:translateY(12px); }
+    100% { opacity:1; transform:translateY(0); }
+  }
+
+  /* ONBOARDING */
+  #screen-onboard { justify-content:flex-end; padding-bottom:52px; }
+  .onboard-top {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px;
+  }
+  .onboard-wordmark {
+    font-family:'Lora', serif;
+    font-size:42px; font-weight:700;
+    color:var(--text); letter-spacing:-1px;
+    opacity:0; animation:fadeUp 0.5s ease 0.1s forwards;
+  }
+  .onboard-tagline {
+    font-size:14px; color:var(--muted); font-weight:400;
+    opacity:0; animation:fadeUp 0.5s ease 0.25s forwards;
+  }
+  .onboard-form {
+    padding:0 28px;
+    opacity:0; animation:fadeUp 0.5s ease 0.4s forwards;
+  }
+
+  /* INPUTS */
+  .input-field {
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:16px 18px;
+    font-family:'Inter', sans-serif;
+    font-size:15px; color:var(--text);
+    outline:none; margin-bottom:12px;
+    transition:border-color 0.2s;
+  }
+  .input-field:focus { border-color:var(--accent); }
+  .input-field::placeholder { color:var(--muted); }
+  textarea.input-field { resize:none; height:110px; }
+
+  /* BUTTONS */
+  .btn-primary {
+    width:100%; padding:16px;
+    background:var(--accent);
+    border:none; border-radius:12px;
+    font-family:'Inter', sans-serif;
+    font-size:14px; font-weight:600;
+    color:white; cursor:pointer;
+    transition:opacity 0.2s, transform 0.1s;
+    letter-spacing:0.2px;
+  }
+  .btn-primary:active { opacity:0.8; transform:scale(0.98); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+
+  .btn-ghost {
+    width:100%; padding:16px;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:12px;
+    font-family:'Inter', sans-serif;
+    font-size:14px; font-weight:500;
+    color:var(--muted); cursor:pointer;
+    margin-top:10px;
+  }
+
+  .btn-small {
+    padding:9px 18px;
+    background:var(--accent);
+    border:none; border-radius:10px;
+    font-family:'Inter', sans-serif;
+    font-size:13px; font-weight:600;
+    color:white; cursor:pointer;
+    transition:opacity 0.2s;
+    white-space:nowrap;
+  }
+  .btn-small:active { opacity:0.8; }
+
+  .btn-small-outline {
+    padding:9px 18px;
+    background:transparent;
+    border:1px solid var(--border);
+    border-radius:10px;
+    font-family:'Inter', sans-serif;
+    font-size:13px; font-weight:500;
+    color:var(--muted); cursor:pointer;
+  }
+
+  /* BINARY NAV */
+  .binary-nav {
+    display:flex;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky; top:0; z-index:50;
+  }
+
+  .nav-tab {
+    flex:1; padding:18px 16px 14px;
+    text-align:center; cursor:pointer;
+    font-family:'Lora', serif;
+    font-size:16px; font-weight:600;
+    color:var(--muted);
+    border-bottom:2px solid transparent;
+    transition:all 0.2s;
+    position:relative;
+  }
+  .nav-tab.active { color:var(--text); border-bottom-color:var(--accent); }
+
+  .nav-divider {
+    width:1px; background:var(--border);
+    margin:12px 0;
+  }
+
+  /* TOPBAR */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 14px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+    position:sticky; top:0; z-index:50;
+  }
+  .topbar-title {
+    font-family:'Lora', serif;
+    font-size:18px; font-weight:600; color:var(--text);
+  }
+  .topbar-back {
+    font-size:13px; color:var(--muted); cursor:pointer;
+    font-weight:500; padding:4px 0;
+  }
+
+  .token-chip {
+    display:flex; align-items:center; gap:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:100px;
+    padding:6px 14px;
+    font-size:13px; font-weight:500;
+  }
+  .token-dot {
+    width:7px; height:7px;
+    background:var(--accent);
+    border-radius:50%;
+    box-shadow:0 0 5px var(--accent);
+  }
+
+  /* MAIN CONTAINER */
+  .main-screen { display:none; flex-direction:column; flex:1; }
+  .main-screen.visible { display:flex; }
+
+  /* SEARCH BAR */
+  .search-wrap { padding:14px 16px 8px; }
+  .search-field {
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 16px;
+    font-family:'Inter', sans-serif;
+    font-size:14px; color:var(--text);
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  .search-field:focus { border-color:var(--accent); }
+  .search-field::placeholder { color:var(--muted); }
+
+  /* SCROLL */
+  .scroll-area {
+    flex:1; overflow-y:auto;
+    padding:8px 16px 120px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* POST CARD */
+  .post-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px; margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color 0.2s, transform 0.1s;
+    animation:fadeUp 0.35s ease both;
+  }
+  .post-card:active { transform:scale(0.99); }
+  .post-card:hover  { border-color:rgba(124,108,255,0.25); }
+
+  .post-type {
+    font-size:10px; font-weight:600;
+    letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--muted); margin-bottom:8px;
+  }
+  .post-type.need  { color:var(--spend); }
+  .post-type.offer { color:var(--earn); }
+
+  .post-title {
+    font-family:'Lora', serif;
+    font-size:16px; font-weight:600;
+    line-height:1.35; margin-bottom:8px;
+  }
+  .post-desc { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:14px; }
+
+  .post-footer { display:flex; align-items:center; justify-content:space-between; }
+  .post-meta   { display:flex; align-items:center; gap:8px; }
+  .avatar {
+    width:24px; height:24px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700;
+  }
+  .post-author { font-size:12px; color:var(--muted); }
+
+  /* GROUP CARD */
+  .group-card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px; margin-bottom:10px;
+    cursor:pointer;
+    transition:border-color 0.2s, transform 0.1s;
+    animation:fadeUp 0.35s ease both;
+  }
+  .group-card:active { transform:scale(0.99); }
+  .group-card:hover  { border-color:rgba(94,240,192,0.25); }
+
+  .group-tag {
+    font-size:10px; font-weight:600;
+    letter-spacing:1.2px; text-transform:uppercase;
+    color:var(--earn); margin-bottom:8px;
+  }
+  .group-title {
+    font-family:'Lora', serif;
+    font-size:16px; font-weight:600;
+    line-height:1.35; margin-bottom:8px;
+  }
+  .group-desc { font-size:13px; color:var(--muted); line-height:1.55; margin-bottom:14px; }
+  .group-footer { display:flex; align-items:center; justify-content:space-between; }
+  .group-members { font-size:12px; color:var(--muted); }
+  .group-joined  { font-size:12px; color:var(--earn); font-weight:600; }
+
+  /* FLOATING PLUS */
+  .fab {
+    position:fixed; bottom:28px;
+    width:52px; height:52px;
+    background:var(--accent);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:24px; color:white; font-weight:300;
+    cursor:pointer;
+    box-shadow:0 4px 20px rgba(124,108,255,0.45);
+    transition:transform 0.15s, box-shadow 0.2s;
+    z-index:90;
+  }
+  .fab:active { transform:scale(0.9); box-shadow:0 2px 10px rgba(124,108,255,0.3); }
+  .fab-exchange { right:28px; }
+  .fab-connect  { right:28px; }
+
+  /* POST FORM */
+  .form-scroll { flex:1; overflow-y:auto; padding:20px 20px 100px; }
+  .form-section { margin-bottom:20px; }
+  .form-label {
+    font-size:11px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:0.9px;
+    margin-bottom:8px; display:block;
+  }
+
+  .type-row { display:flex; gap:8px; margin-bottom:4px; }
+  .type-pill {
+    flex:1; padding:12px;
+    border:1px solid var(--border);
+    border-radius:10px; background:var(--surface);
+    font-family:'Inter', sans-serif;
+    font-size:13px; font-weight:600;
+    color:var(--muted); cursor:pointer; text-align:center;
+    transition:all 0.2s;
+  }
+  .type-pill.sel-need  { border-color:rgba(255,108,157,0.4); background:rgba(255,108,157,0.08); color:var(--spend); }
+  .type-pill.sel-offer { border-color:rgba(94,240,192,0.4);  background:rgba(94,240,192,0.08);  color:var(--earn); }
+
+  /* CHAT */
+  .chat-header {
+    padding:16px 20px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg);
+  }
+  .chat-post-ref {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px; padding:12px 14px;
+    margin-bottom:4px;
+  }
+  .chat-post-ref-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .chat-post-ref-title { font-family:'Lora', serif; font-size:14px; font-weight:600; }
+
+  .chat-messages {
+    flex:1; overflow-y:auto;
+    padding:16px; display:flex; flex-direction:column; gap:10px;
+    padding-bottom:160px;
+  }
+
+  .msg-bubble {
+    max-width:78%; padding:11px 14px;
+    border-radius:16px; font-size:14px; line-height:1.5;
+  }
+  .msg-bubble.mine {
+    align-self:flex-end;
+    background:var(--accent);
+    color:white;
+    border-bottom-right-radius:4px;
+  }
+  .msg-bubble.theirs {
+    align-self:flex-start;
+    background:var(--surface2);
+    color:var(--text);
+    border-bottom-left-radius:4px;
+  }
+  .msg-name { font-size:10px; color:var(--muted); margin-bottom:4px; }
+
+  .chat-input-bar {
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    background:var(--bg);
+    border-top:1px solid var(--border);
+    padding:12px 16px 32px;
+    z-index:80;
+  }
+  .chat-input-row { display:flex; gap:8px; align-items:flex-end; }
+  .chat-input {
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:10px 16px;
+    font-family:'Inter', sans-serif;
+    font-size:14px; color:var(--text);
+    outline:none; resize:none;
+    max-height:100px; line-height:1.4;
+  }
+  .chat-input::placeholder { color:var(--muted); }
+  .chat-send {
+    width:38px; height:38px;
+    background:var(--accent);
+    border:none; border-radius:50%;
+    color:white; font-size:16px;
+    cursor:pointer; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  .confirm-deal-bar {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px; padding:14px 16px;
+    margin-top:10px; display:flex;
+    align-items:center; gap:10px;
+  }
+  .deal-input {
+    flex:1;
+    background:var(--bg);
+    border:1px solid var(--border);
+    border-radius:8px; padding:9px 12px;
+    font-family:'Inter', sans-serif;
+    font-size:14px; color:var(--text);
+    outline:none; min-width:0;
+  }
+  .deal-input::placeholder { color:var(--muted); }
+  .deal-label { font-size:12px; color:var(--muted); white-space:nowrap; }
+
+  /* GROUP SCREEN */
+  .group-header {
+    padding:20px 20px 16px;
+    border-bottom:1px solid var(--border);
+  }
+  .group-header-title { font-family:'Lora', serif; font-size:20px; font-weight:700; margin-bottom:6px; }
+  .group-header-desc  { font-size:14px; color:var(--muted); line-height:1.5; margin-bottom:16px; }
+  .group-header-meta  { font-size:12px; color:var(--muted); }
+  .group-members-list { padding:16px 20px; }
+  .member-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+  .member-av  { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+  .member-name { font-size:14px; font-weight:500; }
+  .member-handle { font-size:12px; color:var(--muted); }
+
+  /* PROFILE */
+  .profile-head {
+    padding:32px 20px 24px; text-align:center;
+    border-bottom:1px solid var(--border);
+  }
+  .profile-av {
+    width:68px; height:68px; border-radius:50%;
+    margin:0 auto 14px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Lora', serif; font-size:26px; font-weight:700;
+    background:linear-gradient(135deg, var(--accent), var(--accent2));
+  }
+  .profile-name   { font-family:'Lora', serif; font-size:22px; font-weight:700; margin-bottom:4px; }
+  .profile-handle { font-size:13px; color:var(--muted); margin-bottom:20px; }
+
+  .stats-row  { display:flex; gap:1px; background:var(--border); border-radius:14px; overflow:hidden; border:1px solid var(--border); }
+  .stat-box   { flex:1; background:var(--surface); padding:16px 8px; text-align:center; }
+  .stat-val   { font-family:'Lora', serif; font-size:22px; font-weight:700; display:block; margin-bottom:3px; }
+  .stat-label { font-size:10px; color:var(--muted); font-weight:500; text-transform:uppercase; letter-spacing:0.8px; }
+
+  .section-label {
+    font-size:11px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:1px;
+    margin:20px 0 12px; display:block;
+  }
+
+  .history-row   { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .history-dot   { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .history-dot.earn  { background:var(--earn); }
+  .history-dot.spend { background:var(--spend); }
+  .history-info  { flex:1; }
+  .history-title { font-size:14px; font-weight:500; margin-bottom:2px; }
+  .history-sub   { font-size:12px; color:var(--muted); }
+  .history-amt   { font-family:'Lora', serif; font-size:15px; font-weight:700; }
+  .history-amt.earn  { color:var(--earn); }
+  .history-amt.spend { color:var(--spend); }
+
+  /* SUCCESS */
+  .success-screen {
+    display:none; position:fixed; inset:0;
+    background:var(--bg); z-index:300;
+    flex-direction:column; align-items:center;
+    justify-content:center; text-align:center; padding:40px;
+  }
+  .success-screen.open { display:flex; }
+  .success-mark {
+    width:72px; height:72px;
+    border:2px solid var(--earn); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; margin-bottom:24px;
+    animation:popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .success-title { font-family:'Lora', serif; font-size:26px; font-weight:700; margin-bottom:8px; }
+  .success-sub   { font-size:14px; color:var(--muted); margin-bottom:32px; line-height:1.6; }
+
+  /* EMPTY / LOADING */
+  .empty { text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.9; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp     { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes slideSheet { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  @keyframes popIn      { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+
+  .d1{animation-delay:.05s} .d2{animation-delay:.1s} .d3{animation-delay:.15s} .d4{animation-delay:.2s} .d5{animation-delay:.25s}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="screen-splash" class="screen active">
+  <div class="splash-logo">Commons</div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="screen-onboard" class="screen">
+  <div class="onboard-top">
+    <div class="onboard-wordmark">Commons</div>
+    <div class="onboard-tagline">Pass it on. Tokenised.</div>
+  </div>
+  <div class="onboard-form">
+    <input class="input-field" type="email"    id="email-input"    placeholder="Email" autocomplete="email">
+    <input class="input-field" type="password" id="password-input" placeholder="Password (min 6 chars)" autocomplete="current-password">
+    <div id="signup-fields">
+      <input class="input-field" type="text" id="name-input"   placeholder="Your name" maxlength="30" autocomplete="off">
+      <input class="input-field" type="text" id="handle-input" placeholder="Handle (letters, numbers, _)" maxlength="20" autocomplete="off">
+    </div>
+    <button class="btn-primary" id="auth-btn" onclick="authAction()">Join</button>
+    <button class="btn-ghost"   id="toggle-auth-btn" onclick="toggleAuthMode()">Already have an account? Sign in</button>
+  </div>
+</div>
+
+<!-- CHECK EMAIL SCREEN -->
+<div id="screen-checkemail" class="screen">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;gap:16px;">
+    <div style="font-size:40px;">✉️</div>
+    <div style="font-family:'Lora',serif;font-size:24px;font-weight:700;">Check your email</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.8;max-width:300px;">
+      We sent a confirmation link to<br>
+      <span id="confirm-email-display" style="color:var(--text);font-weight:500;"></span>
+    </div>
+    <div style="font-size:13px;color:var(--muted);line-height:1.8;margin-top:8px;">
+      Click the link in the email to activate your account. Then come back and sign in.
+    </div>
+    <button class="btn-ghost" style="max-width:260px;margin-top:8px;" onclick="backToSignIn()">Back to sign in</button>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="screen-home" class="screen">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50;">
+    <div style="font-family:'Lora',serif;font-size:18px;font-weight:700;">Commons</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="token-chip">
+        <div class="token-dot"></div>
+        <span id="balance-display">0</span>&nbsp;tokens
+      </div>
+      <div id="nav-av" onclick="showScreen('profile')"
+        style="width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">?</div>
+    </div>
+  </div>
+  <div class="binary-nav">
+    <div class="nav-tab active" id="tab-exchange" onclick="switchTab('exchange')">Exchange</div>
+    <div class="nav-divider"></div>
+    <div class="nav-tab" id="tab-connect" onclick="switchTab('connect')">Connect</div>
+  </div>
+
+  <!-- EXCHANGE PANEL -->
+  <div class="main-screen visible" id="panel-exchange">
+    <div class="search-wrap">
+      <input class="search-field" type="text" id="search-exchange" placeholder="Search posts..." oninput="onSearchExchange()" autocomplete="off">
+    </div>
+    <div class="scroll-area">
+      <div id="feed-list"></div>
+    </div>
+    <div class="fab fab-exchange" onclick="showScreen('post-exchange')">+</div>
+  </div>
+
+  <!-- CONNECT PANEL -->
+  <div class="main-screen" id="panel-connect">
+    <div class="search-wrap">
+      <input class="search-field" type="text" id="search-connect" placeholder="Search groups..." oninput="onSearchConnect()" autocomplete="off">
+    </div>
+    <div class="scroll-area">
+      <div id="groups-list"></div>
+    </div>
+    <div class="fab fab-connect" onclick="showScreen('post-connect')">+</div>
+  </div>
+</div>
+
+<!-- POST EXCHANGE SCREEN -->
+<div id="screen-post-exchange" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title">New Post</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="form-scroll">
+    <div class="form-section">
+      <label class="form-label">I am</label>
+      <div class="type-row">
+        <div class="type-pill sel-need" id="type-need"     onclick="selectPostType('need')">Looking for help</div>
+        <div class="type-pill"          id="type-offering" onclick="selectPostType('offer')">Offering something</div>
+      </div>
+    </div>
+    <div class="form-section">
+      <label class="form-label">Title</label>
+      <input class="input-field" type="text" id="post-title" placeholder="What do you need or offer?" maxlength="80" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label">Description</label>
+      <textarea class="input-field" id="post-desc" placeholder="Give more context. Token amount is agreed in chat."></textarea>
+    </div>
+    <button class="btn-primary" onclick="submitExchangePost()">Post</button>
+  </div>
+</div>
+
+<!-- POST CONNECT SCREEN -->
+<div id="screen-post-connect" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title">New Group</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="form-scroll">
+    <div class="form-section">
+      <label class="form-label">Group name</label>
+      <input class="input-field" type="text" id="group-title" placeholder="e.g. Early morning gym sessions" maxlength="80" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label">Description</label>
+      <textarea class="input-field" id="group-desc" placeholder="Who is this for? When, where, how often?"></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label">Activity type</label>
+      <input class="input-field" type="text" id="group-type" placeholder="e.g. Gym, Study, Football, Language..." maxlength="40" autocomplete="off">
+    </div>
+    <button class="btn-primary" onclick="submitGroup()">Create Group</button>
+  </div>
+</div>
+
+<!-- CHAT SCREEN -->
+<div id="screen-chat" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title" id="chat-title">Chat</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="chat-header">
+    <div class="chat-post-ref">
+      <div class="chat-post-ref-label">Post</div>
+      <div class="chat-post-ref-title" id="chat-post-ref-title"></div>
+    </div>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-bar">
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chat-input" placeholder="Message..." rows="1" oninput="autoResize(this)"></textarea>
+      <button class="chat-send" onclick="sendMessage()">&#x2191;</button>
+    </div>
+    <div class="confirm-deal-bar" id="confirm-deal-bar">
+      <span class="deal-label">Agree on tokens:</span>
+      <input class="deal-input" type="number" id="deal-tokens" placeholder="Amount" min="1">
+      <button class="btn-small" onclick="confirmDeal()">Confirm Deal</button>
+    </div>
+  </div>
+</div>
+
+<!-- GROUP SCREEN -->
+<div id="screen-group" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title">Group</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:120px;">
+    <div class="group-header">
+      <div class="group-header-title" id="group-view-title"></div>
+      <div class="group-header-desc"  id="group-view-desc"></div>
+      <div class="group-header-meta"  id="group-view-meta"></div>
+    </div>
+    <div class="group-members-list">
+      <span class="section-label">Members</span>
+      <div id="group-view-members"></div>
+    </div>
+  </div>
+  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px 36px;">
+    <button class="btn-primary" id="group-join-btn" onclick="joinGroup()">Join Group</button>
+  </div>
+</div>
+
+<!-- PROFILE SCREEN -->
+<div id="screen-profile" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title">Profile</div>
+    <div class="topbar-back" onclick="signOut()" style="color:var(--spend);">Sign out</div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
+    <div class="profile-head">
+      <div class="profile-av" id="profile-av">?</div>
+      <div class="profile-name"   id="profile-name-display"></div>
+      <div class="profile-handle" id="profile-handle-display"></div>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-val" id="stat-tokens" style="color:var(--accent)">0</span><span class="stat-label">Tokens</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-helped" style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-groups" style="color:var(--earn)">0</span><span class="stat-label">Groups</span></div>
+      </div>
+    </div>
+    <div style="padding:0 20px;">
+      <span class="section-label">History</span>
+      <div id="history-list"><div class="empty">No activity yet.</div></div>
+      <span class="section-label" style="margin-top:28px;">Your Groups</span>
+      <div id="groups-joined-list"><div class="empty">No groups yet.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-screen" id="success-screen">
+  <div class="success-mark">&#10003;</div>
+  <div class="success-title" id="success-title">Done</div>
+  <div class="success-sub"   id="success-sub"></div>
+  <button class="btn-primary" style="max-width:260px;" onclick="closeSuccess()">Back to feed</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// SUPABASE CLIENT
+// ─────────────────────────────────────────────
+const SUPABASE_URL = 'https://ytkdhtuxzumplvpygrvi.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0a2RodHV4enVtcGx2cHlncnZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NjQ0MjUsImV4cCI6MjA5MDU0MDQyNX0.CvoN4lmBRqkjPNXRKYEi-6b4ChVDb2b4_bsA0X_4p7g';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+var me          = null;   // current profile row
+var activePost  = null;
+var activeGroup = null;
+var currentTab  = 'exchange';
+var postType    = 'need';
+var authMode    = 'signup';
+var realtimeSub = null;
+var seenMsgIds  = new Set();
+var searchTimer = null;
+
+var AVATARS = ['#7c6cff','#ff6c9d','#5ef0c0','#ffb36c','#6cffb0','#c86cff','#47b3ff'];
+
+function av(str) {
+  var hash = 0;
+  String(str).split('').forEach(function(c){ hash = (hash * 31 + c.charCodeAt(0)) & 0xffff; });
+  return AVATARS[hash % AVATARS.length];
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', async function() {
+  var _a = await db.auth.getSession();
+  var session = _a.data.session;
+
+  if (session) {
+    await loadProfile(session.user.id);
+    hideSplash();
+    showScreen('home');
+  } else {
+    setTimeout(function() {
+      document.getElementById('screen-splash').classList.remove('active');
+      document.getElementById('screen-onboard').classList.add('active');
+    }, 1500);
+  }
+
+  // Handle auth state changes — including redirect back from confirmation email
+  db.auth.onAuthStateChange(async function(event, session) {
+    if (event === 'SIGNED_IN' && session && !me) {
+      // User just confirmed email and was redirected back
+      await loadProfile(session.user.id);
+      hideSplash();
+      showScreen('home');
+    }
+    if (event === 'SIGNED_OUT') {
+      me = null;
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+      document.getElementById('screen-onboard').classList.add('active');
+    }
+  });
+});
+
+function hideSplash() {
+  document.getElementById('screen-splash').classList.remove('active');
+}
+
+async function loadProfile(userId) {
+  var results = await Promise.all([
+    db.from('profiles').select('*').eq('id', userId).single(),
+    db.from('group_members').select('*', { count: 'exact', head: true }).eq('user_id', userId)
+  ]);
+  me = Object.assign({}, results[0].data, { groups_count: results[1].count || 0 });
+  updateBalance();
+}
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+function toggleAuthMode() {
+  authMode = authMode === 'signup' ? 'signin' : 'signup';
+  var isSignup = authMode === 'signup';
+  document.getElementById('signup-fields').style.display = isSignup ? 'block' : 'none';
+  document.getElementById('auth-btn').textContent        = isSignup ? 'Join' : 'Sign in';
+  document.getElementById('toggle-auth-btn').textContent = isSignup
+    ? 'Already have an account? Sign in'
+    : "New here? Create an account";
+}
+
+async function authAction() {
+  var email    = document.getElementById('email-input').value.trim();
+  var password = document.getElementById('password-input').value.trim();
+  if (!email || !password) { alert('Enter your email and password.'); return; }
+
+  var btn = document.getElementById('auth-btn');
+  btn.disabled    = true;
+  btn.textContent = authMode === 'signup' ? 'Creating account…' : 'Signing in…';
+
+  try {
+    if (authMode === 'signin') {
+      var _s = await db.auth.signInWithPassword({ email: email, password: password });
+      if (_s.error) { alert(_s.error.message); return; }
+      await loadProfile(_s.data.user.id);
+      enterApp();
+      return;
+    }
+
+    // Sign up
+    var name   = document.getElementById('name-input').value.trim();
+    var handle = document.getElementById('handle-input').value.trim().replace('@','').toLowerCase().replace(/[^a-z0-9_]/g,'');
+    if (!name || !handle) { alert('Enter your name and a handle.'); return; }
+    if (handle.length < 2) { alert('Handle must be at least 2 characters.'); return; }
+
+    // Check handle uniqueness
+    var _h = await db.from('profiles').select('id').eq('handle', handle).maybeSingle();
+    if (_h.data) { alert('That handle is taken. Try another.'); return; }
+
+    var _su = await db.auth.signUp({ email: email, password: password, options: { data: { name: name } } });
+    if (_su.error) { alert(_su.error.message); return; }
+
+    if (!_su.data.session) {
+      // Email confirmation required — show the check email screen
+      document.getElementById('confirm-email-display').textContent = email;
+      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+      document.getElementById('screen-checkemail').classList.add('active');
+      return;
+    }
+
+    var _p = await db.from('profiles').insert({ id: _su.data.user.id, name: name, handle: handle });
+    if (_p.error) { alert('Profile error: ' + _p.error.message); return; }
+
+    await loadProfile(_su.data.user.id);
+    enterApp();
+
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = authMode === 'signup' ? 'Join' : 'Sign in';
+  }
+}
+
+function backToSignIn() {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-onboard').classList.add('active');
+  authMode = 'signin';
+  toggleAuthMode();
+}
+
+async function signOut() {
+  if (realtimeSub) { db.removeChannel(realtimeSub); realtimeSub = null; }
+  await db.auth.signOut();
+}
+
+function enterApp() {
+  showScreen('home');
+  renderFeed();
+  renderGroups();
+}
+
+// ─────────────────────────────────────────────
+// SCREEN ROUTING
+// ─────────────────────────────────────────────
+function showScreen(name) {
+  if (name !== 'chat' && realtimeSub) {
+    db.removeChannel(realtimeSub);
+    realtimeSub = null;
+  }
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById('screen-' + name);
+  if (el) el.classList.add('active');
+  if (name === 'home')    { renderFeed(); renderGroups(); }
+  if (name === 'profile') { renderProfile(); }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-exchange').className  = 'nav-tab' + (tab === 'exchange' ? ' active' : '');
+  document.getElementById('tab-connect').className   = 'nav-tab' + (tab === 'connect'  ? ' active' : '');
+  document.getElementById('panel-exchange').className = 'main-screen' + (tab === 'exchange' ? ' visible' : '');
+  document.getElementById('panel-connect').className  = 'main-screen' + (tab === 'connect'  ? ' visible' : '');
+}
+
+// ─────────────────────────────────────────────
+// FEED
+// ─────────────────────────────────────────────
+function onSearchExchange() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(renderFeed, 300);
+}
+
+async function renderFeed() {
+  var list  = document.getElementById('feed-list');
+  var query = (document.getElementById('search-exchange').value || '').trim();
+  list.innerHTML = '<div class="empty">Loading…</div>';
+
+  var q = db.from('posts')
+    .select('id, type, title, description, user_id, created_at, profiles!user_id(name, handle)')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  if (query) q = q.or('title.ilike.%' + query + '%,description.ilike.%' + query + '%');
+
+  var _r = await q;
+  if (_r.error) { list.innerHTML = '<div class="empty">Error loading posts.</div>'; return; }
+
+  var posts = _r.data;
+  if (!posts || !posts.length) {
+    list.innerHTML = '<div class="empty">Nothing here yet.<br>Be the first to post.</div>';
+    return;
+  }
+
+  list.innerHTML = posts.map(function(p, i) {
+    var col    = av(p.user_id);
+    var author = p.profiles ? p.profiles.name : 'Unknown';
+    var isOwn  = me && p.user_id === me.id;
+    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
+      '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
+      '<div class="post-title">' + esc(p.title) + '</div>' +
+      (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
+      '<div class="post-footer">' +
+        '<div class="post-meta">' +
+          '<div class="avatar" style="background:' + col + '22;color:' + col + '">' + author[0] + '</div>' +
+          '<span class="post-author">' + esc(author) + '</span>' +
+        '</div>' +
+        (isOwn ? '<span style="font-size:11px;color:var(--muted);">Your post</span>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// GROUPS
+// ─────────────────────────────────────────────
+function onSearchConnect() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(renderGroups, 300);
+}
+
+async function renderGroups() {
+  var list  = document.getElementById('groups-list');
+  var query = (document.getElementById('search-connect').value || '').trim();
+  list.innerHTML = '<div class="empty">Loading…</div>';
+
+  var q = db.from('groups')
+    .select('id, title, description, activity_type, creator_id, group_members(user_id)')
+    .order('created_at', { ascending: false });
+
+  if (query) q = q.or('title.ilike.%' + query + '%,description.ilike.%' + query + '%');
+
+  var _r = await q;
+  if (_r.error) { list.innerHTML = '<div class="empty">Error loading groups.</div>'; return; }
+
+  var groups = _r.data;
+  if (!groups || !groups.length) {
+    list.innerHTML = '<div class="empty">No groups yet.<br>Create one and find your people.</div>';
+    return;
+  }
+
+  list.innerHTML = groups.map(function(g, i) {
+    var col    = av(g.creator_id);
+    var count  = g.group_members ? g.group_members.length : 0;
+    var joined = me && g.group_members && g.group_members.some(function(m){ return m.user_id === me.id; });
+    return '<div class="group-card d' + Math.min(i+1,5) + '" onclick="openGroup(\'' + g.id + '\')">' +
+      '<div class="group-tag">'   + esc(g.activity_type || 'Group') + '</div>' +
+      '<div class="group-title">' + esc(g.title) + '</div>' +
+      '<div class="group-desc">'  + esc(g.description || '') + '</div>' +
+      '<div class="group-footer">' +
+        '<span class="group-members">' + count + ' member' + (count !== 1 ? 's' : '') + '</span>' +
+        (joined ? '<span class="group-joined">Joined</span>' : '<span style="font-size:12px;color:var(--muted);">Open group</span>') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────
+// POST FORM
+// ─────────────────────────────────────────────
+function selectPostType(type) {
+  postType = type;
+  document.getElementById('type-need').className     = 'type-pill' + (type === 'need'  ? ' sel-need'  : '');
+  document.getElementById('type-offering').className = 'type-pill' + (type === 'offer' ? ' sel-offer' : '');
+}
+
+async function submitExchangePost() {
+  if (!me) { alert('Please sign in first.'); return; }
+  var title = document.getElementById('post-title').value.trim();
+  var desc  = document.getElementById('post-desc').value.trim();
+  if (!title) { alert('Add a title.'); return; }
+
+  var _r = await db.from('posts').insert({ user_id: me.id, type: postType, title: title, description: desc });
+  if (_r.error) { alert('Error: ' + _r.error.message); return; }
+
+  document.getElementById('post-title').value = '';
+  document.getElementById('post-desc').value  = '';
+  showSuccess('Posted', 'Your post is live. Respond to messages from the feed.');
+}
+
+async function submitGroup() {
+  if (!me) { alert('Please sign in first.'); return; }
+  var title = document.getElementById('group-title').value.trim();
+  var desc  = document.getElementById('group-desc').value.trim();
+  var type  = document.getElementById('group-type').value.trim();
+  if (!title) { alert('Give the group a name.'); return; }
+
+  var _r = await db.from('groups')
+    .insert({ creator_id: me.id, title: title, description: desc, activity_type: type || 'Group' })
+    .select().single();
+  if (_r.error) { alert('Error: ' + _r.error.message); return; }
+
+  // Auto-join creator
+  await db.from('group_members').insert({ group_id: _r.data.id, user_id: me.id });
+
+  document.getElementById('group-title').value = '';
+  document.getElementById('group-desc').value  = '';
+  document.getElementById('group-type').value  = '';
+  showSuccess('Group created', 'Your group is live on Connect.');
+}
+
+// ─────────────────────────────────────────────
+// CHAT
+// ─────────────────────────────────────────────
+async function openChat(postId) {
+  var _r = await db.from('posts')
+    .select('id, type, title, user_id, profiles!user_id(name, handle)')
+    .eq('id', postId)
+    .single();
+  if (_r.error || !_r.data) return;
+
+  activePost = _r.data;
+  seenMsgIds = new Set();
+
+  document.getElementById('chat-title').textContent          = activePost.profiles ? activePost.profiles.name : 'Unknown';
+  document.getElementById('chat-post-ref-title').textContent = activePost.title;
+
+  // Hide deal bar if you're the post owner (can't deal with yourself)
+  var isOwner = me && activePost.user_id === me.id;
+  document.getElementById('confirm-deal-bar').style.display = isOwner ? 'none' : 'flex';
+
+  await loadMessages(postId);
+
+  // Subscribe to new messages in real time
+  if (realtimeSub) db.removeChannel(realtimeSub);
+  realtimeSub = db.channel('messages-' + postId)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'messages',
+      filter: 'post_id=eq.' + postId
+    }, function(payload) {
+      if (!seenMsgIds.has(payload.new.id)) {
+        seenMsgIds.add(payload.new.id);
+        appendMessage(payload.new);
+      }
+    })
+    .subscribe();
+
+  showScreen('chat');
+}
+
+async function loadMessages(postId) {
+  var wrap = document.getElementById('chat-messages');
+  wrap.innerHTML = '';
+
+  var _r = await db.from('messages')
+    .select('id, sender_id, sender_name, content, created_at')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+
+  if (_r.error) return;
+
+  if (!_r.data || !_r.data.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:40px 20px;">Start the conversation.<br>Agree on tokens, then confirm the deal.</div>';
+    return;
+  }
+
+  _r.data.forEach(function(m) {
+    seenMsgIds.add(m.id);
+    appendMessage(m);
+  });
+}
+
+function appendMessage(msg) {
+  var wrap   = document.getElementById('chat-messages');
+  var empty  = wrap.querySelector('.empty');
+  if (empty) empty.remove();
+
+  var isMine = me && msg.sender_id === me.id;
+  var wrap2  = document.createElement('div');
+
+  if (!isMine) {
+    var nameEl = document.createElement('div');
+    nameEl.className   = 'msg-name';
+    nameEl.textContent = msg.sender_name || 'Unknown';
+    wrap2.appendChild(nameEl);
+  }
+
+  var bubble = document.createElement('div');
+  bubble.className   = 'msg-bubble ' + (isMine ? 'mine' : 'theirs');
+  bubble.textContent = msg.content;
+  wrap2.appendChild(bubble);
+
+  wrap.appendChild(wrap2);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function sendMessage() {
+  if (!me || !activePost) return;
+  var input = document.getElementById('chat-input');
+  var text  = input.value.trim();
+  if (!text) return;
+
+  // Insert and track ID to prevent realtime duplicate
+  var _r = await db.from('messages')
+    .insert({ post_id: activePost.id, sender_id: me.id, sender_name: me.name, content: text })
+    .select('id').single();
+  if (_r.error) { alert('Failed to send: ' + _r.error.message); return; }
+
+  seenMsgIds.add(_r.data.id);
+  appendMessage({ id: _r.data.id, sender_id: me.id, sender_name: me.name, content: text });
+
+  input.value      = '';
+  input.style.height = '';
+}
+
+async function confirmDeal() {
+  if (!me || !activePost) return;
+  var tokens = parseInt(document.getElementById('deal-tokens').value);
+  if (!tokens || tokens < 1) { alert('Enter a valid token amount.'); return; }
+
+  var _r = await db.rpc('confirm_deal', { p_post_id: activePost.id, p_token_amount: tokens });
+  if (_r.error) { alert('Error: ' + _r.error.message); return; }
+  if (_r.data && _r.data.error) { alert(_r.data.error); return; }
+
+  document.getElementById('deal-tokens').value = '';
+  await loadProfile(me.id);
+
+  var d   = _r.data;
+  var msg = d.multiplier < 1
+    ? d.tokens_actual + ' tokens confirmed (' + Math.round(d.multiplier * 100) + '% rate — repeated transaction discount applied).'
+    : d.tokens_actual + ' tokens ' + (activePost.type === 'need' ? 'earned.' : 'burned.');
+  showSuccess('Deal confirmed', msg);
+}
+
+function autoResize(el) {
+  el.style.height = '';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ─────────────────────────────────────────────
+// GROUP
+// ─────────────────────────────────────────────
+async function openGroup(groupId) {
+  var _r = await db.from('groups')
+    .select('id, title, description, activity_type, creator_id, group_members(user_id, profiles!user_id(name, handle))')
+    .eq('id', groupId)
+    .single();
+  if (_r.error || !_r.data) return;
+
+  activeGroup = _r.data;
+  var g    = activeGroup;
+  var mems = g.group_members || [];
+
+  document.getElementById('group-view-title').textContent = g.title;
+  document.getElementById('group-view-desc').textContent  = g.description || '';
+  document.getElementById('group-view-meta').textContent  = (g.activity_type || 'Group') + ' · ' + mems.length + ' member' + (mems.length !== 1 ? 's' : '');
+
+  var joined = me && mems.some(function(m){ return m.user_id === me.id; });
+  var btn    = document.getElementById('group-join-btn');
+  btn.textContent  = joined ? 'Already a member' : 'Join Group';
+  btn.style.opacity = joined ? '0.5' : '1';
+
+  document.getElementById('group-view-members').innerHTML = mems.map(function(m) {
+    var p   = m.profiles || {};
+    var col = av(m.user_id);
+    return '<div class="member-row">' +
+      '<div class="member-av" style="background:' + col + '22;color:' + col + '">' + (p.name ? p.name[0] : '?') + '</div>' +
+      '<div><div class="member-name">' + esc(p.name || 'Unknown') + '</div>' +
+          '<div class="member-handle">@' + esc(p.handle || '') + '</div></div>' +
+    '</div>';
+  }).join('');
+
+  showScreen('group');
+}
+
+async function joinGroup() {
+  if (!me || !activeGroup) return;
+  var mems   = activeGroup.group_members || [];
+  var joined = mems.some(function(m){ return m.user_id === me.id; });
+  if (joined) return;
+
+  var _r = await db.from('group_members').insert({ group_id: activeGroup.id, user_id: me.id });
+  if (_r.error) { alert('Error: ' + _r.error.message); return; }
+
+  showSuccess('Joined', 'You are now a member of "' + activeGroup.title + '".');
+}
+
+// ─────────────────────────────────────────────
+// PROFILE
+// ─────────────────────────────────────────────
+async function renderProfile() {
+  if (!me) return;
+  await loadProfile(me.id);
+
+  document.getElementById('profile-av').textContent           = me.name[0].toUpperCase();
+  document.getElementById('profile-name-display').textContent = me.name;
+  document.getElementById('profile-handle-display').textContent = '@' + me.handle;
+
+  // Transaction history
+  var _t = await db.from('transactions')
+    .select('id, token_amount, multiplier_applied, provider_id, receiver_id, created_at, posts!post_id(title), provider:profiles!provider_id(name), receiver:profiles!receiver_id(name)')
+    .or('provider_id.eq.' + me.id + ',receiver_id.eq.' + me.id)
+    .order('created_at', { ascending: false })
+    .limit(30);
+
+  var hlist = document.getElementById('history-list');
+  if (!_t.data || !_t.data.length) {
+    hlist.innerHTML = '<div class="empty">No activity yet.</div>';
+  } else {
+    hlist.innerHTML = _t.data.map(function(t) {
+      var isEarn = t.provider_id === me.id;
+      var title  = t.posts ? t.posts.title : 'Unknown post';
+      var other  = isEarn ? (t.receiver ? t.receiver.name : '?') : (t.provider ? t.provider.name : '?');
+      var dimNote = t.multiplier_applied < 1 ? ' (' + Math.round(t.multiplier_applied * 100) + '%)' : '';
+      return '<div class="history-row">' +
+        '<div class="history-dot ' + (isEarn ? 'earn' : 'spend') + '"></div>' +
+        '<div class="history-info">' +
+          '<div class="history-title">' + esc(title) + '</div>' +
+          '<div class="history-sub">' + (isEarn ? 'Earned from ' : 'Spent for ') + esc(other) + dimNote + '</div>' +
+        '</div>' +
+        '<div class="history-amt ' + (isEarn ? 'earn' : 'spend') + '">' + (isEarn ? '+' : '-') + t.token_amount + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Joined groups
+  var _g = await db.from('group_members')
+    .select('groups!group_id(id, title, activity_type)')
+    .eq('user_id', me.id);
+
+  var glist = document.getElementById('groups-joined-list');
+  if (!_g.data || !_g.data.length) {
+    glist.innerHTML = '<div class="empty">No groups yet.</div>';
+  } else {
+    glist.innerHTML = _g.data.map(function(m) {
+      var g = m.groups;
+      if (!g) return '';
+      return '<div class="history-row">' +
+        '<div class="history-dot" style="background:var(--earn)"></div>' +
+        '<div class="history-info">' +
+          '<div class="history-title">' + esc(g.title) + '</div>' +
+          '<div class="history-sub">'   + esc(g.activity_type || 'Group') + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
+function updateBalance() {
+  if (!me) return;
+  document.getElementById('balance-display').textContent = me.balance;
+  document.getElementById('stat-tokens').textContent     = me.balance;
+  document.getElementById('stat-earned').textContent     = me.total_earned;
+  document.getElementById('stat-helped').textContent     = me.total_helped;
+  document.getElementById('stat-groups').textContent     = me.groups_count || 0;
+  var navAv = document.getElementById('nav-av');
+  if (navAv && me.name) navAv.textContent = me.name[0].toUpperCase();
+}
+
+// ─────────────────────────────────────────────
+// SUCCESS
+// ─────────────────────────────────────────────
+function showSuccess(title, sub) {
+  document.getElementById('success-title').textContent = title;
+  document.getElementById('success-sub').textContent   = sub;
+  document.getElementById('success-screen').classList.add('open');
+}
+function closeSuccess() {
+  document.getElementById('success-screen').classList.remove('open');
+  showScreen('home');
+}
+</script>
+</body>
+</html>

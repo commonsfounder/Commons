@@ -8,7 +8,9 @@ create table public.profiles (
   id           uuid references auth.users on delete cascade primary key,
   name         text not null,
   handle       text unique not null,
-  balance      integer not null default 20,
+  bio          text not null default '',
+  avatar_url   text,
+  balance      integer not null default 50,
   total_earned integer not null default 0,
   total_helped integer not null default 0,
   created_at   timestamptz default now()
@@ -72,6 +74,13 @@ alter table public.transactions enable row level security;
 create policy "profiles_select" on public.profiles for select using (true);
 create policy "profiles_insert" on public.profiles for insert with check (auth.uid() = id);
 create policy "profiles_update" on public.profiles for update using (auth.uid() = id);
+
+-- storage: avatars bucket
+insert into storage.buckets (id, name, public) values ('avatars', 'avatars', true) on conflict do nothing;
+create policy "avatars_select" on storage.objects for select using (bucket_id = 'avatars');
+create policy "avatars_insert" on storage.objects for insert with check (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "avatars_update" on storage.objects for update using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
+create policy "avatars_delete" on storage.objects for delete using (bucket_id = 'avatars' and auth.uid()::text = (storage.foldername(name))[1]);
 
 -- posts
 create policy "posts_select" on public.posts for select using (true);

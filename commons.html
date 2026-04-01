@@ -443,9 +443,14 @@
     display:flex; align-items:center; justify-content:center;
     font-family:'Lora', serif; font-size:26px; font-weight:700;
     background:linear-gradient(135deg, var(--accent), var(--accent2));
+    cursor:pointer; overflow:hidden; flex-shrink:0;
   }
+  .profile-av img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
   .profile-name   { font-family:'Lora', serif; font-size:22px; font-weight:700; margin-bottom:4px; }
-  .profile-handle { font-size:13px; color:var(--muted); margin-bottom:20px; }
+  .profile-handle { font-size:13px; color:var(--muted); margin-bottom:8px; }
+  .profile-bio    { font-size:13px; color:var(--muted); margin-bottom:20px; line-height:1.5; max-width:260px; margin-left:auto; margin-right:auto; white-space:pre-wrap; }
+  .edit-profile-form { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin:0 0 20px; display:none; }
+  .edit-profile-form.open { display:block; }
 
   .stats-row  { display:flex; gap:1px; background:var(--border); border-radius:14px; overflow:hidden; border:1px solid var(--border); }
   .stat-box   { flex:1; background:var(--surface); padding:16px 8px; text-align:center; }
@@ -691,9 +696,11 @@
   </div>
   <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
     <div class="profile-head">
-      <div class="profile-av" id="profile-av">?</div>
+      <div class="profile-av" id="profile-av" onclick="document.getElementById('avatar-input').click()" title="Tap to change photo">?</div>
+      <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
       <div class="profile-name"   id="profile-name-display"></div>
       <div class="profile-handle" id="profile-handle-display"></div>
+      <div class="profile-bio"    id="profile-bio-display"></div>
       <div class="stats-row">
         <div class="stat-box"><span class="stat-val" id="stat-tokens" style="color:var(--accent)">0</span><span class="stat-label">Tokens</span></div>
         <div class="stat-box"><span class="stat-val" id="stat-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
@@ -702,7 +709,15 @@
       </div>
     </div>
     <div style="padding:0 20px;">
-      <span class="section-label">History</span>
+      <div class="edit-profile-form" id="edit-profile-form">
+        <label class="form-label">Bio</label>
+        <textarea class="input-field" id="bio-input" placeholder="Tell people a bit about yourself…" maxlength="200" style="height:80px;margin-bottom:12px;"></textarea>
+        <button class="btn-primary" onclick="saveProfile()" style="margin-bottom:0;">Save</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <span class="section-label" style="margin:0;">History</span>
+        <span id="edit-profile-toggle" onclick="toggleEditProfile()" style="font-size:12px;color:var(--accent);cursor:pointer;">Edit profile</span>
+      </div>
       <div id="history-list"><div class="empty">No activity yet.</div></div>
       <span class="section-label" style="margin-top:28px;">Your Groups</span>
       <div id="groups-joined-list"><div class="empty">No groups yet.</div></div>
@@ -1223,9 +1238,17 @@ async function renderProfile() {
   if (!me) return;
   await loadProfile(me.id);
 
-  document.getElementById('profile-av').textContent           = me.name[0].toUpperCase();
+  var avEl = document.getElementById('profile-av');
+  if (me.avatar_url) {
+    avEl.innerHTML = '<img src="' + esc(me.avatar_url) + '" alt="">';
+  } else {
+    avEl.textContent = me.name[0].toUpperCase();
+  }
   document.getElementById('profile-name-display').textContent = me.name;
   document.getElementById('profile-handle-display').textContent = '@' + me.handle;
+  var bioEl = document.getElementById('profile-bio-display');
+  if (me.bio) { bioEl.textContent = me.bio; bioEl.style.display = ''; }
+  else { bioEl.style.display = 'none'; }
 
   // Transaction history
   var _t = await db.from('transactions')
@@ -1285,7 +1308,54 @@ function updateBalance() {
   document.getElementById('stat-helped').textContent     = me.total_helped;
   document.getElementById('stat-groups').textContent     = me.groups_count || 0;
   var navAv = document.getElementById('nav-av');
-  if (navAv && me.name) navAv.textContent = me.name[0].toUpperCase();
+  if (navAv && me.name) {
+    if (me.avatar_url) {
+      navAv.innerHTML = '<img src="' + esc(me.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">';
+    } else {
+      navAv.textContent = me.name[0].toUpperCase();
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// EDIT PROFILE
+// ─────────────────────────────────────────────
+function toggleEditProfile() {
+  var form = document.getElementById('edit-profile-form');
+  var open = form.classList.toggle('open');
+  if (open && me) document.getElementById('bio-input').value = me.bio || '';
+  document.getElementById('edit-profile-toggle').textContent = open ? 'Cancel' : 'Edit profile';
+}
+
+async function saveProfile() {
+  if (!me) return;
+  var bio = document.getElementById('bio-input').value.trim();
+  var _r = await db.from('profiles').update({ bio: bio }).eq('id', me.id);
+  if (_r.error) { alert('Save failed: ' + _r.error.message); return; }
+  me.bio = bio;
+  var bioEl = document.getElementById('profile-bio-display');
+  if (bio) { bioEl.textContent = bio; bioEl.style.display = ''; }
+  else { bioEl.style.display = 'none'; }
+  toggleEditProfile();
+}
+
+async function handleAvatarUpload(input) {
+  if (!me || !input.files || !input.files[0]) return;
+  var file = input.files[0];
+  if (file.size > 2 * 1024 * 1024) { alert('Photo must be under 2 MB.'); return; }
+  var ext  = file.name.split('.').pop().toLowerCase();
+  var path = me.id + '/avatar.' + ext;
+  var _u = await db.storage.from('avatars').upload(path, file, { upsert: true });
+  if (_u.error) { alert('Upload failed: ' + _u.error.message); return; }
+  var _pub = db.storage.from('avatars').getPublicUrl(path);
+  var url  = _pub.data.publicUrl + '?t=' + Date.now();
+  var _p = await db.from('profiles').update({ avatar_url: url }).eq('id', me.id);
+  if (_p.error) { alert('Profile update failed: ' + _p.error.message); return; }
+  me.avatar_url = url;
+  var avEl = document.getElementById('profile-av');
+  avEl.innerHTML = '<img src="' + esc(url) + '" alt="">';
+  updateBalance();
+  input.value = '';
 }
 
 // ─────────────────────────────────────────────

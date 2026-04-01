@@ -1146,14 +1146,12 @@ async function sendMessage() {
   var text  = input.value.trim();
   if (!text) return;
 
-  // Insert and track ID to prevent realtime duplicate
-  var _r = await db.from('messages')
-    .insert({ post_id: activePost.id, sender_id: me.id, sender_name: me.name, content: text })
-    .select('id').single();
+  // Insert via security definer function to avoid RLS uid mismatch
+  var _r = await db.rpc('send_message', { p_post_id: activePost.id, p_content: text });
   if (_r.error) { alert('Failed to send: ' + _r.error.message); return; }
 
-  seenMsgIds.add(_r.data.id);
-  appendMessage({ id: _r.data.id, sender_id: me.id, sender_name: me.name, content: text });
+  seenMsgIds.add(_r.data);
+  appendMessage({ id: _r.data, sender_id: me.id, sender_name: me.name, content: text });
 
   input.value      = '';
   input.style.height = '';

@@ -710,6 +710,8 @@
     </div>
     <div style="padding:0 20px;">
       <div class="edit-profile-form" id="edit-profile-form">
+        <label class="form-label">Name</label>
+        <input class="input-field" type="text" id="name-edit-input" placeholder="Your name" maxlength="60" autocomplete="off" style="margin-bottom:12px;">
         <label class="form-label">Bio</label>
         <textarea class="input-field" id="bio-input" placeholder="Tell people a bit about yourself…" maxlength="200" style="height:80px;margin-bottom:12px;"></textarea>
         <button class="btn-primary" onclick="saveProfile()" style="margin-bottom:0;">Save</button>
@@ -739,6 +741,7 @@
       <div class="profile-handle" id="up-handle"></div>
       <div class="profile-bio"    id="up-bio"></div>
       <div class="stats-row">
+        <div class="stat-box"><span class="stat-val" id="up-balance" style="color:var(--accent)">0</span><span class="stat-label">Tokens</span></div>
         <div class="stat-box"><span class="stat-val" id="up-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
         <div class="stat-box"><span class="stat-val" id="up-helped" style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
         <div class="stat-box"><span class="stat-val" id="up-joined" style="color:var(--muted)">—</span><span class="stat-label">Joined</span></div>
@@ -1352,7 +1355,7 @@ async function openUserProfile(userId) {
   prevScreen = activeId ? activeId.id.replace('screen-', '') : 'home';
 
   var _r = await db.from('profiles')
-    .select('id, name, handle, bio, avatar_url, total_earned, total_helped, created_at')
+    .select('id, name, handle, bio, avatar_url, balance, total_earned, total_helped, created_at')
     .eq('id', userId).single();
   if (_r.error || !_r.data) return;
   var u = _r.data;
@@ -1372,8 +1375,9 @@ async function openUserProfile(userId) {
   if (u.bio) { bioEl.textContent = u.bio; bioEl.style.display = ''; }
   else { bioEl.style.display = 'none'; }
 
-  document.getElementById('up-earned').textContent = u.total_earned;
-  document.getElementById('up-helped').textContent = u.total_helped;
+  document.getElementById('up-balance').textContent = u.balance;
+  document.getElementById('up-earned').textContent  = u.total_earned;
+  document.getElementById('up-helped').textContent  = u.total_helped;
 
   var d = new Date(u.created_at);
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1406,19 +1410,27 @@ async function openUserProfile(userId) {
 function toggleEditProfile() {
   var form = document.getElementById('edit-profile-form');
   var open = form.classList.toggle('open');
-  if (open && me) document.getElementById('bio-input').value = me.bio || '';
+  if (open && me) {
+    document.getElementById('name-edit-input').value = me.name || '';
+    document.getElementById('bio-input').value = me.bio || '';
+  }
   document.getElementById('edit-profile-toggle').textContent = open ? 'Cancel' : 'Edit profile';
 }
 
 async function saveProfile() {
   if (!me) return;
-  var bio = document.getElementById('bio-input').value.trim();
-  var _r = await db.from('profiles').update({ bio: bio }).eq('id', me.id);
+  var name = document.getElementById('name-edit-input').value.trim();
+  var bio  = document.getElementById('bio-input').value.trim();
+  if (!name) { alert('Name cannot be empty.'); return; }
+  var _r = await db.rpc('update_profile', { p_name: name, p_bio: bio });
   if (_r.error) { alert('Save failed: ' + _r.error.message); return; }
-  me.bio = bio;
+  me.name = name;
+  me.bio  = bio;
+  document.getElementById('profile-name-display').textContent = name;
   var bioEl = document.getElementById('profile-bio-display');
   if (bio) { bioEl.textContent = bio; bioEl.style.display = ''; }
   else { bioEl.style.display = 'none'; }
+  updateBalance();
   toggleEditProfile();
 }
 

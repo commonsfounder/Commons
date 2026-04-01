@@ -1026,7 +1026,7 @@ async function submitExchangePost() {
   var desc  = document.getElementById('post-desc').value.trim();
   if (!title) { alert('Add a title.'); return; }
 
-  var _r = await db.from('posts').insert({ user_id: me.id, type: postType, title: title, description: desc });
+  var _r = await db.rpc('create_post', { p_type: postType, p_title: title, p_description: desc });
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
 
   document.getElementById('post-title').value = '';
@@ -1041,13 +1041,8 @@ async function submitGroup() {
   var type  = document.getElementById('group-type').value.trim();
   if (!title) { alert('Give the group a name.'); return; }
 
-  var _r = await db.from('groups')
-    .insert({ creator_id: me.id, title: title, description: desc, activity_type: type || 'Group' })
-    .select().single();
+  var _r = await db.rpc('create_group', { p_title: title, p_description: desc, p_activity_type: type || 'Group' });
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
-
-  // Auto-join creator
-  await db.from('group_members').insert({ group_id: _r.data.id, user_id: me.id });
 
   document.getElementById('group-title').value = '';
   document.getElementById('group-desc').value  = '';

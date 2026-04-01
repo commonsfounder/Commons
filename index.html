@@ -1147,7 +1147,7 @@ async function sendMessage() {
   if (!text) return;
 
   // Insert via security definer function to avoid RLS uid mismatch
-  var _r = await db.rpc('send_message', { p_post_id: activePost.id, p_content: text });
+  var _r = await db.rpc('send_message', { p_post_id: activePost.id, p_content: text, p_sender_name: me.name });
   if (_r.error) { alert('Failed to send: ' + _r.error.message); return; }
 
   seenMsgIds.add(_r.data);

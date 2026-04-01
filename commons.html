@@ -725,6 +725,32 @@
   </div>
 </div>
 
+<!-- USER PROFILE -->
+<div id="screen-user-profile" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="goBack()">Back</div>
+    <div class="topbar-title" id="up-title">Profile</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
+    <div class="profile-head">
+      <div class="profile-av" id="up-av" style="cursor:default;">?</div>
+      <div class="profile-name"   id="up-name"></div>
+      <div class="profile-handle" id="up-handle"></div>
+      <div class="profile-bio"    id="up-bio"></div>
+      <div class="stats-row">
+        <div class="stat-box"><span class="stat-val" id="up-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
+        <div class="stat-box"><span class="stat-val" id="up-helped" style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
+        <div class="stat-box"><span class="stat-val" id="up-joined" style="color:var(--muted)">—</span><span class="stat-label">Joined</span></div>
+      </div>
+    </div>
+    <div style="padding:0 20px;">
+      <span class="section-label">Posts</span>
+      <div id="up-posts"></div>
+    </div>
+  </div>
+</div>
+
 <!-- SUCCESS -->
 <div class="success-screen" id="success-screen">
   <div class="success-mark">&#10003;</div>
@@ -753,6 +779,7 @@ var authMode    = 'signup';
 var realtimeSub = null;
 var seenMsgIds  = new Set();
 var searchTimer = null;
+var prevScreen  = 'home';
 
 var AVATARS = ['#7c6cff','#ff6c9d','#5ef0c0','#ffb36c','#6cffb0','#c86cff','#47b3ff'];
 
@@ -958,8 +985,8 @@ async function renderFeed() {
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
       '<div class="post-footer">' +
         '<div class="post-meta">' +
-          '<div class="avatar" style="background:' + col + '22;color:' + col + '">' + author[0] + '</div>' +
-          '<span class="post-author">' + esc(author) + '</span>' +
+          '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + author[0] + '</div>' +
+          '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
         '</div>' +
         (isOwn ? '<span style="font-size:11px;color:var(--muted);">Your post</span>' : '') +
       '</div>' +
@@ -1123,6 +1150,8 @@ function appendMessage(msg) {
     var nameEl = document.createElement('div');
     nameEl.className   = 'msg-name';
     nameEl.textContent = msg.sender_name || 'Unknown';
+    nameEl.style.cursor = 'pointer';
+    nameEl.onclick = function() { openUserProfile(msg.sender_id); };
     wrap2.appendChild(nameEl);
   }
 
@@ -1202,7 +1231,7 @@ async function openGroup(groupId) {
   document.getElementById('group-view-members').innerHTML = mems.map(function(m) {
     var p   = m.profiles || {};
     var col = av(m.user_id);
-    return '<div class="member-row">' +
+    return '<div class="member-row" style="cursor:pointer;" onclick="openUserProfile(\'' + m.user_id + '\')">' +
       '<div class="member-av" style="background:' + col + '22;color:' + col + '">' + (p.name ? p.name[0] : '?') + '</div>' +
       '<div><div class="member-name">' + esc(p.name || 'Unknown') + '</div>' +
           '<div class="member-handle">@' + esc(p.handle || '') + '</div></div>' +
@@ -1308,6 +1337,67 @@ function updateBalance() {
       navAv.textContent = me.name[0].toUpperCase();
     }
   }
+}
+
+// ─────────────────────────────────────────────
+// USER PROFILE
+// ─────────────────────────────────────────────
+function goBack() {
+  showScreen(prevScreen);
+}
+
+async function openUserProfile(userId) {
+  if (!userId) return;
+  var activeId = document.querySelector('.screen.active');
+  prevScreen = activeId ? activeId.id.replace('screen-', '') : 'home';
+
+  var _r = await db.from('profiles')
+    .select('id, name, handle, bio, avatar_url, total_earned, total_helped, created_at')
+    .eq('id', userId).single();
+  if (_r.error || !_r.data) return;
+  var u = _r.data;
+
+  var avEl = document.getElementById('up-av');
+  if (u.avatar_url) {
+    avEl.innerHTML = '<img src="' + esc(u.avatar_url) + '" alt="">';
+  } else {
+    avEl.textContent = u.name[0].toUpperCase();
+    avEl.style.background = '';
+  }
+
+  document.getElementById('up-title').textContent  = '@' + u.handle;
+  document.getElementById('up-name').textContent   = u.name;
+  document.getElementById('up-handle').textContent = '@' + u.handle;
+  var bioEl = document.getElementById('up-bio');
+  if (u.bio) { bioEl.textContent = u.bio; bioEl.style.display = ''; }
+  else { bioEl.style.display = 'none'; }
+
+  document.getElementById('up-earned').textContent = u.total_earned;
+  document.getElementById('up-helped').textContent = u.total_helped;
+
+  var d = new Date(u.created_at);
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('up-joined').textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+
+  var _p = await db.from('posts')
+    .select('id, type, title, description')
+    .eq('user_id', userId).eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  var postsEl = document.getElementById('up-posts');
+  if (!_p.data || !_p.data.length) {
+    postsEl.innerHTML = '<div class="empty">No active posts.</div>';
+  } else {
+    postsEl.innerHTML = _p.data.map(function(p) {
+      return '<div class="post-card" onclick="openChat(\'' + p.id + '\')" style="margin-bottom:12px;">' +
+        '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
+        '<div class="post-title">' + esc(p.title) + '</div>' +
+        (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
+      '</div>';
+    }).join('');
+  }
+
+  showScreen('user-profile');
 }
 
 // ─────────────────────────────────────────────

@@ -1223,7 +1223,7 @@ async function joinGroup() {
   var joined = mems.some(function(m){ return m.user_id === me.id; });
   if (joined) return;
 
-  var _r = await db.from('group_members').insert({ group_id: activeGroup.id, user_id: me.id });
+  var _r = await db.rpc('join_group', { p_group_id: activeGroup.id });
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
 
   showSuccess('Joined', 'You are now a member of "' + activeGroup.title + '".');

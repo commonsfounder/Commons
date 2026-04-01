@@ -961,11 +961,14 @@ window.addEventListener('load', async function() {
   document.getElementById('auth-btn').textContent         = 'Sign in';
   document.getElementById('toggle-auth-btn').textContent  = 'New here? Create an account';
 
-  var _a = await db.auth.getSession();
-  var session = _a.data.session;
-
-  if (session) {
-    await loadProfile(session.user.id);
+  try {
+    var _a = await db.auth.getSession();
+    var session = _a.data.session;
+    if (session) {
+      await loadProfile(session.user.id);
+    }
+  } catch(e) {
+    console.error('Init error:', e);
   }
 
   setTimeout(hideSplash, 2300);

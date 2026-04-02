@@ -277,6 +277,7 @@
     width:24px; height:24px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
     font-size:10px; font-weight:700;
+    overflow:hidden; flex-shrink:0;
   }
   .post-author { font-size:12px; color:var(--muted); }
 
@@ -445,7 +446,7 @@
   .group-header-meta  { font-size:12px; color:var(--muted); }
   .group-members-list { padding:16px 20px; }
   .member-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
-  .member-av  { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+  .member-av  { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; overflow:hidden; }
   .member-name { font-size:14px; font-weight:500; }
   .member-handle { font-size:12px; color:var(--muted); }
 
@@ -646,6 +647,18 @@
       <label class="form-label">Description</label>
       <textarea class="input-field" id="post-desc" placeholder="Give more context. Token amount is agreed in chat."></textarea>
     </div>
+    <div class="form-section">
+      <label class="form-label">Photo (optional)</label>
+      <div id="post-photo-preview" style="display:none;margin-bottom:10px;">
+        <img id="post-photo-img" style="width:100%;border-radius:10px;object-fit:cover;max-height:200px;" alt="">
+        <button onclick="clearPostPhoto()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;">Remove photo</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"/><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"/><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Add a photo
+        <input type="file" id="post-photo-input" accept="image/*" style="display:none" onchange="previewPostPhoto(this)">
+      </label>
+    </div>
     <button class="btn-primary" onclick="submitExchangePost()">Post</button>
   </div>
 </div>
@@ -669,6 +682,18 @@
     <div class="form-section">
       <label class="form-label">Activity type</label>
       <input class="input-field" type="text" id="group-type" placeholder="e.g. Gym, Study, Football, Language..." maxlength="40" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label">Photo (optional)</label>
+      <div id="group-photo-preview" style="display:none;margin-bottom:10px;">
+        <img id="group-photo-img" style="width:100%;border-radius:10px;object-fit:cover;max-height:200px;" alt="">
+        <button onclick="clearGroupPhoto()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;">Remove photo</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"/><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"/><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Add a photo
+        <input type="file" id="group-photo-input" accept="image/*" style="display:none" onchange="previewGroupPhoto(this)">
+      </label>
     </div>
     <button class="btn-primary" onclick="submitGroup()">Create Group</button>
   </div>
@@ -721,6 +746,23 @@
   </div>
   <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px 36px;">
     <button class="btn-primary" id="group-join-btn" onclick="joinGroup()">Join Group</button>
+    <button class="btn-ghost" id="group-chat-btn" onclick="openGroupChat()" style="margin-top:10px;margin-bottom:0;display:none;">Group Chat</button>
+  </div>
+</div>
+
+<!-- ═══ GROUP CHAT ═══ -->
+<div id="screen-group-chat" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('group')">Back</div>
+    <div class="topbar-title" id="group-chat-title">Group Chat</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div id="group-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
+  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 16px 32px;z-index:80;">
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+      <textarea id="group-chat-input" class="chat-input" placeholder="Message…" rows="1" oninput="autoResize(this)"></textarea>
+      <button class="chat-send" onclick="sendGroupMessage()">↑</button>
+    </div>
   </div>
 </div>
 
@@ -775,7 +817,7 @@
 <!-- ═══ USER PROFILE ═══ -->
 <div id="screen-user-profile" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="goBack()">Back</div>
+    <div class="topbar-back" onclick="closeProfileOverlay()">Back</div>
     <div class="topbar-title" id="up-title">Profile</div>
     <div style="width:40px;"></div>
   </div>
@@ -891,6 +933,47 @@
   <button class="btn-primary" style="max-width:260px;" onclick="closeSuccess()">Back to feed</button>
 </div>
 
+<!-- ═══ PROFILE OVERLAY ═══ -->
+<div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;" onclick="closeProfileOverlay(event)">
+  <div id="profile-overlay-card" style="background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:28px 24px 48px;position:relative;max-height:80vh;overflow-y:auto;">
+    <button onclick="closeProfileOverlay()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
+      <div id="po-av" style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:22px;font-weight:700;flex-shrink:0;overflow:hidden;"></div>
+      <div>
+        <div id="po-name" style="font-family:'Lora',serif;font-size:18px;font-weight:700;"></div>
+        <div id="po-handle" style="font-size:13px;color:var(--muted);margin-top:2px;"></div>
+      </div>
+    </div>
+    <div id="po-bio" style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;display:none;"></div>
+    <div style="display:flex;gap:1px;background:var(--border);border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:20px;">
+      <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
+        <div id="po-balance" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--accent);"></div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Tokens</div>
+      </div>
+      <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
+        <div id="po-earned" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--earn);"></div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Earned</div>
+      </div>
+      <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
+        <div id="po-helped" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--accent2);"></div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Helped</div>
+      </div>
+      <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
+        <div id="po-joined" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--muted);font-size:11px;"></div>
+        <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Joined</div>
+      </div>
+    </div>
+    <div id="po-groups-section" style="margin-bottom:16px;display:none;">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Groups</div>
+      <div id="po-groups"></div>
+    </div>
+    <div id="po-posts-section">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Active Posts</div>
+      <div id="po-posts"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────
 // SUPABASE CLIENT
@@ -913,8 +996,16 @@ var authMode        = 'signin';
 var realtimeSub     = null;
 var seenMsgIds      = new Set();
 var searchTimer     = null;
-var prevScreen      = 'home';
 var spaceIsPrivate  = true;
+
+// Group chat state
+var activeGroupChat = null;
+var groupChatSub    = null;
+var seenGroupMsgIds = new Set();
+
+// Photo upload state
+var postPhotoFile  = null;
+var groupPhotoFile = null;
 
 var AVATARS = ['#7c6cff','#ff6c9d','#5ef0c0','#ffb36c','#6cffb0','#c86cff','#47b3ff'];
 
@@ -1107,6 +1198,7 @@ function backToSignIn() {
 
 async function signOut() {
   if (realtimeSub) { db.removeChannel(realtimeSub); realtimeSub = null; }
+  if (groupChatSub) { db.removeChannel(groupChatSub); groupChatSub = null; }
   await db.auth.signOut();
 }
 
@@ -1122,6 +1214,10 @@ function showScreen(name) {
   if (name !== 'chat' && realtimeSub) {
     db.removeChannel(realtimeSub);
     realtimeSub = null;
+  }
+  if (name !== 'group-chat' && groupChatSub) {
+    db.removeChannel(groupChatSub);
+    groupChatSub = null;
   }
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById('screen-' + name);
@@ -1168,7 +1264,7 @@ async function renderFeed() {
   list.innerHTML = '<div class="empty">Loading…</div>';
 
   var q = db.from('posts')
-    .select('id, type, title, description, user_id, created_at, profiles!user_id(name, handle)')
+    .select('id, type, title, description, user_id, created_at, photo_url, profiles!user_id(name, handle, avatar_url)')
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 
@@ -1187,13 +1283,17 @@ async function renderFeed() {
     var col    = av(p.user_id);
     var author = p.profiles ? p.profiles.name : 'Unknown';
     var isOwn  = me && p.user_id === me.id;
+    var avatarHtml = (p.profiles && p.profiles.avatar_url)
+      ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
+      : author[0].toUpperCase();
     return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
+      (p.photo_url ? '<img src="' + esc(p.photo_url) + '" style="width:100%;border-radius:8px;object-fit:cover;max-height:180px;margin-bottom:12px;" alt="">' : '') +
       '<div class="post-footer">' +
         '<div class="post-meta">' +
-          '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + author[0] + '</div>' +
+          '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
           '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
         '</div>' +
         (isOwn ? '<span style="font-size:11px;color:var(--muted);">Your post</span>' : '') +
@@ -1216,7 +1316,7 @@ async function renderGroups() {
   list.innerHTML = '<div class="empty">Loading…</div>';
 
   var q = db.from('groups')
-    .select('id, title, description, activity_type, creator_id, group_members(user_id)')
+    .select('id, title, description, activity_type, creator_id, photo_url, group_members(user_id), profiles!creator_id(name, avatar_url)')
     .order('created_at', { ascending: false });
 
   if (query) q = q.or('title.ilike.%' + query + '%,description.ilike.%' + query + '%');
@@ -1233,13 +1333,25 @@ async function renderGroups() {
   list.innerHTML = groups.map(function(g, i) {
     var count  = g.group_members ? g.group_members.length : 0;
     var joined = me && g.group_members && g.group_members.some(function(m){ return m.user_id === me.id; });
+    var creatorName = g.profiles ? g.profiles.name : 'Unknown';
+    var creatorCol  = av(g.creator_id);
+    var creatorAvatarHtml = (g.profiles && g.profiles.avatar_url)
+      ? '<img src="' + esc(g.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
+      : creatorName[0].toUpperCase();
     return '<div class="group-card d' + Math.min(i+1,5) + '" onclick="openGroup(\'' + g.id + '\')">' +
       '<div class="group-tag">'   + esc(g.activity_type || 'Group') + '</div>' +
       '<div class="group-title">' + esc(g.title) + '</div>' +
       '<div class="group-desc">'  + esc(g.description || '') + '</div>' +
+      (g.photo_url ? '<img src="' + esc(g.photo_url) + '" style="width:100%;border-radius:8px;object-fit:cover;max-height:180px;margin-bottom:12px;" alt="">' : '') +
       '<div class="group-footer">' +
-        '<span class="group-members">' + count + ' member' + (count !== 1 ? 's' : '') + '</span>' +
-        (joined ? '<span class="group-joined">Joined</span>' : '<span style="font-size:12px;color:var(--muted);">Open group</span>') +
+        '<div class="post-meta">' +
+          '<div class="avatar" style="background:' + creatorCol + '22;color:' + creatorCol + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + g.creator_id + '\')">' + creatorAvatarHtml + '</div>' +
+          '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + g.creator_id + '\')">' + esc(creatorName) + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span class="group-members">' + count + ' member' + (count !== 1 ? 's' : '') + '</span>' +
+          (joined ? '<span class="group-joined">Joined</span>' : '<span style="font-size:12px;color:var(--muted);">Open group</span>') +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -1254,15 +1366,68 @@ function selectPostType(type) {
   document.getElementById('type-offering').className = 'type-pill' + (type === 'offer' ? ' sel-offer' : '');
 }
 
+// Post photo helpers
+function previewPostPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  postPhotoFile = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('post-photo-img').src = e.target.result;
+    document.getElementById('post-photo-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(postPhotoFile);
+}
+
+function clearPostPhoto() {
+  postPhotoFile = null;
+  document.getElementById('post-photo-preview').style.display = 'none';
+  document.getElementById('post-photo-input').value = '';
+}
+
+// Group photo helpers
+function previewGroupPhoto(input) {
+  if (!input.files || !input.files[0]) return;
+  groupPhotoFile = input.files[0];
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('group-photo-img').src = e.target.result;
+    document.getElementById('group-photo-preview').style.display = 'block';
+  };
+  reader.readAsDataURL(groupPhotoFile);
+}
+
+function clearGroupPhoto() {
+  groupPhotoFile = null;
+  document.getElementById('group-photo-preview').style.display = 'none';
+  document.getElementById('group-photo-input').value = '';
+}
+
 async function submitExchangePost() {
   if (!me) { alert('Please sign in first.'); return; }
   var title = document.getElementById('post-title').value.trim();
   var desc  = document.getElementById('post-desc').value.trim();
   if (!title) { alert('Add a title.'); return; }
 
+  // Upload photo if present
+  var photoUrl = null;
+  if (postPhotoFile) {
+    var ext  = postPhotoFile.name.split('.').pop().toLowerCase();
+    var path = 'posts/' + me.id + '/' + Date.now() + '.' + ext;
+    var _u   = await db.storage.from('photos').upload(path, postPhotoFile, { upsert: true });
+    if (!_u.error) {
+      photoUrl = db.storage.from('photos').getPublicUrl(path).data.publicUrl;
+    }
+  }
+
   var _r;
-  if (activeCommunity) {
-    _r = await db.from('posts').insert({ user_id: me.id, type: postType, title: title, description: desc, community_id: activeCommunity.id, is_active: true });
+  if (activeCommunity || photoUrl) {
+    // Use direct insert when community is set or photo attached (RPC doesn't support these fields)
+    _r = await db.from('posts').insert({
+      user_id: me.id, type: postType, title: title, description: desc,
+      community_id: activeCommunity ? activeCommunity.id : null,
+      photo_url: photoUrl,
+      is_active: true
+    });
   } else {
     _r = await db.rpc('create_post', { p_type: postType, p_title: title, p_description: desc });
   }
@@ -1270,6 +1435,7 @@ async function submitExchangePost() {
 
   document.getElementById('post-title').value = '';
   document.getElementById('post-desc').value  = '';
+  clearPostPhoto();
   if (activeCommunity) { showScreen('space'); renderSpaceFeed(); }
   else { showSuccess('Posted', 'Your post is live. Respond to messages from the feed.'); }
 }
@@ -1281,9 +1447,26 @@ async function submitGroup() {
   var type  = document.getElementById('group-type').value.trim();
   if (!title) { alert('Give the group a name.'); return; }
 
+  // Upload photo if present
+  var photoUrl = null;
+  if (groupPhotoFile) {
+    var ext  = groupPhotoFile.name.split('.').pop().toLowerCase();
+    var path = 'groups/' + me.id + '/' + Date.now() + '.' + ext;
+    var _u   = await db.storage.from('photos').upload(path, groupPhotoFile, { upsert: true });
+    if (!_u.error) {
+      photoUrl = db.storage.from('photos').getPublicUrl(path).data.publicUrl;
+    }
+  }
+
   var _r;
-  if (activeCommunity) {
-    _r = await db.from('groups').insert({ creator_id: me.id, title: title, description: desc, activity_type: type || 'Group', community_id: activeCommunity.id });
+  if (activeCommunity || photoUrl) {
+    // Use direct insert when community is set or photo attached
+    _r = await db.from('groups').insert({
+      creator_id: me.id, title: title, description: desc,
+      activity_type: type || 'Group',
+      community_id: activeCommunity ? activeCommunity.id : null,
+      photo_url: photoUrl
+    });
   } else {
     _r = await db.rpc('create_group', { p_title: title, p_description: desc, p_activity_type: type || 'Group' });
   }
@@ -1292,6 +1475,7 @@ async function submitGroup() {
   document.getElementById('group-title').value = '';
   document.getElementById('group-desc').value  = '';
   document.getElementById('group-type').value  = '';
+  clearGroupPhoto();
   if (activeCommunity) { showScreen('space'); renderSpaceGroups(); }
   else { showSuccess('Group created', 'Your group is live on Connect.'); }
 }
@@ -1444,6 +1628,10 @@ async function openGroup(groupId) {
   btn.textContent   = joined ? 'Already a member' : 'Join Group';
   btn.style.opacity = joined ? '0.5' : '1';
 
+  // Show/hide group chat button based on membership
+  var chatBtn = document.getElementById('group-chat-btn');
+  if (chatBtn) chatBtn.style.display = joined ? 'block' : 'none';
+
   document.getElementById('group-view-members').innerHTML = mems.map(function(m) {
     var p   = m.profiles || {};
     var col = av(m.user_id);
@@ -1467,6 +1655,82 @@ async function joinGroup() {
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
 
   showSuccess('Joined', 'You are now a member of "' + activeGroup.title + '".');
+}
+
+// ─────────────────────────────────────────────
+// GROUP CHAT
+// ─────────────────────────────────────────────
+async function openGroupChat() {
+  if (!activeGroup || !me) return;
+  activeGroupChat = activeGroup;
+  seenGroupMsgIds = new Set();
+  document.getElementById('group-chat-title').textContent = activeGroup.title;
+  await loadGroupMessages();
+  // realtime
+  if (groupChatSub) db.removeChannel(groupChatSub);
+  groupChatSub = db.channel('group-msgs-' + activeGroup.id)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'group_messages',
+      filter: 'group_id=eq.' + activeGroup.id
+    }, function(payload) {
+      if (!seenGroupMsgIds.has(payload.new.id)) {
+        seenGroupMsgIds.add(payload.new.id);
+        appendGroupMessage(payload.new);
+      }
+    }).subscribe();
+  showScreen('group-chat');
+}
+
+async function loadGroupMessages() {
+  var wrap = document.getElementById('group-chat-messages');
+  wrap.innerHTML = '<div class="empty" style="padding:40px 20px;">Loading…</div>';
+  var _r = await db.from('group_messages')
+    .select('id, sender_id, sender_name, content, created_at')
+    .eq('group_id', activeGroupChat.id)
+    .order('created_at', { ascending: true });
+  wrap.innerHTML = '';
+  if (_r.error || !_r.data || !_r.data.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:40px 20px;">No messages yet. Say hello 👋</div>';
+    return;
+  }
+  _r.data.forEach(function(m) { seenGroupMsgIds.add(m.id); appendGroupMessage(m); });
+}
+
+function appendGroupMessage(msg) {
+  var wrap = document.getElementById('group-chat-messages');
+  var empty = wrap.querySelector('.empty');
+  if (empty) empty.remove();
+  var isMine = me && msg.sender_id === me.id;
+  var outer = document.createElement('div');
+  if (!isMine) {
+    var nameEl = document.createElement('div');
+    nameEl.className = 'msg-name';
+    nameEl.textContent = msg.sender_name || 'Unknown';
+    nameEl.style.cursor = 'pointer';
+    nameEl.onclick = function() { openUserProfile(msg.sender_id); };
+    outer.appendChild(nameEl);
+  }
+  var bubble = document.createElement('div');
+  bubble.className = 'msg-bubble ' + (isMine ? 'mine' : 'theirs');
+  bubble.textContent = msg.content;
+  outer.appendChild(bubble);
+  wrap.appendChild(outer);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+async function sendGroupMessage() {
+  if (!me || !activeGroupChat) return;
+  var input = document.getElementById('group-chat-input');
+  var text = input.value.trim();
+  if (!text) return;
+  var _r = await db.from('group_messages')
+    .insert({ group_id: activeGroupChat.id, sender_id: me.id, sender_name: me.name, content: text })
+    .select('id').single();
+  if (_r.error) { alert('Failed to send: ' + _r.error.message); return; }
+  seenGroupMsgIds.add(_r.data.id);
+  appendGroupMessage({ id: _r.data.id, sender_id: me.id, sender_name: me.name, content: text });
+  input.value = '';
+  input.style.height = '';
 }
 
 // ─────────────────────────────────────────────
@@ -1560,65 +1824,80 @@ function updateBalance() {
 }
 
 // ─────────────────────────────────────────────
-// USER PROFILE
+// USER PROFILE OVERLAY
 // ─────────────────────────────────────────────
-function goBack() {
-  showScreen(prevScreen);
-}
-
 async function openUserProfile(userId) {
   if (!userId) return;
-  var activeId = document.querySelector('.screen.active');
-  prevScreen = activeId ? activeId.id.replace('screen-', '') : 'home';
+  var overlay = document.getElementById('profile-overlay');
+  overlay.style.display = 'flex';
+  // clear previous
+  document.getElementById('po-av').innerHTML = '<div style="color:var(--muted);font-size:12px;">…</div>';
+  document.getElementById('po-name').textContent = '';
+  document.getElementById('po-handle').textContent = '';
+  document.getElementById('po-balance').textContent = '…';
+  document.getElementById('po-earned').textContent = '…';
+  document.getElementById('po-helped').textContent = '…';
+  document.getElementById('po-joined').textContent = '…';
+  document.getElementById('po-bio').style.display = 'none';
+  document.getElementById('po-groups-section').style.display = 'none';
+  document.getElementById('po-posts').innerHTML = '';
 
   var _r = await db.from('profiles')
     .select('id, name, handle, bio, avatar_url, balance, total_earned, total_helped, created_at')
     .eq('id', userId).single();
-  if (_r.error || !_r.data) return;
+  if (_r.error || !_r.data) { closeProfileOverlay(); return; }
   var u = _r.data;
 
-  var avEl = document.getElementById('up-av');
+  var avEl = document.getElementById('po-av');
   if (u.avatar_url) {
-    avEl.innerHTML = '<img src="' + esc(u.avatar_url) + '" alt="">';
+    avEl.innerHTML = '<img src="' + esc(u.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">';
   } else {
     avEl.textContent = u.name[0].toUpperCase();
-    avEl.style.background = '';
+    avEl.style.background = av(u.id);
+    avEl.style.color = '#fff';
   }
-
-  document.getElementById('up-title').textContent  = '@' + u.handle;
-  document.getElementById('up-name').textContent   = u.name;
-  document.getElementById('up-handle').textContent = '@' + u.handle;
-  var bioEl = document.getElementById('up-bio');
-  if (u.bio) { bioEl.textContent = u.bio; bioEl.style.display = ''; }
-  else { bioEl.style.display = 'none'; }
-
-  document.getElementById('up-balance').textContent = u.balance;
-  document.getElementById('up-earned').textContent  = u.total_earned;
-  document.getElementById('up-helped').textContent  = u.total_helped;
-
+  document.getElementById('po-name').textContent   = u.name;
+  document.getElementById('po-handle').textContent = '@' + u.handle;
+  if (u.bio) { var bioEl = document.getElementById('po-bio'); bioEl.textContent = u.bio; bioEl.style.display = 'block'; }
+  document.getElementById('po-balance').textContent = u.balance;
+  document.getElementById('po-earned').textContent  = u.total_earned || 0;
+  document.getElementById('po-helped').textContent  = u.total_helped || 0;
   var d = new Date(u.created_at);
   var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  document.getElementById('up-joined').textContent = months[d.getMonth()] + ' ' + d.getFullYear();
+  document.getElementById('po-joined').textContent = months[d.getMonth()] + ' ' + d.getFullYear();
 
-  var _p = await db.from('posts')
-    .select('id, type, title, description')
-    .eq('user_id', userId).eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  var postsEl = document.getElementById('up-posts');
-  if (!_p.data || !_p.data.length) {
-    postsEl.innerHTML = '<div class="empty">No active posts.</div>';
-  } else {
-    postsEl.innerHTML = _p.data.map(function(p) {
-      return '<div class="post-card" onclick="openChat(\'' + p.id + '\')" style="margin-bottom:12px;">' +
-        '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
-        '<div class="post-title">' + esc(p.title) + '</div>' +
-        (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
+  // Groups
+  var _g = await db.from('group_members').select('groups!group_id(id,title,activity_type)').eq('user_id', userId);
+  if (_g.data && _g.data.length) {
+    document.getElementById('po-groups-section').style.display = 'block';
+    document.getElementById('po-groups').innerHTML = _g.data.map(function(m) {
+      var g = m.groups; if (!g) return '';
+      return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">' +
+        '<div style="width:6px;height:6px;border-radius:50%;background:var(--earn);flex-shrink:0;"></div>' +
+        '<div><div style="font-size:13px;font-weight:500;">' + esc(g.title) + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);">' + esc(g.activity_type || 'Group') + '</div></div>' +
       '</div>';
     }).join('');
   }
 
-  showScreen('user-profile');
+  // Posts
+  var _p = await db.from('posts').select('id,type,title').eq('user_id', userId).eq('is_active', true).order('created_at', {ascending: false}).limit(5);
+  var postsEl = document.getElementById('po-posts');
+  if (!_p.data || !_p.data.length) {
+    postsEl.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No active posts.</div>';
+  } else {
+    postsEl.innerHTML = _p.data.map(function(p) {
+      return '<div onclick="closeProfileOverlay();openChat(\'' + p.id + '\')" style="padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;">' +
+        '<div style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
+        '<div style="font-size:14px;font-weight:600;font-family:\'Lora\',serif;">' + esc(p.title) + '</div>' +
+      '</div>';
+    }).join('');
+  }
+}
+
+function closeProfileOverlay(e) {
+  if (e && e.target !== document.getElementById('profile-overlay')) return;
+  document.getElementById('profile-overlay').style.display = 'none';
 }
 
 // ─────────────────────────────────────────────
@@ -1770,7 +2049,7 @@ async function renderSpaceFeed() {
   var query = (document.getElementById('search-space-exchange').value || '').trim();
   list.innerHTML = '<div class="empty">Loading…</div>';
   var q = db.from('posts')
-    .select('id, type, title, description, user_id, created_at, profiles!user_id(name, handle)')
+    .select('id, type, title, description, user_id, created_at, photo_url, profiles!user_id(name, handle, avatar_url)')
     .eq('is_active', true).eq('community_id', activeCommunity.id)
     .order('created_at', { ascending: false });
   if (query) q = q.or('title.ilike.%' + query + '%,description.ilike.%' + query + '%');
@@ -1781,12 +2060,16 @@ async function renderSpaceFeed() {
   list.innerHTML = posts.map(function(p, i) {
     var col    = av(p.user_id);
     var author = p.profiles ? p.profiles.name : 'Unknown';
+    var avatarHtml = (p.profiles && p.profiles.avatar_url)
+      ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
+      : author[0].toUpperCase();
     return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
+      (p.photo_url ? '<img src="' + esc(p.photo_url) + '" style="width:100%;border-radius:8px;object-fit:cover;max-height:180px;margin-bottom:12px;" alt="">' : '') +
       '<div class="post-footer"><div class="post-meta">' +
-        '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + author[0] + '</div>' +
+        '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
         '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
       '</div></div></div>';
   }).join('');
@@ -1798,7 +2081,7 @@ async function renderSpaceGroups() {
   var query = (document.getElementById('search-space-connect').value || '').trim();
   list.innerHTML = '<div class="empty">Loading…</div>';
   var q = db.from('groups')
-    .select('id, title, description, activity_type, creator_id, group_members(user_id)')
+    .select('id, title, description, activity_type, creator_id, photo_url, group_members(user_id), profiles!creator_id(name, avatar_url)')
     .eq('community_id', activeCommunity.id)
     .order('created_at', { ascending: false });
   if (query) q = q.or('title.ilike.%' + query + '%,description.ilike.%' + query + '%');
@@ -1809,13 +2092,27 @@ async function renderSpaceGroups() {
   list.innerHTML = groups.map(function(g, i) {
     var count  = g.group_members ? g.group_members.length : 0;
     var joined = me && g.group_members && g.group_members.some(function(m){ return m.user_id === me.id; });
+    var creatorName = g.profiles ? g.profiles.name : 'Unknown';
+    var creatorCol  = av(g.creator_id);
+    var creatorAvatarHtml = (g.profiles && g.profiles.avatar_url)
+      ? '<img src="' + esc(g.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
+      : creatorName[0].toUpperCase();
     return '<div class="group-card d' + Math.min(i+1,5) + '" onclick="openGroup(\'' + g.id + '\')">' +
       '<div class="group-tag">'   + esc(g.activity_type || 'Group') + '</div>' +
       '<div class="group-title">' + esc(g.title) + '</div>' +
       '<div class="group-desc">'  + esc(g.description || '') + '</div>' +
-      '<div class="group-footer"><span class="group-members">' + count + ' member' + (count !== 1 ? 's' : '') + '</span>' +
-      (joined ? '<span class="group-joined">Joined</span>' : '<span style="font-size:12px;color:var(--muted);">Open group</span>') +
-      '</div></div>';
+      (g.photo_url ? '<img src="' + esc(g.photo_url) + '" style="width:100%;border-radius:8px;object-fit:cover;max-height:180px;margin-bottom:12px;" alt="">' : '') +
+      '<div class="group-footer">' +
+        '<div class="post-meta">' +
+          '<div class="avatar" style="background:' + creatorCol + '22;color:' + creatorCol + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + g.creator_id + '\')">' + creatorAvatarHtml + '</div>' +
+          '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + g.creator_id + '\')">' + esc(creatorName) + '</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span class="group-members">' + count + ' member' + (count !== 1 ? 's' : '') + '</span>' +
+          (joined ? '<span class="group-joined">Joined</span>' : '<span style="font-size:12px;color:var(--muted);">Open group</span>') +
+        '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
 }
 

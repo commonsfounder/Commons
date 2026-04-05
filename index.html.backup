@@ -1,16 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0024)https://joincommons.org/ -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Commons</title>
-<link href="./Commons newest_files/css2" rel="stylesheet">
-<script src="./Commons newest_files/supabase-js@2"></script>
-<!-- Vercel Web Analytics -->
-<script>
-  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-</script>
-<script defer src="/_vercel/insights/script.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root {
     --bg: #F7F5F0;
@@ -524,64 +519,20 @@
   @keyframes popIn      { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
 
   .d1{animation-delay:.05s} .d2{animation-delay:.1s} .d3{animation-delay:.15s} .d4{animation-delay:.2s} .d5{animation-delay:.25s}
-
-  /* ─── PENDING CONFIRMATION CARDS ─── */
-  .pending-card {
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-left:3px solid var(--accent2);
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:10px;
-  }
-  .pending-card-title { font-size:14px; font-weight:600; margin-bottom:3px; }
-  .pending-card-sub   { font-size:12px; color:var(--muted); margin-bottom:10px; line-height:1.5; }
-  .pending-card-status { font-size:11px; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px; display:block; }
-  .pending-card-status.waiting { color:var(--muted); }
-  .pending-card-status.ready   { color:var(--earn); }
-
-  /* ─── SCORING MODAL ─── */
-  .modal-overlay {
-    display:none; position:fixed; inset:0;
-    background:rgba(28,43,43,0.55); z-index:200;
-    align-items:flex-end; justify-content:center;
-  }
-  .modal-overlay.open { display:flex; }
-  .modal-sheet {
-    background:var(--bg);
-    border-radius:20px 20px 0 0;
-    padding:28px 24px 52px;
-    width:100%; max-width:430px;
-    animation:slideSheet 0.3s ease;
-  }
-  .modal-title { font-family:'Lora',serif; font-size:20px; font-weight:700; margin-bottom:6px; }
-  .modal-sub   { font-size:13px; color:var(--muted); margin-bottom:24px; line-height:1.5; }
-  .score-question { margin-bottom:20px; }
-  .score-qlabel { font-size:13px; font-weight:600; margin-bottom:10px; display:block; }
-  .score-options { display:flex; gap:6px; }
-  .score-btn {
-    flex:1; padding:10px 2px;
-    border:1px solid var(--border);
-    border-radius:8px; background:var(--surface);
-    font-size:11px; font-weight:600;
-    color:var(--muted); cursor:pointer;
-    text-align:center; transition:all 0.15s;
-  }
-  .score-btn.selected { background:var(--accent); color:white; border-color:var(--accent); }
 </style>
-<link type="text/css" rel="stylesheet" href="chrome-extension://fheoggkfdfchfphceeifdbepaooicaho/css/mcafee_fonts.css"></head>
+</head>
 <body>
 
 <!-- ═══ SPLASH ═══ -->
-<div id="screen-splash" class="screen">
+<div id="screen-splash" class="screen active">
   <div class="sp-row">
     <div class="sp-dot sp-d1"></div>
     <svg class="sp-arr sp-a1" width="20" height="10" viewBox="0 0 20 10" fill="none">
-      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="sp-dot sp-d2"></div>
     <svg class="sp-arr sp-a2" width="20" height="10" viewBox="0 0 20 10" fill="none">
-      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <div class="sp-dot sp-d3"></div>
   </div>
@@ -591,19 +542,19 @@
 <!-- ═══ ONBOARDING ═══ -->
 <div id="screen-onboard" class="screen">
   <div class="onboard-top">
-    <div id="onboard-logo-wrap" style="display:flex;align-items:center;justify-content:center;margin-bottom:4px;opacity:0;animation:fadeUp 0.5s ease 0.05s forwards;"><svg width="44" height="12" viewBox="0 0 44 12" fill="none" style="vertical-align:middle;margin-right:8px;"><circle cx="6" cy="6" r="5" fill="var(--accent)"></circle><path d="M12 6h4M14 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="22" cy="6" r="5" fill="var(--accent)" opacity="0.6"></circle><path d="M28 6h4M30 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path><circle cx="38" cy="6" r="5" fill="var(--accent)" opacity="0.3"></circle></svg></div>
+    <div id="onboard-logo-wrap" style="display:flex;align-items:center;justify-content:center;margin-bottom:4px;opacity:0;animation:fadeUp 0.5s ease 0.05s forwards;"></div>
     <div class="onboard-wordmark">Commons</div>
     <div class="onboard-tagline">Find your village.</div>
   </div>
   <div class="onboard-form">
-    <input class="input-field" type="email" id="email-input" placeholder="Email" autocomplete="email" fdprocessedid="77sb5s">
-    <input class="input-field" type="password" id="password-input" placeholder="Password (min 6 chars)" autocomplete="current-password" fdprocessedid="cgw0ph">
+    <input class="input-field" type="email" id="email-input" placeholder="Email" autocomplete="email">
+    <input class="input-field" type="password" id="password-input" placeholder="Password (min 6 chars)" autocomplete="current-password">
     <div id="signup-fields" style="display:none;">
       <input class="input-field" type="text" id="name-input" placeholder="Your name" maxlength="30" autocomplete="off">
       <input class="input-field" type="text" id="handle-input" placeholder="Handle (letters, numbers, _)" maxlength="20" autocomplete="off">
     </div>
     <button class="btn-primary" id="auth-btn" onclick="authAction()">Sign in</button>
-    <button class="btn-ghost" id="toggle-auth-btn" onclick="toggleAuthMode()" fdprocessedid="60g9qb">New here? Create an account</button>
+    <button class="btn-ghost" id="toggle-auth-btn" onclick="toggleAuthMode()">New here? Create an account</button>
   </div>
 </div>
 
@@ -611,7 +562,7 @@
 <div id="screen-checkemail" class="screen">
   <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;gap:16px;">
     <div style="font-size:40px;">✉️</div>
-    <div style="font-family:&#39;Lora&#39;,serif;font-size:24px;font-weight:700;">Check your email</div>
+    <div style="font-family:'Lora',serif;font-size:24px;font-weight:700;">Check your email</div>
     <div style="font-size:14px;color:var(--muted);line-height:1.8;max-width:300px;">
       We sent a confirmation link to<br>
       <span id="confirm-email-display" style="color:var(--text);font-weight:500;"></span>
@@ -624,32 +575,48 @@
 </div>
 
 <!-- ═══ HOME ═══ -->
-<div id="screen-home" class="screen active">
+<div id="screen-home" class="screen">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50;">
-    <div id="home-topbar-logo" style="display:flex;align-items:center;"><svg width="44" height="12" viewBox="0 0 44 12" fill="none" style="vertical-align:middle;margin-right:8px;"><circle cx="6" cy="6" r="5" fill="var(--accent)"></circle><path d="M12 6h4M14 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="22" cy="6" r="5" fill="var(--accent)" opacity="0.6"></circle><path d="M28 6h4M30 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path><circle cx="38" cy="6" r="5" fill="var(--accent)" opacity="0.3"></circle></svg><span style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;">Commons</span></div>
+    <div id="home-topbar-logo" style="display:flex;align-items:center;"></div>
     <div style="display:flex;align-items:center;gap:10px;">
+      <!-- Search icon -->
+      <div onclick="showScreen('search')" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;border:1px solid var(--border);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="6" cy="6" r="4.5" stroke="var(--muted)" stroke-width="1.4"/>
+          <path d="M9.5 9.5l3 3" stroke="var(--muted)" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <!-- Spaces icon -->
+      <div onclick="showScreen('spaces')" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px;border:1px solid var(--border);">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="0" y="0" width="5.5" height="5.5" rx="1.5" fill="var(--muted)"/>
+          <rect x="8.5" y="0" width="5.5" height="5.5" rx="1.5" fill="var(--muted)"/>
+          <rect x="0" y="8.5" width="5.5" height="5.5" rx="1.5" fill="var(--muted)"/>
+          <rect x="8.5" y="8.5" width="5.5" height="5.5" rx="1.5" fill="var(--muted)"/>
+        </svg>
+      </div>
       <div class="token-chip">
         <div class="token-dot"></div>
-        <span id="balance-display">72</span>&nbsp;tokens
+        <span id="balance-display">0</span>&nbsp;tokens
       </div>
-      <div id="nav-av" onclick="showScreen(&#39;profile&#39;)" style="width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:&#39;Lora&#39;,serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;overflow:hidden;"><img src="./Commons newest_files/avatar.jpeg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt=""></div>
+      <div id="nav-av" onclick="showScreen('profile')" style="width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;overflow:hidden;">?</div>
     </div>
   </div>
   <div class="binary-nav">
-    <div class="nav-tab active" id="tab-exchange" onclick="switchTab(&#39;exchange&#39;)">Exchange</div>
+    <div class="nav-tab active" id="tab-exchange" onclick="switchTab('exchange')">Exchange</div>
     <div class="nav-divider"></div>
-    <div class="nav-tab" id="tab-connect" onclick="switchTab(&#39;connect&#39;)">Connect</div>
+    <div class="nav-tab" id="tab-connect" onclick="switchTab('connect')">Connect</div>
   </div>
 
   <!-- EXCHANGE PANEL -->
   <div class="main-screen visible" id="panel-exchange">
     <div class="search-wrap">
-      <input class="search-field" type="text" id="search-exchange" placeholder="Search posts..." oninput="onSearchExchange()" autocomplete="off" fdprocessedid="kwfgi9">
+      <input class="search-field" type="text" id="search-exchange" placeholder="Search posts..." oninput="onSearchExchange()" autocomplete="off">
     </div>
     <div class="scroll-area">
-      <div id="feed-list"><div class="post-card d1" onclick="openChat(&#39;19308812-7d2c-4b95-99af-d0bb1eaebd9b&#39;)"><div class="post-type need">Looking for help</div><div class="post-title">Miss my pookie</div><div class="post-desc">Help</div><div class="post-footer"><div class="post-meta"><div class="avatar" style="background:#ffb36c22;color:#ffb36c;cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;ee618ccc-58fd-4d42-beb9-b3a9cca96a70&#39;)"><img src="./Commons newest_files/avatar.jpeg" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt=""></div><span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;ee618ccc-58fd-4d42-beb9-b3a9cca96a70&#39;)">Chizigam</span></div><span style="font-size:11px;color:var(--muted);">Your post</span></div></div><div class="post-card d2" onclick="openChat(&#39;80b8f2c9-e481-41d3-950b-c5043bc77cca&#39;)"><div class="post-type need">Looking for help</div><div class="post-title">Missing person !! Urgent</div><div class="post-desc">I woke up, and chizi wasnt there in my bed</div><div class="post-footer"><div class="post-meta"><div class="avatar" style="background:#c86cff22;color:#c86cff;cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;2fdedd67-4300-443c-8ed9-bec57992524f&#39;)"><img src="./Commons newest_files/avatar.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt=""></div><span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;2fdedd67-4300-443c-8ed9-bec57992524f&#39;)">Alisa</span></div></div></div><div class="post-card d3" onclick="openChat(&#39;8c5d8305-2a37-4b8f-b600-87c2eee5c583&#39;)"><div class="post-type need">Looking for help</div><div class="post-title">Food</div><div class="post-desc">food</div><div class="post-footer"><div class="post-meta"><div class="avatar" style="background:#c86cff22;color:#c86cff;cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;29adc43e-8186-437f-aadf-0c5c6b3a4d9b&#39;)">D</div><span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;29adc43e-8186-437f-aadf-0c5c6b3a4d9b&#39;)">Dummy</span></div></div></div></div>
+      <div id="feed-list"></div>
     </div>
-    <div class="fab fab-exchange" onclick="showScreen(&#39;post-exchange&#39;)">+</div>
+    <div class="fab fab-exchange" onclick="showScreen('post-exchange')">+</div>
   </div>
 
   <!-- CONNECT PANEL -->
@@ -658,9 +625,9 @@
       <input class="search-field" type="text" id="search-connect" placeholder="Search groups..." oninput="onSearchConnect()" autocomplete="off">
     </div>
     <div class="scroll-area">
-      <div id="groups-list"><div class="group-card d1" onclick="openGroup(&#39;e38555f0-223c-45b4-ba34-151ec3d3ca88&#39;)"><div class="group-tag">Thirsting</div><div class="group-title">Chizi Fan Club</div><div class="group-desc">Groopies assemble</div><div class="group-footer"><div class="post-meta"><div class="avatar" style="background:#c86cff22;color:#c86cff;cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;2fdedd67-4300-443c-8ed9-bec57992524f&#39;)"><img src="./Commons newest_files/avatar.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt=""></div><span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;2fdedd67-4300-443c-8ed9-bec57992524f&#39;)">Alisa</span></div><div style="display:flex;align-items:center;gap:8px;"><span class="group-members">2 members</span><span class="group-joined">Joined</span></div></div></div><div class="group-card d2" onclick="openGroup(&#39;4b470e80-2a2e-4ba4-b41e-922762e41eac&#39;)"><div class="group-tag">Sports</div><div class="group-title">Football</div><div class="group-desc">Tomorrow</div><div class="group-footer"><div class="post-meta"><div class="avatar" style="background:#c86cff22;color:#c86cff;cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;29adc43e-8186-437f-aadf-0c5c6b3a4d9b&#39;)">D</div><span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(&#39;29adc43e-8186-437f-aadf-0c5c6b3a4d9b&#39;)">Dummy</span></div><div style="display:flex;align-items:center;gap:8px;"><span class="group-members">3 members</span><span class="group-joined">Joined</span></div></div></div></div>
+      <div id="groups-list"></div>
     </div>
-    <div class="fab fab-connect" onclick="showScreen(&#39;post-connect&#39;)">+</div>
+    <div class="fab fab-connect" onclick="showScreen('post-connect')">+</div>
   </div>
 </div>
 
@@ -675,8 +642,8 @@
     <div class="form-section">
       <label class="form-label">I am</label>
       <div class="type-row">
-        <div class="type-pill sel-need" id="type-need" onclick="selectPostType(&#39;need&#39;)">Looking for help</div>
-        <div class="type-pill" id="type-offering" onclick="selectPostType(&#39;offer&#39;)">Offering something</div>
+        <div class="type-pill sel-need" id="type-need" onclick="selectPostType('need')">Looking for help</div>
+        <div class="type-pill" id="type-offering" onclick="selectPostType('offer')">Offering something</div>
       </div>
     </div>
     <div class="form-section">
@@ -694,7 +661,7 @@
         <button onclick="clearPostPhoto()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;">Remove photo</button>
       </div>
       <label style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"></rect><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"></circle><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"/><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"/><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Add a photo
         <input type="file" id="post-photo-input" accept="image/*" style="display:none" onchange="previewPostPhoto(this)">
       </label>
@@ -730,7 +697,7 @@
         <button onclick="clearGroupPhoto()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;margin-top:4px;">Remove photo</button>
       </div>
       <label style="display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--surface);border:1px dashed var(--border);border-radius:10px;cursor:pointer;font-size:13px;color:var(--muted);">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"></rect><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"></circle><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="10" rx="2" stroke="var(--muted)" stroke-width="1.3"/><circle cx="5.5" cy="6.5" r="1.2" fill="var(--muted)"/><path d="M1 10.5l3.5-3 2.5 2.5 2-2 4 4" stroke="var(--muted)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Add a photo
         <input type="file" id="group-photo-input" accept="image/*" style="display:none" onchange="previewGroupPhoto(this)">
       </label>
@@ -742,7 +709,7 @@
 <!-- ═══ CHAT ═══ -->
 <div id="screen-chat" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="showScreen(&#39;home&#39;)">Back</div>
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
     <div class="topbar-title" id="chat-title">Chat</div>
     <div style="width:40px;"></div>
   </div>
@@ -758,9 +725,10 @@
       <textarea class="chat-input" id="chat-input" placeholder="Message..." rows="1" oninput="autoResize(this)"></textarea>
       <button class="chat-send" onclick="sendMessage()">↑</button>
     </div>
-    <div id="confirm-deal-bar" style="display:none;margin-top:10px;">
-      <button class="btn-primary" id="request-confirm-btn" onclick="requestConfirmation()" style="padding:14px;">Request Confirmation</button>
-      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.5;">Both parties confirm independently in their profile. Tokens only move after both confirm and rate the exchange.</div>
+    <div class="confirm-deal-bar" id="confirm-deal-bar" style="display:flex;">
+      <span class="deal-label">Agree on tokens:</span>
+      <input class="deal-input" type="number" id="deal-tokens" placeholder="Amount" min="1">
+      <button class="btn-small" onclick="confirmDeal()">Confirm Deal</button>
     </div>
   </div>
 </div>
@@ -768,15 +736,15 @@
 <!-- ═══ GROUP ═══ -->
 <div id="screen-group" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="showScreen(&#39;home&#39;)">Back</div>
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
     <div class="topbar-title">Group</div>
     <div style="width:40px;"></div>
   </div>
   <div style="flex:1;overflow-y:auto;padding-bottom:120px;">
     <div class="group-header">
       <div class="group-header-title" id="group-view-title"></div>
-      <div class="group-header-desc" id="group-view-desc"></div>
-      <div class="group-header-meta" id="group-view-meta"></div>
+      <div class="group-header-desc"  id="group-view-desc"></div>
+      <div class="group-header-meta"  id="group-view-meta"></div>
     </div>
     <div class="group-members-list">
       <span class="section-label">Members</span>
@@ -792,7 +760,7 @@
 <!-- ═══ GROUP CHAT ═══ -->
 <div id="screen-group-chat" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="showScreen(&#39;group&#39;)">Back</div>
+    <div class="topbar-back" onclick="showScreen('group')">Back</div>
     <div class="topbar-title" id="group-chat-title">Group Chat</div>
     <div style="width:40px;"></div>
   </div>
@@ -808,22 +776,22 @@
 <!-- ═══ PROFILE ═══ -->
 <div id="screen-profile" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="showScreen(&#39;home&#39;)">Back</div>
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
     <div class="topbar-title">Profile</div>
     <div class="topbar-back" onclick="signOut()" style="color:var(--spend);">Sign out</div>
   </div>
   <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
     <div class="profile-head">
-      <div class="profile-av" id="profile-av" onclick="document.getElementById(&#39;avatar-input&#39;).click()" title="Tap to change photo"></div>
+      <div class="profile-av" id="profile-av" onclick="document.getElementById('avatar-input').click()" title="Tap to change photo"></div>
       <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
-      <div class="profile-name" id="profile-name-display"></div>
+      <div class="profile-name"   id="profile-name-display"></div>
       <div class="profile-handle" id="profile-handle-display"></div>
-      <div class="profile-bio" id="profile-bio-display" style="display:none;"></div>
+      <div class="profile-bio"    id="profile-bio-display" style="display:none;"></div>
       <div class="stats-row">
-        <div class="stat-box"><span class="stat-val" id="stat-tokens" style="color:var(--accent)">72</span><span class="stat-label">Tokens</span></div>
-        <div class="stat-box"><span class="stat-val" id="stat-earned" style="color:var(--earn)">22</span><span class="stat-label">Earned</span></div>
-        <div class="stat-box"><span class="stat-val" id="stat-helped" style="color:var(--accent2)">5</span><span class="stat-label">Helped</span></div>
-        <div class="stat-box"><span class="stat-val" id="stat-groups" style="color:var(--earn)">2</span><span class="stat-label">Groups</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-tokens" style="color:var(--accent)">0</span><span class="stat-label">Tokens</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-helped" style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
+        <div class="stat-box"><span class="stat-val" id="stat-groups" style="color:var(--earn)">0</span><span class="stat-label">Groups</span></div>
       </div>
     </div>
     <div style="padding:0 20px;">
@@ -841,15 +809,13 @@
       <div id="history-list"></div>
       <span class="section-label" style="margin-top:28px;">Your Groups</span>
       <div id="groups-joined-list"></div>
-      <span class="section-label" style="margin-top:28px;">Pending Confirmations</span>
-      <div id="pending-confirmations-list"><div class="empty" style="padding:20px 0;">No pending confirmations.</div></div>
     </div>
 
     <!-- Dark mode toggle -->
     <div id="dark-mode-row" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-top:1px solid var(--border);margin-top:8px;">
       <span style="font-size:15px;color:var(--text);">Dark mode</span>
       <div id="dark-toggle" onclick="toggleDarkMode()" style="width:46px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
-        <div id="dark-toggle-thumb" style="width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px; transform: translateX(0px);"></div>
+        <div id="dark-toggle-thumb" style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
       </div>
     </div>
   </div>
@@ -865,14 +831,14 @@
   <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
     <div class="profile-head">
       <div class="profile-av" id="up-av" style="cursor:default;"></div>
-      <div class="profile-name" id="up-name"></div>
+      <div class="profile-name"   id="up-name"></div>
       <div class="profile-handle" id="up-handle"></div>
-      <div class="profile-bio" id="up-bio" style="display:none;"></div>
+      <div class="profile-bio"    id="up-bio" style="display:none;"></div>
       <div class="stats-row">
         <div class="stat-box"><span class="stat-val" id="up-balance" style="color:var(--accent)">0</span><span class="stat-label">Tokens</span></div>
-        <div class="stat-box"><span class="stat-val" id="up-earned" style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
-        <div class="stat-box"><span class="stat-val" id="up-helped" style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
-        <div class="stat-box"><span class="stat-val" id="up-joined" style="color:var(--muted)">—</span><span class="stat-label">Joined</span></div>
+        <div class="stat-box"><span class="stat-val" id="up-earned"  style="color:var(--earn)">0</span><span class="stat-label">Earned</span></div>
+        <div class="stat-box"><span class="stat-val" id="up-helped"  style="color:var(--accent2)">0</span><span class="stat-label">Helped</span></div>
+        <div class="stat-box"><span class="stat-val" id="up-joined"  style="color:var(--muted)">—</span><span class="stat-label">Joined</span></div>
       </div>
     </div>
     <div style="padding:0 20px;">
@@ -885,59 +851,104 @@
 <!-- ═══ SEARCH ═══ -->
 <div id="screen-search" class="screen">
   <div class="topbar">
-    <div class="topbar-back" onclick="showScreen(&#39;home&#39;)">Back</div>
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
     <div class="topbar-title">Search</div>
     <div style="width:40px;"></div>
   </div>
   <div style="padding:14px 16px 8px;">
-    <input class="search-field" type="text" id="global-search-input" placeholder="Search people, posts, groups…" oninput="onGlobalSearch()" autocomplete="off" autofocus="">
+    <input class="search-field" type="text" id="global-search-input" placeholder="Search people, posts, groups…" oninput="onGlobalSearch()" autocomplete="off" autofocus>
   </div>
   <div style="display:flex;border-bottom:1px solid var(--border);">
-    <div id="search-tab-people" class="nav-tab active" style="font-family:&#39;Inter&#39;,sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab(&#39;people&#39;)">People</div>
-    <div id="search-tab-posts" class="nav-tab" style="font-family:&#39;Inter&#39;,sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab(&#39;posts&#39;)">Posts</div>
-    <div id="search-tab-groups" class="nav-tab" style="font-family:&#39;Inter&#39;,sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab(&#39;groups&#39;)">Groups</div>
+    <div id="search-tab-people"  class="nav-tab active" style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab('people')">People</div>
+    <div id="search-tab-posts"   class="nav-tab"        style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab('posts')">Posts</div>
+    <div id="search-tab-groups"  class="nav-tab"        style="font-family:'Inter',sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab('groups')">Groups</div>
   </div>
   <div style="flex:1;overflow-y:auto;padding:8px 16px 80px;">
     <div id="search-results"></div>
   </div>
 </div>
 
-<!-- ═══ SCORING MODAL ═══ -->
-<div class="modal-overlay" id="scoring-modal">
-  <div class="modal-sheet">
-    <div class="modal-title">Rate this exchange</div>
-    <div class="modal-sub">Your answers determine how many tokens are awarded. Be honest — this keeps the community fair.</div>
-    <div class="score-question">
-      <span class="score-qlabel">How much time did this take?</span>
-      <div class="score-options" id="score-time-opts">
-        <div class="score-btn" onclick="selectScore('time',1)">Quick</div>
-        <div class="score-btn" onclick="selectScore('time',2)">Short</div>
-        <div class="score-btn" onclick="selectScore('time',3)">Medium</div>
-        <div class="score-btn" onclick="selectScore('time',4)">Long</div>
-        <div class="score-btn" onclick="selectScore('time',5)">A lot</div>
+<!-- ═══ SPACES LIST ═══ -->
+<div id="screen-spaces" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('home')">Back</div>
+    <div class="topbar-title">Spaces</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:8px 16px 120px;">
+    <div id="spaces-list"></div>
+  </div>
+  <div class="fab" onclick="showScreen('create-space')" style="right:28px;">+</div>
+</div>
+
+<!-- ═══ CREATE SPACE ═══ -->
+<div id="screen-create-space" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('spaces')">Back</div>
+    <div class="topbar-title">New Space</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="form-scroll">
+    <div class="form-section">
+      <label class="form-label">Name</label>
+      <input class="input-field" type="text" id="space-name" placeholder="e.g. UCL Economics 2025" maxlength="60" autocomplete="off">
+    </div>
+    <div class="form-section">
+      <label class="form-label">Description</label>
+      <textarea class="input-field" id="space-desc" placeholder="What is this space for?"></textarea>
+    </div>
+    <div class="form-section">
+      <label class="form-label">Access</label>
+      <div style="display:flex;gap:8px;">
+        <div id="space-private-pill" class="type-pill sel-offer" onclick="setSpacePrivate(true)" style="flex:1;">Private (approve members)</div>
+        <div id="space-public-pill"  class="type-pill"           onclick="setSpacePrivate(false)" style="flex:1;">Public (open)</div>
       </div>
     </div>
-    <div class="score-question">
-      <span class="score-qlabel">How much effort was involved?</span>
-      <div class="score-options" id="score-effort-opts">
-        <div class="score-btn" onclick="selectScore('effort',1)">Easy</div>
-        <div class="score-btn" onclick="selectScore('effort',2)">Light</div>
-        <div class="score-btn" onclick="selectScore('effort',3)">Moderate</div>
-        <div class="score-btn" onclick="selectScore('effort',4)">Hard</div>
-        <div class="score-btn" onclick="selectScore('effort',5)">A lot</div>
-      </div>
+    <button class="btn-primary" onclick="submitSpace()">Create Space</button>
+  </div>
+</div>
+
+<!-- ═══ SPACE HOME ═══ -->
+<div id="screen-space" class="screen">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:50;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div onclick="leaveSpace()" style="font-size:13px;color:var(--muted);cursor:pointer;font-weight:500;">← Back</div>
+      <div id="space-topbar-name" style="font-family:'Lora',serif;font-size:16px;font-weight:700;"></div>
     </div>
-    <div class="score-question">
-      <span class="score-qlabel">What would this have cost elsewhere?</span>
-      <div class="score-options" id="score-cost-opts">
-        <div class="score-btn" onclick="selectScore('cost',1)">Free</div>
-        <div class="score-btn" onclick="selectScore('cost',2)">Cheap</div>
-        <div class="score-btn" onclick="selectScore('cost',3)">Moderate</div>
-        <div class="score-btn" onclick="selectScore('cost',4)">Pricey</div>
-        <div class="score-btn" onclick="selectScore('cost',5)">A lot</div>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="token-chip"><div class="token-dot"></div><span id="space-balance-display">0</span>&nbsp;tokens</div>
+      <div id="space-nav-av" onclick="showScreen('profile')" style="width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0;">?</div>
     </div>
-    <button class="btn-primary" onclick="submitScoring()" style="margin-top:4px;">Award Tokens</button>
+  </div>
+  <div class="binary-nav">
+    <div class="nav-tab active" id="space-tab-exchange" onclick="switchSpaceTab('exchange')">Exchange</div>
+    <div class="nav-divider"></div>
+    <div class="nav-tab" id="space-tab-connect" onclick="switchSpaceTab('connect')">Connect</div>
+  </div>
+  <div class="main-screen visible" id="space-panel-exchange">
+    <div class="search-wrap"><input class="search-field" type="text" id="search-space-exchange" placeholder="Search posts..." oninput="onSearchSpaceExchange()" autocomplete="off"></div>
+    <div class="scroll-area"><div id="space-feed-list"></div></div>
+    <div class="fab" onclick="showSpacePostForm()" style="right:28px;">+</div>
+  </div>
+  <div class="main-screen" id="space-panel-connect">
+    <div class="search-wrap"><input class="search-field" type="text" id="search-space-connect" placeholder="Search groups..." oninput="onSearchSpaceConnect()" autocomplete="off"></div>
+    <div class="scroll-area"><div id="space-groups-list"></div></div>
+    <div class="fab" onclick="showSpaceGroupForm()" style="right:28px;">+</div>
+  </div>
+  <div id="space-admin-bar" style="display:none;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 20px 32px;">
+    <button class="btn-ghost" onclick="showScreen('join-requests')" style="margin-top:0;font-size:13px;">Manage join requests</button>
+  </div>
+</div>
+
+<!-- ═══ JOIN REQUESTS ═══ -->
+<div id="screen-join-requests" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="showScreen('space')">Back</div>
+    <div class="topbar-title">Join Requests</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px 16px 40px;">
+    <div id="join-requests-list"></div>
   </div>
 </div>
 
@@ -945,7 +956,7 @@
 <div class="success-screen" id="success-screen">
   <div class="success-mark">✓</div>
   <div class="success-title" id="success-title">Done</div>
-  <div class="success-sub" id="success-sub"></div>
+  <div class="success-sub"   id="success-sub"></div>
   <button class="btn-primary" style="max-width:260px;" onclick="closeSuccess()">Back to feed</button>
 </div>
 
@@ -954,28 +965,28 @@
   <div id="profile-overlay-card" style="background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:28px 24px 48px;position:relative;max-height:80vh;overflow-y:auto;">
     <button onclick="closeProfileOverlay()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
-      <div id="po-av" style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:&#39;Lora&#39;,serif;font-size:22px;font-weight:700;flex-shrink:0;overflow:hidden;"></div>
+      <div id="po-av" style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Lora',serif;font-size:22px;font-weight:700;flex-shrink:0;overflow:hidden;"></div>
       <div>
-        <div id="po-name" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;"></div>
+        <div id="po-name" style="font-family:'Lora',serif;font-size:18px;font-weight:700;"></div>
         <div id="po-handle" style="font-size:13px;color:var(--muted);margin-top:2px;"></div>
       </div>
     </div>
     <div id="po-bio" style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;display:none;"></div>
     <div style="display:flex;gap:1px;background:var(--border);border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:20px;">
       <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
-        <div id="po-balance" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;color:var(--accent);"></div>
+        <div id="po-balance" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--accent);"></div>
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Tokens</div>
       </div>
       <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
-        <div id="po-earned" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;color:var(--earn);"></div>
+        <div id="po-earned" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--earn);"></div>
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Earned</div>
       </div>
       <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
-        <div id="po-helped" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;color:var(--accent2);"></div>
+        <div id="po-helped" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--accent2);"></div>
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Helped</div>
       </div>
       <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
-        <div id="po-joined" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;color:var(--muted);font-size:11px;"></div>
+        <div id="po-joined" style="font-family:'Lora',serif;font-size:18px;font-weight:700;color:var(--muted);font-size:11px;"></div>
         <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Joined</div>
       </div>
     </div>
@@ -1022,10 +1033,6 @@ var seenGroupMsgIds = new Set();
 // Photo upload state
 var postPhotoFile  = null;
 var groupPhotoFile = null;
-
-// Pending exchange / scoring state
-var activeScoringExchangeId = null;
-var scoreValues = { time: 0, effort: 0, cost: 0 };
 
 var AVATARS = ['#7c6cff','#ff6c9d','#5ef0c0','#ffb36c','#6cffb0','#c86cff','#47b3ff'];
 
@@ -1252,12 +1259,15 @@ function showScreen(name) {
       if (sbd) sbd.textContent = me.balance;
     }
   }
-  if (name === 'profile') { renderProfile(); }
-  if (name === 'search')  { document.getElementById('search-results').innerHTML = '<div class="empty">Start typing to search.</div>'; setTimeout(function(){ var i = document.getElementById('global-search-input'); if(i){i.value='';i.focus();} }, 100); }
+  if (name === 'profile')       { renderProfile(); }
+  if (name === 'spaces')        { renderSpaces(); }
+  if (name === 'search')        { document.getElementById('search-results').innerHTML = '<div class="empty">Start typing to search.</div>'; setTimeout(function(){ var i = document.getElementById('global-search-input'); if(i){i.value='';i.focus();} }, 100); }
+  if (name === 'join-requests') { renderJoinRequests(); }
 }
 
 function goBackFromPost() {
-  showScreen('home');
+  if (activeCommunity) { showScreen('space'); }
+  else { showScreen('home'); }
 }
 
 function switchTab(tab) {
@@ -1431,16 +1441,19 @@ async function submitExchangePost() {
   if (postPhotoFile) {
     var ext  = postPhotoFile.name.split('.').pop().toLowerCase();
     var path = 'posts/' + me.id + '/' + Date.now() + '.' + ext;
-    var _u   = await db.storage.from('avatars').upload(path, postPhotoFile, { upsert: true });
+    var _u   = await db.storage.from('photos').upload(path, postPhotoFile, { upsert: true });
     if (_u.error) { alert('Photo upload failed: ' + _u.error.message); return; }
-    photoUrl = db.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    photoUrl = db.storage.from('photos').getPublicUrl(path).data.publicUrl;
   }
 
   var _r;
-  if (photoUrl) {
+  if (activeCommunity || photoUrl) {
+    // Use direct insert when community is set or photo attached (RPC doesn't support these fields)
     _r = await db.from('posts').insert({
       user_id: me.id, type: postType, title: title, description: desc,
-      photo_url: photoUrl, is_active: true
+      community_id: activeCommunity ? activeCommunity.id : null,
+      photo_url: photoUrl,
+      is_active: true
     });
   } else {
     _r = await db.rpc('create_post', { p_type: postType, p_title: title, p_description: desc });
@@ -1450,7 +1463,8 @@ async function submitExchangePost() {
   document.getElementById('post-title').value = '';
   document.getElementById('post-desc').value  = '';
   clearPostPhoto();
-  showSuccess('Posted', 'Your post is live. Respond to messages from the feed.');
+  if (activeCommunity) { showScreen('space'); renderSpaceFeed(); }
+  else { showSuccess('Posted', 'Your post is live. Respond to messages from the feed.'); }
 }
 
 async function submitGroup() {
@@ -1465,16 +1479,19 @@ async function submitGroup() {
   if (groupPhotoFile) {
     var ext  = groupPhotoFile.name.split('.').pop().toLowerCase();
     var path = 'groups/' + me.id + '/' + Date.now() + '.' + ext;
-    var _u   = await db.storage.from('avatars').upload(path, groupPhotoFile, { upsert: true });
+    var _u   = await db.storage.from('photos').upload(path, groupPhotoFile, { upsert: true });
     if (_u.error) { alert('Photo upload failed: ' + _u.error.message); return; }
-    photoUrl = db.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+    photoUrl = db.storage.from('photos').getPublicUrl(path).data.publicUrl;
   }
 
   var _r;
-  if (photoUrl) {
+  if (activeCommunity || photoUrl) {
+    // Use direct insert when community is set or photo attached
     _r = await db.from('groups').insert({
       creator_id: me.id, title: title, description: desc,
-      activity_type: type || 'Group', photo_url: photoUrl
+      activity_type: type || 'Group',
+      community_id: activeCommunity ? activeCommunity.id : null,
+      photo_url: photoUrl
     });
   } else {
     _r = await db.rpc('create_group', { p_title: title, p_description: desc, p_activity_type: type || 'Group' });
@@ -1485,7 +1502,8 @@ async function submitGroup() {
   document.getElementById('group-desc').value  = '';
   document.getElementById('group-type').value  = '';
   clearGroupPhoto();
-  showSuccess('Group created', 'Your group is live on Connect.');
+  if (activeCommunity) { showScreen('space'); renderSpaceGroups(); }
+  else { showSuccess('Group created', 'Your group is live on Connect.'); }
 }
 
 // ─────────────────────────────────────────────
@@ -1505,7 +1523,7 @@ async function openChat(postId) {
   document.getElementById('chat-post-ref-title').textContent = activePost.title;
 
   var isOwner = me && activePost.user_id === me.id;
-  document.getElementById('confirm-deal-bar').style.display = isOwner ? 'none' : 'block';
+  document.getElementById('confirm-deal-bar').style.display = isOwner ? 'none' : 'flex';
 
   await loadMessages(postId);
 
@@ -1589,180 +1607,23 @@ async function sendMessage() {
   input.style.height = '';
 }
 
-async function requestConfirmation() {
+async function confirmDeal() {
   if (!me || !activePost) return;
-  var btn = document.getElementById('request-confirm-btn');
-  btn.disabled = true;
-  btn.textContent = 'Requesting…';
+  var tokens = parseInt(document.getElementById('deal-tokens').value);
+  if (!tokens || tokens < 1) { alert('Enter a valid token amount.'); return; }
 
-  // Check for existing pending exchange from this user on this post
-  var _chk = await db.from('pending_exchanges')
-    .select('id')
-    .eq('post_id', activePost.id)
-    .eq('provider_id', me.id)
-    .maybeSingle();
-
-  if (_chk.data) {
-    btn.disabled = false;
-    btn.textContent = 'Request Confirmation';
-    alert('You already have a pending confirmation for this post. Check your profile.');
-    return;
-  }
-
-  var _r = await db.from('pending_exchanges').insert({
-    post_id:     activePost.id,
-    provider_id: me.id,
-    receiver_id: activePost.user_id
-  });
-
-  btn.disabled = false;
-  btn.textContent = 'Request Confirmation';
-
+  var _r = await db.rpc('confirm_deal', { p_post_id: activePost.id, p_token_amount: tokens });
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
+  if (_r.data && _r.data.error) { alert(_r.data.error); return; }
 
-  var otherName = activePost.profiles ? activePost.profiles.name : 'the other person';
-  showSuccess('Confirmation requested', 'Both you and ' + otherName + ' need to confirm in your profiles. Tokens only move after both sides confirm and rate the exchange.');
-}
-
-// ─────────────────────────────────────────────
-// PENDING CONFIRMATIONS
-// ─────────────────────────────────────────────
-async function loadPendingConfirmations() {
-  var container = document.getElementById('pending-confirmations-list');
-  if (!container || !me) return;
-
-  var _r = await db.from('pending_exchanges')
-    .select('id, post_id, provider_id, receiver_id, provider_confirmed, receiver_confirmed, status, created_at, posts!post_id(title), provider:profiles!provider_id(name), receiver:profiles!receiver_id(name)')
-    .or('provider_id.eq.' + me.id + ',receiver_id.eq.' + me.id)
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false });
-
-  if (!_r.data || !_r.data.length) {
-    container.innerHTML = '<div class="empty" style="padding:20px 0;">No pending confirmations.</div>';
-    return;
-  }
-
-  container.innerHTML = _r.data.map(function(ex) {
-    var isProvider    = ex.provider_id === me.id;
-    var myConfirmed   = isProvider ? ex.provider_confirmed : ex.receiver_confirmed;
-    var theirConfirmed = isProvider ? ex.receiver_confirmed : ex.provider_confirmed;
-    var other         = isProvider ? (ex.receiver ? ex.receiver.name : '?') : (ex.provider ? ex.provider.name : '?');
-    var postTitle     = ex.posts ? ex.posts.title : 'Unknown post';
-    var role          = isProvider ? 'You helped' : 'You received help';
-    var bothDone      = ex.provider_confirmed && ex.receiver_confirmed;
-
-    var statusHtml = bothDone
-      ? '<span class="pending-card-status ready">Both confirmed — rate the exchange</span>'
-      : myConfirmed
-        ? '<span class="pending-card-status waiting">Your side confirmed · waiting for ' + esc(other) + '</span>'
-        : '<span class="pending-card-status waiting">Needs your confirmation</span>';
-
-    var actionHtml = bothDone
-      ? '<button class="btn-small" onclick="openScoringForm(\'' + ex.id + '\')">Rate Exchange</button>'
-      : myConfirmed
-        ? '<button class="btn-small-outline" disabled style="opacity:0.5;cursor:default;">Confirmed</button>'
-        : '<button class="btn-small" onclick="confirmExchange(\'' + ex.id + '\')">Confirm</button>';
-
-    return '<div class="pending-card">' +
-      '<div class="pending-card-title">' + esc(postTitle) + '</div>' +
-      '<div class="pending-card-sub">' + esc(role) + ' · with ' + esc(other) + '</div>' +
-      statusHtml +
-      actionHtml +
-    '</div>';
-  }).join('');
-}
-
-async function confirmExchange(exchangeId) {
-  var _ex = await db.from('pending_exchanges')
-    .select('id, provider_id, receiver_id, provider_confirmed, receiver_confirmed')
-    .eq('id', exchangeId).single();
-  if (_ex.error || !_ex.data) { alert('Exchange not found.'); return; }
-
-  var isProvider = me.id === _ex.data.provider_id;
-  var update     = isProvider ? { provider_confirmed: true } : { receiver_confirmed: true };
-
-  var _u = await db.from('pending_exchanges').update(update).eq('id', exchangeId);
-  if (_u.error) { alert('Error: ' + _u.error.message); return; }
-
-  // Re-fetch to check if both are now confirmed
-  var _fresh = await db.from('pending_exchanges')
-    .select('provider_confirmed, receiver_confirmed')
-    .eq('id', exchangeId).single();
-
-  if (_fresh.data && _fresh.data.provider_confirmed && _fresh.data.receiver_confirmed) {
-    openScoringForm(exchangeId);
-  } else {
-    showSuccess('Confirmed!', 'Waiting for the other party to confirm. Once both sides confirm you\'ll rate the exchange and tokens will be awarded.');
-    renderProfile();
-  }
-}
-
-// ─────────────────────────────────────────────
-// SCORING
-// ─────────────────────────────────────────────
-function openScoringForm(exchangeId) {
-  activeScoringExchangeId = exchangeId;
-  scoreValues = { time: 0, effort: 0, cost: 0 };
-  ['score-time-opts', 'score-effort-opts', 'score-cost-opts'].forEach(function(id) {
-    document.getElementById(id).querySelectorAll('.score-btn').forEach(function(b) {
-      b.classList.remove('selected');
-    });
-  });
-  document.getElementById('scoring-modal').classList.add('open');
-}
-
-function closeScoringForm() {
-  document.getElementById('scoring-modal').classList.remove('open');
-  activeScoringExchangeId = null;
-}
-
-function selectScore(dimension, value) {
-  scoreValues[dimension] = value;
-  document.getElementById('score-' + dimension + '-opts').querySelectorAll('.score-btn').forEach(function(b, i) {
-    b.classList.toggle('selected', i + 1 === value);
-  });
-}
-
-async function submitScoring() {
-  if (!activeScoringExchangeId) return;
-  if (!scoreValues.time || !scoreValues.effort || !scoreValues.cost) {
-    alert('Please answer all three questions.'); return;
-  }
-
-  var totalScore    = scoreValues.time + scoreValues.effort + scoreValues.cost;
-  var tokensAwarded = Math.max(1, Math.round(totalScore / 15 * 10)); // 1–10 tokens
-  var myRole        = '';
-
-  var _ex = await db.from('pending_exchanges')
-    .select('provider_id, receiver_id').eq('id', activeScoringExchangeId).single();
-  if (_ex.data) myRole = _ex.data.provider_id === me.id ? 'provider' : 'receiver';
-
-  // Save rating (ignore duplicate errors — other party may have already rated)
-  await db.from('exchange_ratings').insert({
-    exchange_id:   activeScoringExchangeId,
-    user_id:       me.id,
-    role:          myRole,
-    time_score:    scoreValues.time,
-    effort_score:  scoreValues.effort,
-    cost_score:    scoreValues.cost,
-    total_score:   totalScore,
-    tokens_awarded: tokensAwarded
-  });
-
-  // Process tokens
-  var _proc = await db.rpc('process_exchange', {
-    p_exchange_id: activeScoringExchangeId,
-    p_tokens:      tokensAwarded
-  });
-
-  closeScoringForm();
+  document.getElementById('deal-tokens').value = '';
   await loadProfile(me.id);
 
-  if (_proc.error) {
-    showSuccess('Rated!', 'Your rating was saved. Tokens will be processed once both parties have rated.');
-  } else {
-    showSuccess('Exchange complete!', tokensAwarded + ' tokens processed. Thanks for showing up for your community.');
-  }
+  var d   = _r.data;
+  var msg = d.multiplier < 1
+    ? d.tokens_actual + ' tokens confirmed (' + Math.round(d.multiplier * 100) + '% rate — repeated transaction discount applied).'
+    : d.tokens_actual + ' tokens ' + (activePost.type === 'need' ? 'earned.' : 'burned.');
+  showSuccess('Deal confirmed', msg);
 }
 
 function autoResize(el) {
@@ -1967,7 +1828,6 @@ async function renderProfile() {
   }
 
   updateDarkToggleUI();
-  await loadPendingConfirmations();
 }
 
 function updateBalance() {
@@ -2436,6 +2296,5 @@ function closeSuccess() {
   else { showScreen('home'); }
 }
 </script>
-
-
-<span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_CONTENT_APS_BALLOON" style="display: none;"></span></body></html>
+</body>
+</html>

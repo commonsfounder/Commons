@@ -75,11 +75,16 @@ ALTER TABLE pending_exchanges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exchange_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE compliments ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY IF NOT EXISTS "auth_all_communities" ON communities FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auth_all_community_members" ON community_members FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auth_all_pending_exchanges" ON pending_exchanges FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auth_all_exchange_ratings" ON exchange_ratings FOR ALL TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY IF NOT EXISTS "auth_all_compliments" ON compliments FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_communities" ON communities;
+CREATE POLICY "auth_all_communities" ON communities FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_community_members" ON community_members;
+CREATE POLICY "auth_all_community_members" ON community_members FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_pending_exchanges" ON pending_exchanges;
+CREATE POLICY "auth_all_pending_exchanges" ON pending_exchanges FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_exchange_ratings" ON exchange_ratings;
+CREATE POLICY "auth_all_exchange_ratings" ON exchange_ratings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_compliments" ON compliments;
+CREATE POLICY "auth_all_compliments" ON compliments FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Group messaging
 CREATE TABLE IF NOT EXISTS group_messages (
@@ -91,7 +96,8 @@ CREATE TABLE IF NOT EXISTS group_messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE group_messages ENABLE ROW LEVEL SECURITY;
-CREATE POLICY IF NOT EXISTS "auth_all_group_messages" ON group_messages FOR ALL TO authenticated USING (true) WITH CHECK (true);
+DROP POLICY IF EXISTS "auth_all_group_messages" ON group_messages;
+CREATE POLICY "auth_all_group_messages" ON group_messages FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Photo URLs on posts and groups
 ALTER TABLE posts ADD COLUMN IF NOT EXISTS photo_url TEXT;

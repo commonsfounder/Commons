@@ -1022,7 +1022,9 @@
 <!-- ═══ PROFILE ═══ -->
 <div id="screen-profile" class="screen">
   <div class="topbar">
-    <div style="width:40px;"></div>
+    <div id="dark-toggle" onclick="toggleDarkMode()" style="width:46px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
+      <div id="dark-toggle-thumb" style="width:20px;height:20px;border-radius:50%;background:white;position:absolute;top:3px;left:3px;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2);transform:translateX(0px);"></div>
+    </div>
     <div class="topbar-title">Profile</div>
     <div class="topbar-back" onclick="signOut()" style="color:var(--spend);">Sign out</div>
   </div>
@@ -1059,13 +1061,6 @@
       <div id="pending-confirmations-list"><div class="empty" style="padding:20px 0;">No pending confirmations.</div></div>
     </div>
 
-    <!-- Dark mode toggle -->
-    <div id="dark-mode-row" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-top:1px solid var(--border);margin-top:8px;">
-      <span style="font-size:15px;color:var(--text);">Dark mode</span>
-      <div id="dark-toggle" onclick="toggleDarkMode()" style="width:46px;height:26px;border-radius:13px;background:var(--border);cursor:pointer;position:relative;transition:background 0.2s;flex-shrink:0;">
-        <div id="dark-toggle-thumb" style="width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 3px; left: 3px; transition: transform 0.2s; box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 3px; transform: translateX(0px);"></div>
-      </div>
-    </div>
   </div>
 </div>
 

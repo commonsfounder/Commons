@@ -1,30 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Teal rounded-square background -->
   <rect width="512" height="512" rx="112" fill="#F7F5F0"/>
 
-  <!--
-    Commons logo: three dots + two arrows, exactly as in the app.
-    Original viewBox 44×12 scaled ×9 and centred in 512×512.
-    Offset-x = (512 - 44×9) / 2 = 58  |  cy = 256
-  -->
+  <!-- Exact logo from feed topbar, viewBox 0 0 44 12, scaled ×9, centred (offset x=58, y=202) -->
 
-  <!-- Dot 1  (cx=6→112, r=5→45) -->
-  <circle cx="112" cy="256" r="45" fill="white"/>
+  <!-- Dot 1: cx=6→112, cy=6→256, r=5→45, full opacity -->
+  <circle cx="112" cy="256" r="45" fill="#2ABFBF"/>
 
-  <!-- Arrow 1  (line + chevron, full opacity) -->
-  <!-- line: M12→166 h4→+36  |  chevron: M14→184, 3.5→232, 2.5→+23 -->
-  <path d="M166 256 h36 M184 232 l23 24 -23 24"
-        stroke="white" stroke-width="12"
+  <!-- Arrow 1: M12,6 h4 → M166,256 h36 | M14,3.5 l2.5,2.5 -2.5,2.5 → M184,231.5 l22.5,22.5 -22.5,22.5 -->
+  <path d="M166,256 h36 M184,231.5 l22.5,22.5 -22.5,22.5"
+        stroke="#2ABFBF" stroke-width="11.7"
         stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 
-  <!-- Dot 2  (cx=22→256, opacity 0.6) -->
-  <circle cx="256" cy="256" r="45" fill="white" opacity="0.6"/>
+  <!-- Dot 2: cx=22→256, cy=256, r=45, opacity=0.6 -->
+  <circle cx="256" cy="256" r="45" fill="#2ABFBF" opacity="0.6"/>
 
-  <!-- Arrow 2  (opacity 0.6) -->
-  <path d="M310 256 h36 M328 232 l23 24 -23 24"
-        stroke="white" stroke-width="12"
+  <!-- Arrow 2: M28,6 h4 → M310,256 h36 | M30,3.5 l2.5,2.5 -2.5,2.5 → M328,231.5 l22.5,22.5 -22.5,22.5 -->
+  <path d="M310,256 h36 M328,231.5 l22.5,22.5 -22.5,22.5"
+        stroke="#2ABFBF" stroke-width="11.7"
         stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.6"/>
 
-  <!-- Dot 3  (cx=38→400, opacity 0.3) -->
-  <circle cx="400" cy="256" r="45" fill="white" opacity="0.3"/>
+  <!-- Dot 3: cx=38→400, cy=256, r=45, opacity=0.3 -->
+  <circle cx="400" cy="256" r="45" fill="#2ABFBF" opacity="0.3"/>
 </svg>

@@ -233,47 +233,110 @@
     background:var(--bg);
     z-index:300;
     display:flex; flex-direction:column;
-    transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+    transition:transform 0.38s cubic-bezier(0.32,0.72,0,1);
+    overflow:hidden;
   }
   #wallet-overlay.open { transform:translateX(-50%) translateY(0); }
+
   .wallet-topbar {
     display:flex; align-items:center; justify-content:space-between;
-    padding:18px 20px 14px;
-    border-bottom:1px solid var(--border);
+    padding:18px 20px 16px;
     background:var(--surface);
+    border-bottom:1px solid var(--border);
     position:sticky; top:0; z-index:10;
+    backdrop-filter:blur(12px);
   }
-  .wallet-title { font-family:'Lora',serif; font-size:20px; font-weight:700; color:var(--text); }
+  .wallet-title { font-family:'Lora',serif; font-size:19px; font-weight:700; color:var(--text); }
   .wallet-close {
-    width:34px; height:34px; border-radius:50%;
+    width:36px; height:36px; border-radius:50%;
     background:var(--surface2); border:none;
     display:flex; align-items:center; justify-content:center;
-    cursor:pointer; color:var(--text);
-    transition:transform 0.15s, background 0.15s;
+    cursor:pointer; color:var(--muted);
+    transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), color 0.15s;
+    flex-shrink:0;
   }
-  .wallet-close:active { transform:scale(0.88); background:var(--border); }
-  .wallet-stats {
-    display:grid; grid-template-columns:1fr 1fr 1fr;
-    gap:10px; padding:20px 16px 16px;
+  .wallet-close:active { transform:scale(0.84); }
+
+  /* Hero balance card */
+  .wallet-hero {
+    margin:20px 16px 0;
+    background:linear-gradient(135deg, #1da8a8 0%, #2ABFBF 50%, #3dd4d4 100%);
+    border-radius:24px;
+    padding:28px 24px 24px;
+    position:relative; overflow:hidden;
   }
-  .wallet-stat {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:16px; padding:14px 12px 12px;
-    display:flex; flex-direction:column; align-items:center; gap:4px;
+  .wallet-hero::before {
+    content:''; position:absolute; top:-40px; right:-40px;
+    width:160px; height:160px; border-radius:50%;
+    background:rgba(255,255,255,0.08); pointer-events:none;
   }
-  .wallet-stat-val {
-    font-family:'Lora',serif; font-size:22px; font-weight:700; line-height:1;
+  .wallet-hero::after {
+    content:''; position:absolute; bottom:-30px; left:10px;
+    width:110px; height:110px; border-radius:50%;
+    background:rgba(255,255,255,0.05); pointer-events:none;
   }
-  .wallet-stat-val.bal  { color:var(--accent); }
-  .wallet-stat-val.earn { color:var(--earn); }
-  .wallet-stat-val.spend { color:var(--spend); }
-  .wallet-stat-label { font-size:10px; font-weight:600; color:var(--muted); letter-spacing:0.4px; text-transform:uppercase; }
-  .wallet-section-label {
-    font-size:11px; font-weight:700; color:var(--muted);
-    text-transform:uppercase; letter-spacing:0.8px;
-    padding:0 20px 10px;
+  .wallet-hero-label {
+    font-size:12px; font-weight:600; color:rgba(255,255,255,0.72);
+    text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px;
   }
-  .wallet-tx-list { flex:1; overflow-y:auto; padding:0 16px calc(32px + env(safe-area-inset-bottom,0px)); }
+  .wallet-hero-balance {
+    font-family:'Lora',serif; font-size:52px; font-weight:700;
+    color:#fff; line-height:1; margin-bottom:4px; position:relative; z-index:1;
+  }
+  .wallet-hero-unit {
+    font-size:16px; font-weight:500; color:rgba(255,255,255,0.75);
+    margin-bottom:20px;
+  }
+  .wallet-hero-divider {
+    border:none; border-top:1px solid rgba(255,255,255,0.18); margin:0 0 18px;
+  }
+  .wallet-hero-stats { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .wallet-hero-stat { display:flex; flex-direction:column; gap:3px; }
+  .wallet-hero-stat:first-child { border-right:1px solid rgba(255,255,255,0.18); padding-right:16px; }
+  .wallet-hero-stat:last-child  { padding-left:16px; }
+  .wallet-hero-stat-val {
+    font-family:'Lora',serif; font-size:24px; font-weight:700; color:#fff;
+  }
+  .wallet-hero-stat-label {
+    font-size:11px; font-weight:600; color:rgba(255,255,255,0.65);
+    text-transform:uppercase; letter-spacing:0.5px;
+  }
+
+  /* Transaction section */
+  .wallet-tx-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:24px 20px 12px;
+  }
+  .wallet-tx-heading {
+    font-size:16px; font-weight:700; color:var(--text);
+  }
+  .wallet-tx-count {
+    font-size:12px; font-weight:500; color:var(--muted);
+    background:var(--surface2); border-radius:20px; padding:3px 10px;
+  }
+  .wallet-tx-list {
+    flex:1; overflow-y:auto;
+    padding:0 16px calc(40px + env(safe-area-inset-bottom,0px));
+  }
+  .wallet-tx-row {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 0; border-bottom:1px solid var(--border);
+  }
+  .wallet-tx-icon {
+    width:40px; height:40px; border-radius:14px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .wallet-tx-icon.earn  { background:rgba(42,191,191,0.12); }
+  .wallet-tx-icon.spend { background:rgba(244,162,97,0.12); }
+  .wallet-tx-body { flex:1; min-width:0; }
+  .wallet-tx-title { font-size:14px; font-weight:600; color:var(--text); margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .wallet-tx-sub   { font-size:12px; color:var(--muted); }
+  .wallet-tx-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+  .wallet-tx-amt   { font-family:'Lora',serif; font-size:16px; font-weight:700; }
+  .wallet-tx-amt.earn  { color:var(--earn); }
+  .wallet-tx-amt.spend { color:var(--spend); }
+  .wallet-tx-date  { font-size:11px; color:var(--muted); }
   .token-dot {
     width:7px; height:7px;
     background:var(--accent);
@@ -717,7 +780,7 @@
 <body>
 
 <!-- ═══ SPLASH ═══ -->
-<div id="screen-splash" class="screen">
+<div id="screen-splash" class="screen active">
   <div class="sp-row">
     <div class="sp-dot sp-d1"></div>
     <svg class="sp-arr sp-a1" width="20" height="10" viewBox="0 0 20 10" fill="none">
@@ -768,7 +831,7 @@
 </div>
 
 <!-- ═══ HOME ═══ -->
-<div id="screen-home" class="screen active">
+<div id="screen-home" class="screen">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(28,43,43,0.04);">
     <div id="home-topbar-logo" style="display:flex;align-items:center;"><svg width="44" height="12" viewBox="0 0 44 12" fill="none" style="vertical-align:middle;margin-right:8px;"><circle cx="6" cy="6" r="5" fill="var(--accent)"></circle><path d="M12 6h4M14 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="22" cy="6" r="5" fill="var(--accent)" opacity="0.6"></circle><path d="M28 6h4M30 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path><circle cx="38" cy="6" r="5" fill="var(--accent)" opacity="0.3"></circle></svg><span style="font-family:'Lora',serif;font-size:18px;font-weight:700;">Commons</span></div>
     <div class="token-chip" onclick="openWallet()">
@@ -1128,29 +1191,36 @@
 <!-- ═══ WALLET OVERLAY ═══ -->
 <div id="wallet-overlay">
   <div class="wallet-topbar">
-    <span class="wallet-title">Wallet</span>
+    <span class="wallet-title">Token Wallet</span>
     <button class="wallet-close" onclick="closeWallet()">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-        <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
   </div>
   <div style="flex:1;overflow-y:auto;">
-    <div class="wallet-stats">
-      <div class="wallet-stat">
-        <span class="wallet-stat-val bal" id="wallet-balance">—</span>
-        <span class="wallet-stat-label">Balance</span>
-      </div>
-      <div class="wallet-stat">
-        <span class="wallet-stat-val earn" id="wallet-earned">—</span>
-        <span class="wallet-stat-label">Earned</span>
-      </div>
-      <div class="wallet-stat">
-        <span class="wallet-stat-val spend" id="wallet-burned">—</span>
-        <span class="wallet-stat-label">Burned</span>
+    <!-- Hero balance card -->
+    <div class="wallet-hero">
+      <div class="wallet-hero-label">Current Balance</div>
+      <div class="wallet-hero-balance" id="wallet-balance">—</div>
+      <div class="wallet-hero-unit">tokens</div>
+      <hr class="wallet-hero-divider">
+      <div class="wallet-hero-stats">
+        <div class="wallet-hero-stat">
+          <div class="wallet-hero-stat-val" id="wallet-earned">—</div>
+          <div class="wallet-hero-stat-label">Total Earned</div>
+        </div>
+        <div class="wallet-hero-stat">
+          <div class="wallet-hero-stat-val" id="wallet-burned">—</div>
+          <div class="wallet-hero-stat-label">Total Burned</div>
+        </div>
       </div>
     </div>
-    <div class="wallet-section-label">Transaction History</div>
+    <!-- Transaction history -->
+    <div class="wallet-tx-header">
+      <span class="wallet-tx-heading">History</span>
+      <span class="wallet-tx-count" id="wallet-tx-count"></span>
+    </div>
     <div class="wallet-tx-list" id="wallet-tx-list"></div>
   </div>
 </div>
@@ -1220,6 +1290,10 @@ var seenMsgIds      = new Set();
 var searchTimer     = null;
 var spaceIsPrivate  = true;
 
+// Pre-fetch cache — populated during splash so feed renders instantly on reveal
+var _postsCache  = null;
+var _groupsCache = null;
+
 // Group chat state
 var activeGroupChat = null;
 var groupChatSub    = null;
@@ -1286,6 +1360,16 @@ window.addEventListener('load', async function() {
     var session = _a.data.session;
     if (session) {
       await loadProfile(session.user.id);
+      // Fire data fetches immediately during splash so feed is ready when splash ends
+      db.from('posts')
+        .select('id, type, title, description, user_id, created_at, photo_url, profiles!user_id(name, handle, avatar_url)')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+        .then(function(r) { if (!r.error) _postsCache = r.data; });
+      db.from('groups')
+        .select('id, title, description, activity_type, creator_id, photo_url, group_members(user_id), profiles!creator_id(name, avatar_url)')
+        .order('created_at', { ascending: false })
+        .then(function(r) { if (!r.error) _groupsCache = r.data; });
     }
   } catch(e) {
     console.error('Init error:', e);
@@ -1569,6 +1653,14 @@ function onSearchExchange() {
 async function renderFeed() {
   var list  = document.getElementById('feed-list');
   var query = (document.getElementById('search-exchange').value || '').trim();
+
+  // Use pre-fetched cache on first load (no skeleton flash); always fetch fresh after
+  if (_postsCache && !query) {
+    _paintFeed(list, _postsCache, query);
+    _postsCache = null; // use once, then always fetch fresh
+    return;
+  }
+
   list.innerHTML = skeletonCards(3);
 
   var q = db.from('posts')
@@ -1581,7 +1673,10 @@ async function renderFeed() {
   var _r = await q;
   if (_r.error) { list.innerHTML = emptyState('⚡', 'Connection issue', 'Pull down to retry.'); return; }
 
-  var posts = _r.data;
+  _paintFeed(list, _r.data, query);
+}
+
+function _paintFeed(list, posts, query) {
   if (!posts || !posts.length) {
     list.innerHTML = query
       ? emptyState('🔍', 'Nothing found', 'Try a different search term.')
@@ -1623,6 +1718,14 @@ function onSearchConnect() {
 async function renderGroups() {
   var list  = document.getElementById('groups-list');
   var query = (document.getElementById('search-connect').value || '').trim();
+
+  // Use pre-fetched cache on first load
+  if (_groupsCache && !query) {
+    _paintGroups(list, _groupsCache, query);
+    _groupsCache = null;
+    return;
+  }
+
   list.innerHTML = skeletonCards(3);
 
   var q = db.from('groups')
@@ -1634,7 +1737,10 @@ async function renderGroups() {
   var _r = await q;
   if (_r.error) { list.innerHTML = emptyState('⚡', 'Connection issue', 'Pull down to retry.'); return; }
 
-  var groups = _r.data;
+  _paintGroups(list, _r.data, query);
+}
+
+function _paintGroups(list, groups, query) {
   if (!groups || !groups.length) {
     list.innerHTML = query
       ? emptyState('🔍', 'Nothing found', 'Try a different search term.')
@@ -2413,6 +2519,7 @@ async function renderWallet() {
   document.getElementById('wallet-balance').textContent = me.balance || 0;
   document.getElementById('wallet-earned').textContent  = me.total_earned || 0;
   document.getElementById('wallet-burned').textContent  = '…';
+  document.getElementById('wallet-tx-count').textContent = '';
   document.getElementById('wallet-tx-list').innerHTML   = skeletonCards(4);
 
   var _t = await db.from('transactions')
@@ -2426,6 +2533,7 @@ async function renderWallet() {
     return s + (t.receiver_id === me.id ? t.token_amount : 0);
   }, 0);
   document.getElementById('wallet-burned').textContent = totalBurned;
+  document.getElementById('wallet-tx-count').textContent = txns.length ? txns.length + ' transactions' : '';
 
   var txList = document.getElementById('wallet-tx-list');
   if (!txns.length) {
@@ -2433,21 +2541,26 @@ async function renderWallet() {
     return;
   }
 
+  var now = new Date();
   txList.innerHTML = txns.map(function(t) {
-    var isEarn = t.provider_id === me.id;
-    var title  = (t.posts && t.posts.title) ? t.posts.title : 'Exchange';
-    var other  = isEarn
-      ? (t.receiver  ? t.receiver.name  : 'Someone')
-      : (t.provider  ? t.provider.name  : 'Someone');
-    var d = new Date(t.created_at);
-    var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined });
-    return '<div class="history-row">' +
-      '<div class="history-dot ' + (isEarn ? 'earn' : 'spend') + '"></div>' +
-      '<div class="history-info">' +
-        '<div class="history-title">' + esc(title) + '</div>' +
-        '<div class="history-sub">' + (isEarn ? 'Earned from ' : 'Spent with ') + esc(other) + ' &middot; ' + dateStr + '</div>' +
+    var isEarn  = t.provider_id === me.id;
+    var title   = (t.posts && t.posts.title) ? t.posts.title : 'Exchange';
+    var other   = isEarn
+      ? (t.receiver ? t.receiver.name : 'Someone')
+      : (t.provider ? t.provider.name : 'Someone');
+    var d       = new Date(t.created_at);
+    var dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+    var icon    = isEarn ? '↑' : '↓';
+    return '<div class="wallet-tx-row">' +
+      '<div class="wallet-tx-icon ' + (isEarn ? 'earn' : 'spend') + '">' + icon + '</div>' +
+      '<div class="wallet-tx-body">' +
+        '<div class="wallet-tx-title">' + esc(title) + '</div>' +
+        '<div class="wallet-tx-sub">' + (isEarn ? 'From ' : 'To ') + esc(other) + '</div>' +
       '</div>' +
-      '<div class="history-amt ' + (isEarn ? 'earn' : 'spend') + '">' + (isEarn ? '+' : '−') + t.token_amount + '</div>' +
+      '<div class="wallet-tx-right">' +
+        '<div class="wallet-tx-amt ' + (isEarn ? 'earn' : 'spend') + '">' + (isEarn ? '+' : '−') + t.token_amount + '</div>' +
+        '<div class="wallet-tx-date">' + dateStr + '</div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }

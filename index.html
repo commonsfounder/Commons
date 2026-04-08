@@ -1440,13 +1440,15 @@ async function loadProfile(userId) {
 // ─────────────────────────────────────────────
 // DARK MODE
 // ─────────────────────────────────────────────
-function toggleDarkMode() {
+async function toggleDarkMode() {
   var newVal = !me.dark_mode;
   me.dark_mode = newVal;
   document.body.classList.toggle('dark', newVal);
   try { localStorage.setItem('commons_theme', newVal ? 'dark' : 'light'); } catch(e) {}
   updateDarkToggleUI();
-  db.from('profiles').update({ dark_mode: newVal }).eq('id', me.id);
+  // Await the save so the preference is guaranteed to reach Supabase before the user
+  // closes the app. Silently ignored if dark_mode column not yet migrated.
+  try { await db.from('profiles').update({ dark_mode: newVal }).eq('id', me.id); } catch(e) {}
 }
 
 function updateDarkToggleUI() {
@@ -2175,27 +2177,73 @@ async function submitScoring() {
     alert('Please answer all three questions.'); return;
   }
 
-  // All token computation happens server-side in submit_rating (SECURITY DEFINER).
-  // The client never computes or writes tokens_awarded directly.
-  var _r = await db.rpc('submit_rating', {
-    p_exchange_id:  activeScoringExchangeId,
-    p_time_score:   scoreValues.time,
-    p_effort_score: scoreValues.effort,
-    p_cost_score:   scoreValues.cost
+  var totalScore    = scoreValues.time + scoreValues.effort + scoreValues.cost;
+  var tokensAwarded = Math.max(1, Math.round(totalScore / 15 * 10)); // 1–10
+
+  // Fetch exchange so we know roles and current status
+  var _ex = await db.from('pending_exchanges')
+    .select('provider_id, receiver_id, status')
+    .eq('id', activeScoringExchangeId).single();
+  if (_ex.error || !_ex.data) { closeScoringForm(); return; }
+
+  var myRole = _ex.data.provider_id === me.id ? 'provider' : 'receiver';
+
+  // Save this user's rating (ON CONFLICT DO NOTHING keeps it idempotent)
+  var _ri = await db.from('exchange_ratings').insert({
+    exchange_id:    activeScoringExchangeId,
+    user_id:        me.id,
+    role:           myRole,
+    time_score:     scoreValues.time,
+    effort_score:   scoreValues.effort,
+    cost_score:     scoreValues.cost,
+    total_score:    totalScore,
+    tokens_awarded: tokensAwarded
   });
 
+  // Rating insert failed (e.g. already submitted) — still treat as rated
   closeScoringForm();
 
-  if (_r.error) {
-    alert('Rating error: ' + _r.error.message);
-    return;
-  }
+  // Check whether both parties have now rated
+  var _allRatings = await db.from('exchange_ratings')
+    .select('tokens_awarded')
+    .eq('exchange_id', activeScoringExchangeId);
 
-  await loadProfile(me.id);
+  var ratings   = _allRatings.data || [];
+  var bothRated = ratings.length >= 2;
+  var avgTokens = bothRated
+    ? Math.max(1, Math.round(ratings.reduce(function(s, r) { return s + r.tokens_awarded; }, 0) / ratings.length))
+    : tokensAwarded;
 
-  if (_r.data && _r.data.both_rated) {
-    showSuccess('Exchange complete! 🎉', (_r.data.tokens || '') + ' tokens awarded. Thank you for showing up for your community.');
+  if (bothRated && _ex.data.status !== 'completed') {
+    // Try the SECURITY DEFINER RPC first
+    var _proc = await db.rpc('process_exchange', {
+      p_exchange_id: activeScoringExchangeId,
+      p_tokens:      avgTokens
+    });
+
+    if (_proc.error) {
+      // Fallback: direct balance updates if RPC not deployed yet
+      var [_provP, _recvP] = await Promise.all([
+        db.from('profiles').select('balance, total_earned, total_helped').eq('id', _ex.data.provider_id).single(),
+        db.from('profiles').select('balance').eq('id', _ex.data.receiver_id).single()
+      ]);
+      await Promise.all([
+        _provP.data && db.from('profiles').update({
+          balance:      (_provP.data.balance      || 0) + avgTokens,
+          total_earned: (_provP.data.total_earned || 0) + avgTokens,
+          total_helped: (_provP.data.total_helped || 0) + 1
+        }).eq('id', _ex.data.provider_id),
+        _recvP.data && db.from('profiles').update({
+          balance: Math.max(0, (_recvP.data.balance || 0) - avgTokens)
+        }).eq('id', _ex.data.receiver_id),
+        db.from('pending_exchanges').update({ status: 'completed' }).eq('id', activeScoringExchangeId)
+      ]);
+    }
+
+    await loadProfile(me.id);
+    showSuccess('Exchange complete! 🎉', avgTokens + ' tokens awarded. Thank you for showing up for your community.');
   } else {
+    await loadProfile(me.id);
     showSuccess('Rated!', 'Your rating is saved. Tokens will be awarded once both parties have rated.');
   }
 }

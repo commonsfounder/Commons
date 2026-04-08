@@ -2116,12 +2116,26 @@ async function confirmExchange(exchangeId) {
     .eq('id', exchangeId).single();
   if (_ex.error || !_ex.data) { alert('Exchange not found.'); return; }
 
-  // Confirmation is handled server-side — the RPC validates the caller is a party
-  // and sets only their own flag. Status/token fields cannot be touched by clients.
-  var _u = await db.rpc('confirm_exchange', { p_exchange_id: exchangeId });
+  var ex = _ex.data;
+  if (ex.provider_id !== me.id && ex.receiver_id !== me.id) {
+    alert('You are not a party to this exchange.'); return;
+  }
+
+  // Set only the current user's own confirmation flag
+  var update = ex.provider_id === me.id
+    ? { provider_confirmed: true }
+    : { receiver_confirmed: true };
+
+  var _u = await db.from('pending_exchanges').update(update).eq('id', exchangeId);
   if (_u.error) { alert('Error: ' + _u.error.message); return; }
 
-  if (_u.data && _u.data.both_confirmed) {
+  // Re-fetch to check if both sides have now confirmed
+  var _fresh = await db.from('pending_exchanges')
+    .select('provider_confirmed, receiver_confirmed')
+    .eq('id', exchangeId).single();
+  if (_fresh.error || !_fresh.data) { renderProfile(); return; }
+
+  if (_fresh.data.provider_confirmed && _fresh.data.receiver_confirmed) {
     openScoringForm(exchangeId);
   } else {
     showSuccess('Confirmed!', 'Waiting for the other party to confirm. Once both sides confirm you\'ll rate the exchange and tokens will be awarded.');

@@ -746,6 +746,91 @@
   }
   .score-btn.selected { background:var(--accent); color:white; border-color:var(--accent); }
 
+  /* ─── PROFILE TABS ─── */
+  .profile-tabs {
+    display:flex; border-bottom:1px solid var(--border);
+    margin:0 20px 0; background:transparent;
+  }
+  .profile-tab {
+    flex:1; padding:12px 8px 10px; text-align:center; cursor:pointer;
+    font-size:13px; font-weight:600; color:var(--muted);
+    border-bottom:2px solid transparent; transition:all 0.2s;
+  }
+  .profile-tab.active { color:var(--text); border-bottom-color:var(--accent); }
+  .profile-tab-panel { padding:0 20px; }
+  .profile-tab-panel.hidden { display:none; }
+
+  /* ─── DM SCREENS ─── */
+  .dm-thread-item {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 20px; cursor:pointer;
+    border-bottom:1px solid var(--border);
+    transition:background 0.15s;
+  }
+  .dm-thread-item:active { background:var(--surface2); }
+  .dm-av {
+    width:46px; height:46px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px; font-weight:700; flex-shrink:0; overflow:hidden;
+  }
+  .dm-thread-body { flex:1; min-width:0; }
+  .dm-thread-name { font-size:15px; font-weight:600; margin-bottom:2px; }
+  .dm-thread-preview { font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dm-thread-time { font-size:11px; color:var(--muted); flex-shrink:0; }
+  .dm-unread-dot {
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent); flex-shrink:0;
+  }
+
+  /* DM chat bubbles */
+  .dm-bubble-wrap { display:flex; margin-bottom:10px; }
+  .dm-bubble-wrap.mine { justify-content:flex-end; }
+  .dm-bubble {
+    max-width:72%; padding:10px 14px;
+    border-radius:18px; font-size:14px; line-height:1.45;
+    word-break:break-word;
+  }
+  .dm-bubble-wrap.mine .dm-bubble {
+    background:var(--accent); color:#fff;
+    border-bottom-right-radius:4px;
+  }
+  .dm-bubble-wrap.theirs .dm-bubble {
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--text); border-bottom-left-radius:4px;
+  }
+  .dm-bubble-time { font-size:10px; color:var(--muted); margin-top:3px; text-align:right; }
+  .dm-bubble-wrap.theirs .dm-bubble-time { text-align:left; }
+
+  .dm-compose {
+    display:flex; align-items:flex-end; gap:10px;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+    border-top:1px solid var(--border); background:var(--bg);
+  }
+  .dm-compose-input {
+    flex:1; background:var(--surface); border:1px solid var(--border);
+    border-radius:20px; padding:10px 16px;
+    font-family:'Inter',sans-serif; font-size:14px; color:var(--text);
+    outline:none; resize:none; max-height:100px; line-height:1.4;
+    transition:border-color 0.2s;
+  }
+  .dm-compose-input:focus { border-color:var(--accent); }
+  .dm-compose-input::placeholder { color:var(--muted); }
+  .dm-send-btn {
+    width:40px; height:40px; border-radius:50%; flex-shrink:0;
+    background:var(--accent); border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s;
+  }
+  .dm-send-btn:active { transform:scale(0.84); }
+  .dm-send-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  /* unread badge on nav */
+  .bn-badge {
+    position:absolute; top:6px; right:calc(50% - 16px);
+    width:8px; height:8px; border-radius:50%;
+    background:var(--accent2); border:1.5px solid var(--surface);
+  }
+
   /* ─── BOTTOM NAV ─── */
   #bottom-nav {
     position:fixed; bottom:0; left:50%; transform:translateX(-50%);
@@ -792,6 +877,227 @@
     transform:scale(0.86);
     box-shadow:0 2px 8px rgba(42,191,191,0.3);
   }
+
+  /* ─── SIGN IN SCREEN ─── */
+  #screen-signin {
+    justify-content:flex-end; padding-bottom:52px;
+  }
+  .signin-top {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px;
+    padding:0 28px 20px;
+  }
+  .signin-logo {
+    display:flex; align-items:center; gap:10px; margin-bottom:8px;
+    opacity:0; animation:fadeUp 0.45s ease 0.1s forwards;
+  }
+  .signin-wordmark {
+    font-family:'Lora',serif; font-size:36px; font-weight:700;
+    color:var(--text); letter-spacing:-0.8px;
+    opacity:0; animation:fadeUp 0.45s ease 0.2s forwards;
+  }
+  .signin-tagline {
+    font-size:14px; color:var(--muted); text-align:center;
+    line-height:1.65; max-width:240px;
+    opacity:0; animation:fadeUp 0.45s ease 0.3s forwards;
+  }
+  .signin-form {
+    padding:0 28px;
+    opacity:0; animation:fadeUp 0.45s ease 0.42s forwards;
+  }
+  .signin-or {
+    text-align:center; font-size:12px; color:var(--muted);
+    margin:14px 0; position:relative;
+  }
+  .signin-or::before, .signin-or::after {
+    content:''; position:absolute; top:50%;
+    width:42%; height:1px; background:var(--border);
+  }
+  .signin-or::before { left:0; }
+  .signin-or::after  { right:0; }
+
+  /* ─── ONBOARDING FLOW ─── */
+  #screen-onboard {
+    overflow:hidden; /* steps slide inside */
+  }
+
+  /* Progress bar */
+  .ob-progress {
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--border); z-index:10;
+  }
+  .ob-progress-fill {
+    height:100%; background:var(--accent);
+    transition:width 0.4s cubic-bezier(0.4,0,0.2,1);
+    border-radius:0 2px 2px 0;
+  }
+
+  /* Step container */
+  .ob-step {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    opacity:0; transform:translateX(40px);
+    pointer-events:none;
+    transition:opacity 0.32s ease, transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94);
+    overflow-y:auto;
+  }
+  .ob-step.active {
+    opacity:1; transform:translateX(0);
+    pointer-events:auto;
+  }
+  .ob-step.exit-left {
+    opacity:0; transform:translateX(-40px);
+  }
+
+  /* Step 1 – welcome */
+  .ob-welcome {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    gap:12px; padding:40px 32px 0; text-align:center;
+  }
+  .ob-welcome-logo {
+    margin-bottom:8px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;
+  }
+  .ob-welcome-title {
+    font-family:'Lora',serif; font-size:32px; font-weight:700;
+    line-height:1.15; letter-spacing:-0.5px;
+    animation: fadeUp 0.45s ease 0.3s both;
+  }
+  .ob-welcome-sub {
+    font-size:15px; color:var(--muted); line-height:1.7;
+    max-width:270px;
+    animation: fadeUp 0.45s ease 0.42s both;
+  }
+  .ob-welcome-ctas {
+    width:100%; padding:0 28px 52px; margin-top:auto;
+    animation: fadeUp 0.45s ease 0.55s both;
+  }
+  .ob-signin-link {
+    text-align:center; font-size:13px; color:var(--muted);
+    margin-top:14px; cursor:default;
+  }
+  .ob-signin-link span {
+    color:var(--accent); font-weight:600; cursor:pointer;
+  }
+
+  /* Steps 2–4 shared */
+  .ob-topbar {
+    display:flex; align-items:center; padding:18px 20px 0;
+    flex-shrink:0;
+  }
+  .ob-back {
+    width:36px; height:36px; border-radius:50%;
+    background:var(--surface2); border:none;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text); flex-shrink:0;
+    transition:transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .ob-back:active { transform:scale(0.82); }
+  .ob-step-label {
+    font-size:11px; font-weight:600; color:var(--muted);
+    text-transform:uppercase; letter-spacing:1.2px;
+    margin-left:12px;
+  }
+  .ob-body {
+    flex:1; overflow-y:auto;
+    padding:20px 24px calc(20px + env(safe-area-inset-bottom,0px));
+  }
+  .ob-q {
+    font-family:'Lora',serif; font-size:24px; font-weight:700;
+    line-height:1.3; margin-bottom:6px; color:var(--text);
+  }
+  .ob-sub {
+    font-size:13px; color:var(--muted); line-height:1.6;
+    margin-bottom:22px;
+  }
+
+  /* Tile grid */
+  .ob-tiles {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; margin-bottom:24px;
+  }
+  .ob-tile {
+    background:var(--surface); border:2px solid var(--border);
+    border-radius:14px; padding:16px 12px;
+    cursor:pointer; text-align:center;
+    transition:all 0.18s cubic-bezier(0.34,1.1,0.64,1);
+    user-select:none; -webkit-tap-highlight-color:transparent;
+  }
+  .ob-tile:active { transform:scale(0.94); }
+  .ob-tile.sel {
+    border-color:var(--accent);
+    background:rgba(42,191,191,0.08);
+    box-shadow:0 0 0 3px rgba(42,191,191,0.15);
+  }
+  .ob-tile-icon { font-size:28px; margin-bottom:6px; display:block; line-height:1; }
+  .ob-tile-label { font-size:12px; font-weight:600; color:var(--text); line-height:1.3; }
+
+  /* Step 5 – validation */
+  .ob-valid-wrap {
+    flex:1; display:flex; flex-direction:column; padding:32px 28px;
+  }
+  .ob-valid-mark {
+    width:64px; height:64px; border-radius:50%;
+    background:rgba(42,191,191,0.12);
+    display:flex; align-items:center; justify-content:center;
+    font-size:28px; margin-bottom:24px;
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+  }
+  .ob-valid-title {
+    font-family:'Lora',serif; font-size:24px; font-weight:700;
+    line-height:1.3; margin-bottom:12px;
+    animation: fadeUp 0.4s ease 0.2s both;
+  }
+  .ob-valid-msg {
+    font-size:15px; color:var(--muted); line-height:1.8;
+    margin-bottom:32px; flex:1;
+    animation: fadeUp 0.4s ease 0.3s both;
+  }
+
+  /* Step 6 – create account */
+  .ob-field-hint {
+    font-size:11px; color:var(--muted); margin:-6px 0 10px;
+    padding-left:2px;
+  }
+
+  /* Step 7 – you're in */
+  .ob-win-wrap {
+    flex:1; display:flex; flex-direction:column;
+    align-items:center; text-align:center;
+    padding:52px 28px 40px;
+  }
+  .ob-win-confetti {
+    font-size:48px; margin-bottom:16px;
+    animation: popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.05s both;
+  }
+  .ob-win-title {
+    font-family:'Lora',serif; font-size:28px; font-weight:700;
+    margin-bottom:8px;
+    animation: fadeUp 0.4s ease 0.2s both;
+  }
+  .ob-win-sub {
+    font-size:14px; color:var(--muted); line-height:1.7;
+    margin-bottom:32px; max-width:280px;
+    animation: fadeUp 0.4s ease 0.3s both;
+  }
+  .ob-token-badge {
+    background:linear-gradient(135deg, #1da8a8 0%, #2ABFBF 100%);
+    border-radius:20px; padding:20px 32px;
+    margin-bottom:32px; width:100%;
+    animation: fadeUp 0.4s ease 0.42s both;
+  }
+  .ob-token-val {
+    font-family:'Lora',serif; font-size:40px; font-weight:700;
+    color:#fff; line-height:1; margin-bottom:4px;
+  }
+  .ob-token-label {
+    font-size:12px; color:rgba(255,255,255,0.75);
+    text-transform:uppercase; letter-spacing:0.8px; font-weight:600;
+  }
+  .ob-win-ctas {
+    width:100%; animation:fadeUp 0.4s ease 0.55s both;
+  }
 </style>
 <link type="text/css" rel="stylesheet" href="chrome-extension://fheoggkfdfchfphceeifdbepaooicaho/css/mcafee_fonts.css"></head>
 <body>
@@ -812,23 +1118,167 @@
   <div class="sp-wordmark">Commons</div>
 </div>
 
-<!-- ═══ ONBOARDING ═══ -->
-<div id="screen-onboard" class="screen">
-  <div class="onboard-top">
-    <div id="onboard-logo-wrap" style="display:flex;align-items:center;justify-content:center;margin-bottom:4px;opacity:0;animation:fadeUp 0.5s ease 0.05s forwards;"><svg width="44" height="12" viewBox="0 0 44 12" fill="none" style="vertical-align:middle;margin-right:8px;"><circle cx="6" cy="6" r="5" fill="var(--accent)"></circle><path d="M12 6h4M14 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="22" cy="6" r="5" fill="var(--accent)" opacity="0.6"></circle><path d="M28 6h4M30 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path><circle cx="38" cy="6" r="5" fill="var(--accent)" opacity="0.3"></circle></svg></div>
-    <div class="onboard-wordmark">Commons</div>
-    <div class="onboard-tagline">Find your village.</div>
+<!-- ═══ SIGN IN (returning users) ═══ -->
+<div id="screen-signin" class="screen">
+  <div class="signin-top">
+    <div class="signin-logo" id="signin-logo-wrap"></div>
+    <div class="signin-wordmark">Commons</div>
+    <div class="signin-tagline">Help and be helped in your community.</div>
   </div>
-  <div class="onboard-form">
-    <input class="input-field" type="email" id="email-input" placeholder="Email" autocomplete="email" fdprocessedid="77sb5s">
-    <input class="input-field" type="password" id="password-input" placeholder="Password (min 6 chars)" autocomplete="current-password" fdprocessedid="cgw0ph">
-    <div id="signup-fields" style="display:none;">
-      <input class="input-field" type="text" id="name-input" placeholder="Your name" maxlength="30" autocomplete="off">
-      <input class="input-field" type="text" id="handle-input" placeholder="Handle (letters, numbers, _)" maxlength="20" autocomplete="off">
+  <div class="signin-form">
+    <input class="input-field" type="email" id="si-email" placeholder="Email" autocomplete="email">
+    <input class="input-field" type="password" id="si-password" placeholder="Password" autocomplete="current-password">
+    <button class="btn-primary" id="si-btn" onclick="signInAction()">Sign in</button>
+    <div class="signin-or">or</div>
+    <button class="btn-ghost" onclick="startOnboarding()" style="margin-top:0;">New here? Create an account</button>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING FLOW (new users only) ═══ -->
+<div id="screen-onboard" class="screen" style="position:relative;">
+
+  <!-- Progress bar (steps 2–6 = 1–5) -->
+  <div class="ob-progress">
+    <div class="ob-progress-fill" id="ob-progress-fill" style="width:0%"></div>
+  </div>
+
+  <!-- ── Step 1: Welcome ── -->
+  <div class="ob-step active" id="ob-step-1">
+    <div class="ob-welcome">
+      <div class="ob-welcome-logo" id="ob-logo-wrap"></div>
+      <div class="ob-welcome-title">Find your village.</div>
+      <div class="ob-welcome-sub">Real help from real neighbours. No money needed — just time and care.</div>
     </div>
-    <button class="btn-primary" id="auth-btn" onclick="authAction()">Sign in</button>
-    <button class="btn-ghost" id="toggle-auth-btn" onclick="toggleAuthMode()" fdprocessedid="60g9qb">New here? Create an account</button>
+    <div class="ob-welcome-ctas">
+      <button class="btn-primary" onclick="obGoTo(2)">Get started</button>
+      <div class="ob-signin-link">Already have an account? <span onclick="showSignIn()">Sign in</span></div>
+    </div>
   </div>
+
+  <!-- ── Step 2: Offer tiles ── -->
+  <div class="ob-step" id="ob-step-2">
+    <div class="ob-topbar">
+      <button class="ob-back" onclick="obGoTo(1)">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="ob-step-label">Step 1 of 5</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-q">What can you offer?</div>
+      <div class="ob-sub">Pick everything that sounds like you. You can always add more later.</div>
+      <div class="ob-tiles" id="ob-offer-tiles">
+        <div class="ob-tile" data-val="Lifts &amp; transport" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">🚗</span><span class="ob-tile-label">Lifts &amp; transport</span></div>
+        <div class="ob-tile" data-val="Cooking &amp; food" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">🍳</span><span class="ob-tile-label">Cooking &amp; food</span></div>
+        <div class="ob-tile" data-val="Academic help" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">📚</span><span class="ob-tile-label">Academic help</span></div>
+        <div class="ob-tile" data-val="Skills &amp; DIY" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">🔧</span><span class="ob-tile-label">Skills &amp; DIY</span></div>
+        <div class="ob-tile" data-val="Errands" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">🏃</span><span class="ob-tile-label">Errands</span></div>
+        <div class="ob-tile" data-val="Emotional support" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">💬</span><span class="ob-tile-label">Emotional support</span></div>
+        <div class="ob-tile" data-val="Physical help" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">💪</span><span class="ob-tile-label">Physical help</span></div>
+        <div class="ob-tile" data-val="Other" onclick="obToggle(this,'offers')"><span class="ob-tile-icon">✨</span><span class="ob-tile-label">Other</span></div>
+      </div>
+      <button class="btn-primary" onclick="obGoTo(3)">Continue</button>
+      <button class="btn-ghost" style="margin-top:8px;" onclick="obGoTo(3)">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- ── Step 3: Need tiles ── -->
+  <div class="ob-step" id="ob-step-3">
+    <div class="ob-topbar">
+      <button class="ob-back" onclick="obGoTo(2)">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="ob-step-label">Step 2 of 5</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-q">What do you need most?</div>
+      <div class="ob-sub">Being able to ask for help is part of what makes this work.</div>
+      <div class="ob-tiles" id="ob-need-tiles">
+        <div class="ob-tile" data-val="Lifts &amp; transport" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">🚗</span><span class="ob-tile-label">Lifts &amp; transport</span></div>
+        <div class="ob-tile" data-val="Cooking &amp; food" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">🍳</span><span class="ob-tile-label">Cooking &amp; food</span></div>
+        <div class="ob-tile" data-val="Academic help" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">📚</span><span class="ob-tile-label">Academic help</span></div>
+        <div class="ob-tile" data-val="Skills &amp; DIY" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">🔧</span><span class="ob-tile-label">Skills &amp; DIY</span></div>
+        <div class="ob-tile" data-val="Errands" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">🏃</span><span class="ob-tile-label">Errands</span></div>
+        <div class="ob-tile" data-val="Emotional support" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">💬</span><span class="ob-tile-label">Emotional support</span></div>
+        <div class="ob-tile" data-val="Physical help" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">💪</span><span class="ob-tile-label">Physical help</span></div>
+        <div class="ob-tile" data-val="Other" onclick="obToggle(this,'needs')"><span class="ob-tile-icon">✨</span><span class="ob-tile-label">Other</span></div>
+      </div>
+      <button class="btn-primary" onclick="obGoTo(4)">Continue</button>
+      <button class="btn-ghost" style="margin-top:8px;" onclick="obGoTo(4)">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- ── Step 4: Location ── -->
+  <div class="ob-step" id="ob-step-4">
+    <div class="ob-topbar">
+      <button class="ob-back" onclick="obGoTo(3)">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="ob-step-label">Step 3 of 5</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-q">Where are you based?</div>
+      <div class="ob-sub">Helps your community find you. This can be as general as a city or neighbourhood.</div>
+      <input class="input-field" id="ob-location" type="text" placeholder="e.g. Hackney, London" autocomplete="off" style="margin-bottom:12px;">
+      <button class="btn-primary" onclick="obGoTo(5)">Continue</button>
+      <button class="btn-ghost" style="margin-top:8px;" onclick="obGoTo(5)">Skip for now</button>
+    </div>
+  </div>
+
+  <!-- ── Step 5: Validation ── -->
+  <div class="ob-step" id="ob-step-5">
+    <div class="ob-topbar">
+      <button class="ob-back" onclick="obGoTo(4)">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="ob-step-label">Step 4 of 5</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-valid-wrap" style="padding:0;">
+        <div class="ob-valid-mark">🌱</div>
+        <div class="ob-valid-title" id="ob-valid-title">You're exactly what this community needs.</div>
+        <div class="ob-valid-msg" id="ob-valid-msg"></div>
+        <button class="btn-primary" onclick="obGoTo(6)">Create your account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 6: Create account ── -->
+  <div class="ob-step" id="ob-step-6">
+    <div class="ob-topbar">
+      <button class="ob-back" onclick="obGoTo(5)">
+        <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="ob-step-label">Step 5 of 5</span>
+    </div>
+    <div class="ob-body">
+      <div class="ob-q">Almost there</div>
+      <div class="ob-sub">Create your account to join the community.</div>
+      <input class="input-field" id="ob-name" type="text" placeholder="Your name" maxlength="30" autocomplete="off" oninput="obAutoHandle()" style="margin-bottom:12px;">
+      <input class="input-field" id="ob-email" type="email" placeholder="Email" autocomplete="email" style="margin-bottom:12px;">
+      <input class="input-field" id="ob-password" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password" style="margin-bottom:12px;">
+      <input class="input-field" id="ob-handle" type="text" placeholder="Handle (auto-generated)" maxlength="20" autocomplete="off" style="margin-bottom:4px;" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+      <div class="ob-field-hint">Your @handle — letters, numbers and _ only</div>
+      <button class="btn-primary" id="ob-join-btn" onclick="obSignUp()" style="margin-top:8px;">Join Commons</button>
+    </div>
+  </div>
+
+  <!-- ── Step 7: You're in! ── -->
+  <div class="ob-step" id="ob-step-7">
+    <div class="ob-win-wrap">
+      <div class="ob-win-confetti">🎉</div>
+      <div class="ob-win-title" id="ob-win-title">Welcome to Commons!</div>
+      <div class="ob-win-sub">You've been given 10 tokens to get started. Use them to ask for help — and earn more by giving it.</div>
+      <div class="ob-token-badge">
+        <div class="ob-token-val">10</div>
+        <div class="ob-token-label">Starting tokens</div>
+      </div>
+      <div class="ob-win-ctas">
+        <button class="btn-primary" onclick="obPostOffer()">Post your first offer</button>
+        <button class="btn-ghost" onclick="obEnterFeed()" style="margin-top:10px;">Explore the feed</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══ CHECK EMAIL ═══ -->
@@ -1042,23 +1492,39 @@
         <div class="stat-box"><span class="stat-val" id="stat-groups" style="color:var(--earn)">2</span><span class="stat-label">Groups</span></div>
       </div>
     </div>
-    <div style="padding:0 20px;">
+    <!-- Edit profile form (collapsible) -->
+    <div style="padding:0 20px 0;">
+      <div style="display:flex;align-items:center;justify-content:flex-end;padding:0 0 12px;">
+        <span id="edit-profile-toggle" onclick="toggleEditProfile()" style="font-size:12px;color:var(--accent);cursor:pointer;">Edit profile</span>
+      </div>
       <div class="edit-profile-form" id="edit-profile-form">
         <label class="form-label">Name</label>
         <input class="input-field" type="text" id="name-edit-input" placeholder="Your name" maxlength="60" autocomplete="off" style="margin-bottom:12px;">
         <label class="form-label">Bio</label>
         <textarea class="input-field" id="bio-input" placeholder="Tell people a bit about yourself…" maxlength="200" style="height:80px;margin-bottom:12px;"></textarea>
-        <button class="btn-primary" onclick="saveProfile()" style="margin-bottom:0;">Save</button>
+        <button class="btn-primary" onclick="saveProfile()" style="margin-bottom:16px;">Save</button>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <span class="section-label" style="margin:0;">History</span>
-        <span id="edit-profile-toggle" onclick="toggleEditProfile()" style="font-size:12px;color:var(--accent);cursor:pointer;">Edit profile</span>
+    </div>
+
+    <!-- Pending confirmations — prominent, always visible -->
+    <div style="padding:0 20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span class="section-label" style="margin:0;">Pending Confirmations</span>
+        <div id="pending-count-badge" style="display:none;background:var(--accent2);color:white;border-radius:20px;font-size:11px;font-weight:700;padding:2px 8px;line-height:1.4;"></div>
       </div>
-      <div id="history-list"></div>
-      <span class="section-label" style="margin-top:28px;">Your Groups</span>
-      <div id="groups-joined-list"></div>
-      <span class="section-label" style="margin-top:28px;">Pending Confirmations</span>
       <div id="pending-confirmations-list"><div class="empty" style="padding:20px 0;">No pending confirmations.</div></div>
+    </div>
+
+    <!-- Tabs: History | Groups -->
+    <div class="profile-tabs" style="margin-top:24px;">
+      <div class="profile-tab active" id="ptab-history" onclick="switchProfileTab('history')">History</div>
+      <div class="profile-tab" id="ptab-groups" onclick="switchProfileTab('groups')">Groups</div>
+    </div>
+    <div class="profile-tab-panel" id="ppanel-history" style="padding:16px 20px 80px;">
+      <div id="history-list"></div>
+    </div>
+    <div class="profile-tab-panel hidden" id="ppanel-groups" style="padding:16px 20px 80px;">
+      <div id="groups-joined-list"></div>
     </div>
 
   </div>
@@ -1170,6 +1636,10 @@
       </div>
     </div>
     <div id="po-bio" style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5;display:none;"></div>
+    <button id="po-dm-btn" onclick="startDMFromOverlay()" style="width:100%;padding:12px;background:var(--accent);border:none;border-radius:12px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:white;cursor:pointer;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.2s,transform 0.1s;" onmousedown="this.style.opacity='0.82';this.style.transform='scale(0.98)'" onmouseup="this.style.opacity='';this.style.transform=''">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12a1 1 0 011 1v7a1 1 0 01-1 1H5l-4 3V3a1 1 0 011-1z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      Send Message
+    </button>
     <div style="display:flex;gap:1px;background:var(--border);border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:20px;">
       <div style="flex:1;background:var(--surface);padding:12px 6px;text-align:center;">
         <div id="po-balance" style="font-family:&#39;Lora&#39;,serif;font-size:18px;font-weight:700;color:var(--accent);"></div>
@@ -1245,21 +1715,7 @@
     </svg>
     <span>Home</span>
   </div>
-  <div class="bn-item" id="bn-search" onclick="navTo('search')">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.6"/>
-      <path d="M15 15L19 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-    </svg>
-    <span>Search</span>
-  </div>
-  <div class="bn-center" id="bn-plus" onclick="navTo('post')">
-    <div class="bn-plus-btn">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-        <path d="M11 4v14M4 11h14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
-      </svg>
-    </div>
-  </div>
-  <div class="bn-item" id="bn-groups" onclick="navTo('groups')">
+  <div class="bn-item" id="bn-groups" onclick="navTo('groups')" style="position:relative;">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/>
       <circle cx="15" cy="8" r="3.2" stroke="currentColor" stroke-width="1.6"/>
@@ -1268,7 +1724,21 @@
     </svg>
     <span>Groups</span>
   </div>
-  <div class="bn-item" id="bn-profile" onclick="navTo('profile')">
+  <div class="bn-center" id="bn-plus" onclick="navTo('post')">
+    <div class="bn-plus-btn">
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+        <path d="M11 4v14M4 11h14" stroke="white" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+  <div class="bn-item" id="bn-messages" onclick="navTo('messages')" style="position:relative;">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+      <path d="M4 4h14a1 1 0 011 1v9a1 1 0 01-1 1H7l-4 3V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
+    <div class="bn-badge" id="bn-messages-badge" style="display:none;"></div>
+    <span>Messages</span>
+  </div>
+  <div class="bn-item" id="bn-profile" onclick="navTo('profile')" style="position:relative;">
     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
       <circle cx="11" cy="8" r="3.5" stroke="currentColor" stroke-width="1.6"/>
       <path d="M4 19.5c0-3.5 3.1-6.5 7-6.5s7 3 7 6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -1276,6 +1746,42 @@
     <span>Profile</span>
   </div>
 </nav>
+
+<!-- ═══ DM LIST ═══ -->
+<div id="screen-dm-list" class="screen">
+  <div class="topbar">
+    <div style="width:40px;"></div>
+    <div class="topbar-title">Messages</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding-bottom:80px;" id="dm-list-scroll">
+    <div id="dm-thread-list"><div style="padding:20px 20px 0;"></div></div>
+  </div>
+</div>
+
+<!-- ═══ DM THREAD ═══ -->
+<div id="screen-dm-thread" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="navTo('messages')" style="display:flex;align-items:center;gap:8px;">
+      <svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M7 1L1 6.5L7 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div id="dm-thread-av" style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;overflow:hidden;flex-shrink:0;"></div>
+      <div class="topbar-title" id="dm-thread-name" style="font-size:16px;"></div>
+    </div>
+    <div style="width:60px;"></div>
+  </div>
+  <div id="dm-messages" style="flex:1;overflow-y:auto;padding:12px 16px 16px;"></div>
+  <div class="dm-compose">
+    <textarea class="dm-compose-input" id="dm-input" placeholder="Message…" rows="1" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM();}"></textarea>
+    <button class="dm-send-btn" onclick="sendDM()" id="dm-send-btn">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M14 2L8 8M14 2L9.5 14L8 8L2 6L14 2Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
 
 <script>
 // ─────────────────────────────────────────────
@@ -1310,6 +1816,12 @@ var _groupsCache = null;
 var activeGroupChat = null;
 var groupChatSub    = null;
 var seenGroupMsgIds = new Set();
+
+// DM state
+var activeDMUserId   = null;
+var activeDMUserName = null;
+var dmSub            = null;
+var seenDMMsgIds     = new Set();
 
 // Photo upload state
 var postPhotoFile  = null;
@@ -1348,8 +1860,10 @@ function logoSVG() {
 function setLogoElements() {
   var homeEl = document.getElementById('home-topbar-logo');
   if (homeEl) homeEl.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:18px;font-weight:700;">Commons</span>';
-  var onboardEl = document.getElementById('onboard-logo-wrap');
-  if (onboardEl) onboardEl.innerHTML = logoSVG();
+  var siEl = document.getElementById('signin-logo-wrap');
+  if (siEl) siEl.innerHTML = logoSVG();
+  var obEl = document.getElementById('ob-logo-wrap');
+  if (obEl) obEl.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:22px;font-weight:700;margin-left:4px;">Commons</span>';
 }
 
 // ─────────────────────────────────────────────
@@ -1360,11 +1874,6 @@ var _splashMinUntil = 0; // set on load
 window.addEventListener('load', async function() {
   setLogoElements();
   _splashMinUntil = Date.now() + 2000; // splash shows for at least 2s
-
-  authMode = 'signin';
-  document.getElementById('signup-fields').style.display  = 'none';
-  document.getElementById('auth-btn').textContent         = 'Sign in';
-  document.getElementById('toggle-auth-btn').textContent  = 'New here? Create an account';
 
   // Single reliable auth check on load
   try {
@@ -1404,8 +1913,7 @@ window.addEventListener('load', async function() {
     }
     if (event === 'SIGNED_OUT') {
       me = null;
-      document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-      document.getElementById('screen-onboard').classList.add('active');
+      showSignIn();
     }
   });
 });
@@ -1419,7 +1927,7 @@ function hideSplash() {
     setTimeout(function() {
       sp.classList.remove('active', 'sp-out');
       if (me) { navTo('home'); }
-      else { document.getElementById('screen-onboard').classList.add('active'); }
+      else { showSignIn(); }
     }, 400);
   }, delay);
 }
@@ -1465,48 +1973,184 @@ function updateDarkToggleUI() {
 }
 
 // ─────────────────────────────────────────────
-// AUTH
+// AUTH — SIGN IN (returning users)
 // ─────────────────────────────────────────────
-function toggleAuthMode() {
-  authMode = authMode === 'signup' ? 'signin' : 'signup';
-  var isSignup = authMode === 'signup';
-  document.getElementById('signup-fields').style.display  = isSignup ? 'block' : 'none';
-  document.getElementById('auth-btn').textContent         = isSignup ? 'Join' : 'Sign in';
-  document.getElementById('toggle-auth-btn').textContent  = isSignup
-    ? 'Already have an account? Sign in'
-    : 'New here? Create an account';
+function showSignIn() {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-signin').classList.add('active');
+  var nav = document.getElementById('bottom-nav');
+  if (nav) nav.classList.remove('visible');
+  // Populate logo in sign-in screen
+  var wrap = document.getElementById('signin-logo-wrap');
+  if (wrap) wrap.innerHTML = logoSVG();
 }
 
-async function authAction() {
-  var email    = document.getElementById('email-input').value.trim();
-  var password = document.getElementById('password-input').value.trim();
+async function signInAction() {
+  var email    = (document.getElementById('si-email').value    || '').trim();
+  var password = (document.getElementById('si-password').value || '').trim();
   if (!email || !password) { alert('Enter your email and password.'); return; }
+  var btn = document.getElementById('si-btn');
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    var _s = await db.auth.signInWithPassword({ email: email, password: password });
+    if (_s.error) { alert(_s.error.message); return; }
+    await loadProfile(_s.data.user.id);
+    enterApp();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Sign in';
+  }
+}
 
-  var btn = document.getElementById('auth-btn');
-  btn.disabled    = true;
-  btn.textContent = authMode === 'signup' ? 'Creating account…' : 'Signing in…';
+function backToSignIn() {
+  showSignIn();
+}
+
+// ─────────────────────────────────────────────
+// ONBOARDING FLOW STATE
+// ─────────────────────────────────────────────
+var _obStep    = 1;
+var _obOffers  = [];
+var _obNeeds   = [];
+var _obLocation = '';
+
+function startOnboarding() {
+  _obStep    = 1;
+  _obOffers  = [];
+  _obNeeds   = [];
+  _obLocation = '';
+  // Reset tile selections
+  document.querySelectorAll('#ob-offer-tiles .ob-tile, #ob-need-tiles .ob-tile').forEach(function(t){ t.classList.remove('sel'); });
+  document.getElementById('ob-location').value  = '';
+  document.getElementById('ob-name').value      = '';
+  document.getElementById('ob-email').value     = '';
+  document.getElementById('ob-password').value  = '';
+  document.getElementById('ob-handle').value    = '';
+  // Populate logo
+  var wrap = document.getElementById('ob-logo-wrap');
+  if (wrap) wrap.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:22px;font-weight:700;margin-left:4px;">Commons</span>';
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-onboard').classList.add('active');
+  var nav = document.getElementById('bottom-nav');
+  if (nav) nav.classList.remove('visible');
+  // Show step 1 cleanly
+  document.querySelectorAll('.ob-step').forEach(function(s){ s.classList.remove('active','exit-left'); s.style.opacity=''; s.style.transform=''; });
+  document.getElementById('ob-step-1').classList.add('active');
+  document.getElementById('ob-progress-fill').style.width = '0%';
+}
+
+var _OB_TOTAL = 5; // steps 2–6
+
+function obGoTo(n) {
+  var prev = _obStep;
+  _obStep = n;
+
+  // On entering step 5, build validation message
+  if (n === 5) obBuildValidation();
+
+  // Update progress bar (steps 2–6 map to 1–5 of 5)
+  var pct = n <= 1 ? 0 : Math.round(((n - 1) / _OB_TOTAL) * 100);
+  document.getElementById('ob-progress-fill').style.width = pct + '%';
+
+  var prevEl = document.getElementById('ob-step-' + prev);
+  var nextEl = document.getElementById('ob-step-' + n);
+  if (!nextEl) return;
+
+  var goingForward = n > prev;
+
+  // Exit current step
+  if (prevEl && prevEl !== nextEl) {
+    prevEl.classList.remove('active');
+    if (goingForward) prevEl.classList.add('exit-left');
+    setTimeout(function() { if (prevEl) prevEl.classList.remove('exit-left'); }, 380);
+  }
+
+  // Reset any lingering inline styles, place off-screen, then animate in
+  nextEl.classList.remove('active', 'exit-left');
+  nextEl.removeAttribute('style');
+  // Override: position off-screen instantly (no transition)
+  nextEl.style.cssText = 'transition:none;opacity:0;transform:translateX(' + (goingForward ? '50px' : '-50px') + ');';
+  // Force reflow
+  void nextEl.offsetWidth;
+  // Remove overrides and let CSS + .active take over in next frame
+  requestAnimationFrame(function() {
+    nextEl.style.cssText = '';
+    nextEl.classList.add('active');
+  });
+}
+
+function obToggle(el, type) {
+  var val = el.getAttribute('data-val');
+  el.classList.toggle('sel');
+  if (type === 'offers') {
+    var i = _obOffers.indexOf(val);
+    if (i === -1) _obOffers.push(val); else _obOffers.splice(i, 1);
+  } else {
+    var i = _obNeeds.indexOf(val);
+    if (i === -1) _obNeeds.push(val); else _obNeeds.splice(i, 1);
+  }
+}
+
+function obAutoHandle() {
+  var name = document.getElementById('ob-name').value.trim();
+  var h    = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '').slice(0, 18);
+  document.getElementById('ob-handle').value = h;
+}
+
+var OB_OFFER_MSGS = {
+  'Cooking & food':    'There\'s something powerful about feeding your neighbours. That kind of generosity builds real community.',
+  'Lifts & transport': 'Getting people where they need to be is a quiet but essential gift — and you\'re ready to give it.',
+  'Academic help':     'Sharing knowledge is one of the most generous things you can do. Someone out there needs exactly what you know.',
+  'Skills & DIY':      'Practical skills are a superpower. The things you\'ve learned to do can save someone\'s day — or week.',
+  'Emotional support': 'Being there for people takes real presence. That kind of support is rarer and more valuable than you think.',
+  'Errands':           'Small tasks add up to big relief for people who are stretched thin. You\'re the kind of person who makes that difference.',
+  'Physical help':     'Showing up with your hands and energy is a genuine gift — especially for those who can\'t do it themselves.',
+  'Other':             'Whatever you\'re bringing, the community needs it. The best neighbourhoods are built by people like you.'
+};
+
+function obBuildValidation() {
+  var title, msg;
+  if (_obOffers.length > 0 && _obNeeds.length > 0) {
+    title = 'You\'re already part of this.';
+    var offerLine = OB_OFFER_MSGS[_obOffers[0]] || 'You\'re already showing up for your community.';
+    msg = offerLine + '\n\nAnd being open about what you need? That takes real courage — and it makes everyone stronger.';
+  } else if (_obOffers.length > 0) {
+    title = 'The community is lucky to have you.';
+    msg = OB_OFFER_MSGS[_obOffers[0]] || 'Whatever you\'re bringing, it matters more than you know.';
+  } else if (_obNeeds.length > 0) {
+    title = 'Asking for help is the start of something.';
+    msg = 'Most people find it hard to ask. You\'re already doing the brave thing. Commons is here to make that easier — and to make sure nobody has to go it alone.';
+  } else {
+    title = 'Everyone belongs here.';
+    msg = 'You don\'t need to have everything figured out. Join Commons, look around, and let the community show you what\'s possible.';
+  }
+  document.getElementById('ob-valid-title').textContent = title;
+  document.getElementById('ob-valid-msg').textContent   = msg;
+}
+
+async function obSignUp() {
+  var name     = document.getElementById('ob-name').value.trim();
+  var email    = document.getElementById('ob-email').value.trim();
+  var password = document.getElementById('ob-password').value.trim();
+  var handle   = document.getElementById('ob-handle').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+  _obLocation  = document.getElementById('ob-location').value.trim();
+
+  if (!name)     { alert('Enter your name.');       return; }
+  if (!email)    { alert('Enter your email.');      return; }
+  if (password.length < 6) { alert('Password must be at least 6 characters.'); return; }
+  if (handle.length < 2)   { alert('Handle must be at least 2 characters.'); return; }
+
+  var btn = document.getElementById('ob-join-btn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
 
   try {
-    if (authMode === 'signin') {
-      var _s = await db.auth.signInWithPassword({ email: email, password: password });
-      if (_s.error) { alert(_s.error.message); return; }
-      await loadProfile(_s.data.user.id);
-      enterApp();
-      return;
-    }
-
-    // Sign up
-    var name   = document.getElementById('name-input').value.trim();
-    var handle = document.getElementById('handle-input').value.trim().replace('@','').toLowerCase().replace(/[^a-z0-9_]/g,'');
-    if (!name || !handle) { alert('Enter your name and a handle.'); return; }
-    if (handle.length < 2) { alert('Handle must be at least 2 characters.'); return; }
-
+    // Check handle uniqueness
     var _h = await db.from('profiles').select('id').eq('handle', handle).maybeSingle();
-    if (_h.data) { alert('That handle is taken. Try another.'); return; }
+    if (_h.data) { alert('That handle is taken — try another.'); return; }
 
     var _su = await db.auth.signUp({ email: email, password: password, options: { data: { name: name } } });
     if (_su.error) { alert(_su.error.message); return; }
 
+    // Email confirmation required
     if (!_su.data.session) {
       document.getElementById('confirm-email-display').textContent = email;
       document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
@@ -1514,26 +2158,41 @@ async function authAction() {
       return;
     }
 
-    var _p = await db.from('profiles').insert({ id: _su.data.user.id, name: name, handle: handle, balance: 10 });
+    // Insert profile with onboarding data
+    var _p = await db.from('profiles').insert({
+      id:       _su.data.user.id,
+      name:     name,
+      handle:   handle,
+      balance:  10,
+      offers:   _obOffers,
+      needs:    _obNeeds,
+      location: _obLocation || null
+    });
     if (_p.error) { alert('Profile error: ' + _p.error.message); return; }
 
     await loadProfile(_su.data.user.id);
-    enterApp();
+
+    // Show "you're in" screen
+    document.getElementById('ob-win-title').textContent = 'Welcome, ' + name.split(' ')[0] + '!';
+    obGoTo(7);
 
   } finally {
-    btn.disabled    = false;
-    btn.textContent = authMode === 'signup' ? 'Join' : 'Sign in';
+    btn.disabled = false; btn.textContent = 'Join Commons';
   }
 }
 
-function backToSignIn() {
-  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
-  document.getElementById('screen-onboard').classList.add('active');
-  authMode = 'signin';
-  document.getElementById('signup-fields').style.display  = 'none';
-  document.getElementById('auth-btn').textContent         = 'Sign in';
-  document.getElementById('toggle-auth-btn').textContent  = 'New here? Create an account';
+function obPostOffer() {
+  enterApp();
+  showScreen('post-exchange');
 }
+
+function obEnterFeed() {
+  enterApp();
+}
+
+// Legacy stubs — kept in case referenced elsewhere
+function toggleAuthMode() { startOnboarding(); }
+function authAction() { signInAction(); }
 
 async function signOut() {
   if (realtimeSub) { db.removeChannel(realtimeSub); realtimeSub = null; }
@@ -1556,7 +2215,7 @@ function navTo(section) {
   }
   currentSection = section;
   // Update nav active state
-  ['home','search','groups','profile'].forEach(function(s) {
+  ['home','search','groups','messages','profile'].forEach(function(s) {
     var el = document.getElementById('bn-' + s);
     if (el) el.classList.toggle('active', s === section);
   });
@@ -1579,6 +2238,9 @@ function navTo(section) {
     showScreen('search');
   } else if (section === 'profile') {
     showScreen('profile');
+  } else if (section === 'messages') {
+    showScreen('dm-list');
+    renderDMList();
   }
 }
 
@@ -1594,14 +2256,21 @@ function showScreen(name) {
     db.removeChannel(groupChatSub);
     groupChatSub = null;
   }
+  if (name !== 'dm-thread' && dmSub) {
+    db.removeChannel(dmSub);
+    dmSub = null;
+  }
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   var el = document.getElementById('screen-' + name);
   if (el) el.classList.add('active');
 
   // Bottom nav: show on main screens only
-  var mainScreens = ['home', 'search', 'profile'];
+  var mainScreens = ['home', 'search', 'profile', 'dm-list', 'dm-thread'];
   var nav = document.getElementById('bottom-nav');
   if (nav) nav.classList.toggle('visible', mainScreens.indexOf(name) !== -1);
+  // Always hide nav on auth/onboard screens
+  var authScreens = ['onboard', 'signin', 'checkemail'];
+  if (nav && authScreens.indexOf(name) !== -1) nav.classList.remove('visible');
 
   if (name === 'home') {
     setLogoElements();
@@ -2069,6 +2738,20 @@ async function loadPendingConfirmations() {
     return ex.status === 'pending' || (ex.status === 'completed' && !ratedSet.has(ex.id));
   });
 
+  // Update badge
+  var badge = document.getElementById('pending-count-badge');
+  var actionNeeded = pending.filter(function(ex) {
+    var isProvider = ex.provider_id === me.id;
+    var myConfirmed = isProvider ? ex.provider_confirmed : ex.receiver_confirmed;
+    var alreadyRated = ratedSet.has(ex.id);
+    var bothDone = ex.provider_confirmed && ex.receiver_confirmed;
+    return (!myConfirmed && !alreadyRated) || (bothDone && !alreadyRated);
+  }).length;
+  if (badge) {
+    badge.style.display = actionNeeded > 0 ? '' : 'none';
+    badge.textContent = actionNeeded;
+  }
+
   if (!pending.length) {
     container.innerHTML = '<div class="empty-state" style="padding:36px 0 20px;">' +
       '<div class="empty-icon">✅</div>' +
@@ -2432,6 +3115,13 @@ function _populateProfileHead() {
   else { bioEl.style.display = 'none'; }
 }
 
+function switchProfileTab(tab) {
+  ['history','groups'].forEach(function(t) {
+    document.getElementById('ptab-' + t).className = 'profile-tab' + (t === tab ? ' active' : '');
+    document.getElementById('ppanel-' + t).className = 'profile-tab-panel' + (t === tab ? '' : ' hidden');
+  });
+}
+
 async function renderProfile() {
   if (!me) return;
 
@@ -2443,6 +3133,7 @@ async function renderProfile() {
   // Show loading skeletons for async sections
   document.getElementById('history-list').innerHTML = skeletonCards(2);
   document.getElementById('groups-joined-list').innerHTML = skeletonCards(1);
+  document.getElementById('pending-confirmations-list').innerHTML = skeletonCards(1);
 
   // Step 2: Refresh profile from DB + fetch sections in parallel
   var [, _t, _g] = await Promise.all([
@@ -2596,8 +3287,12 @@ async function renderWallet() {
 // ─────────────────────────────────────────────
 async function openUserProfile(userId) {
   if (!userId) return;
+  _dmOverlayUserId = userId;
   var overlay = document.getElementById('profile-overlay');
   overlay.style.display = 'flex';
+  // Hide DM button for own profile
+  var dmBtn = document.getElementById('po-dm-btn');
+  if (dmBtn) dmBtn.style.display = (me && userId === me.id) ? 'none' : 'flex';
   // clear previous
   document.getElementById('po-av').innerHTML = '<div style="color:var(--muted);font-size:12px;">…</div>';
   document.getElementById('po-name').textContent = '';
@@ -3022,6 +3717,207 @@ async function approveRequest(memberId) {
 async function declineRequest(memberId) {
   await db.from('community_members').delete().eq('id', memberId);
   renderJoinRequests();
+}
+
+// ─────────────────────────────────────────────
+// DIRECT MESSAGES
+// ─────────────────────────────────────────────
+var _dmOverlayUserId = null; // tracks which user the profile overlay is showing
+
+async function renderDMList() {
+  var list = document.getElementById('dm-thread-list');
+  list.innerHTML = '<div style="padding:16px 20px 0;">' + skeletonCards(3) + '</div>';
+
+  // Fetch all DM conversations involving me (latest message per partner)
+  var _r = await db.from('direct_messages')
+    .select('id, sender_id, receiver_id, content, created_at, sender:profiles!sender_id(name, handle, avatar_url), receiver:profiles!receiver_id(name, handle, avatar_url)')
+    .or('sender_id.eq.' + me.id + ',receiver_id.eq.' + me.id)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (_r.error) {
+    list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;">Couldn\'t load messages.</div>';
+    return;
+  }
+
+  var msgs = _r.data || [];
+
+  // Deduplicate into one thread per partner
+  var seen = new Set();
+  var threads = [];
+  msgs.forEach(function(m) {
+    var partnerId   = m.sender_id === me.id ? m.receiver_id : m.sender_id;
+    var partnerData = m.sender_id === me.id ? m.receiver : m.sender;
+    if (!seen.has(partnerId) && partnerData) {
+      seen.add(partnerId);
+      threads.push({ partnerId: partnerId, partner: partnerData, lastMsg: m });
+    }
+  });
+
+  if (!threads.length) {
+    list.innerHTML = '<div style="text-align:center;padding:72px 28px;">' +
+      '<div style="font-size:36px;margin-bottom:16px;">💬</div>' +
+      '<div style="font-family:\'Lora\',serif;font-size:18px;font-weight:700;margin-bottom:8px;">No messages yet</div>' +
+      '<div style="font-size:13px;color:var(--muted);line-height:1.6;">Tap any person\'s name or avatar in the feed to start a conversation.</div>' +
+    '</div>';
+    return;
+  }
+
+  list.innerHTML = threads.map(function(t) {
+    var col = av(t.partnerId);
+    var avHtml = t.partner.avatar_url
+      ? '<img src="' + esc(t.partner.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
+      : (t.partner.name || '?')[0].toUpperCase();
+    var preview = (t.lastMsg.sender_id === me.id ? 'You: ' : '') + esc(t.lastMsg.content);
+    var d = new Date(t.lastMsg.created_at);
+    var now = new Date();
+    var timeStr = d.toDateString() === now.toDateString()
+      ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+      : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return '<div class="dm-thread-item" onclick="openDMThread(\'' + t.partnerId + '\',\'' + esc(t.partner.name || '') + '\')">' +
+      '<div class="dm-av" style="background:' + col + '22;color:' + col + ';">' + avHtml + '</div>' +
+      '<div class="dm-thread-body">' +
+        '<div class="dm-thread-name">' + esc(t.partner.name || t.partner.handle || 'User') + '</div>' +
+        '<div class="dm-thread-preview">' + preview.slice(0,60) + (preview.length > 60 ? '…' : '') + '</div>' +
+      '</div>' +
+      '<div class="dm-thread-time">' + timeStr + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function openDMThread(userId, userName) {
+  activeDMUserId   = userId;
+  activeDMUserName = userName;
+  seenDMMsgIds     = new Set();
+
+  // Populate topbar
+  document.getElementById('dm-thread-name').textContent = userName;
+  var avEl = document.getElementById('dm-thread-av');
+  avEl.style.background = av(userId) + '22';
+  avEl.style.color       = av(userId);
+  avEl.textContent       = (userName || '?')[0].toUpperCase();
+
+  // Fetch user avatar
+  db.from('profiles').select('avatar_url').eq('id', userId).single().then(function(r) {
+    if (r.data && r.data.avatar_url) {
+      avEl.innerHTML = '<img src="' + esc(r.data.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">';
+    }
+  });
+
+  showScreen('dm-thread');
+  // Re-apply messages nav active
+  document.getElementById('bn-messages').classList.add('active');
+
+  var msgArea = document.getElementById('dm-messages');
+  msgArea.innerHTML = skeletonCards(3);
+
+  await loadDMMessages();
+  subscribeToDM();
+}
+
+async function loadDMMessages() {
+  if (!activeDMUserId || !me) return;
+  var _r = await db.from('direct_messages')
+    .select('id, sender_id, content, created_at')
+    .or(
+      'and(sender_id.eq.' + me.id + ',receiver_id.eq.' + activeDMUserId + '),' +
+      'and(sender_id.eq.' + activeDMUserId + ',receiver_id.eq.' + me.id + ')'
+    )
+    .order('created_at', { ascending: true })
+    .limit(100);
+
+  var msgs = _r.data || [];
+  var msgArea = document.getElementById('dm-messages');
+  if (!msgs.length) {
+    msgArea.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">No messages yet. Say hello!</div>';
+    return;
+  }
+  msgs.forEach(function(m) { seenDMMsgIds.add(m.id); });
+  msgArea.innerHTML = msgs.map(function(m) { return renderDMBubble(m); }).join('');
+  msgArea.scrollTop = msgArea.scrollHeight;
+}
+
+function renderDMBubble(m) {
+  var isMine = m.sender_id === me.id;
+  var d = new Date(m.created_at);
+  var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return '<div class="dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs') + '">' +
+    '<div>' +
+      '<div class="dm-bubble">' + esc(m.content) + '</div>' +
+      '<div class="dm-bubble-time">' + timeStr + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function subscribeToDM() {
+  if (dmSub) { db.removeChannel(dmSub); dmSub = null; }
+  if (!activeDMUserId || !me) return;
+
+  dmSub = db.channel('dm-' + [me.id, activeDMUserId].sort().join('-'))
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'direct_messages',
+      filter: 'receiver_id=eq.' + me.id
+    }, function(payload) {
+      var m = payload.new;
+      if (m.sender_id !== activeDMUserId) return;
+      if (seenDMMsgIds.has(m.id)) return;
+      seenDMMsgIds.add(m.id);
+      var msgArea = document.getElementById('dm-messages');
+      if (!msgArea) return;
+      var atBottom = msgArea.scrollHeight - msgArea.scrollTop - msgArea.clientHeight < 60;
+      msgArea.innerHTML += renderDMBubble(m);
+      if (atBottom) msgArea.scrollTop = msgArea.scrollHeight;
+    })
+    .subscribe();
+}
+
+async function sendDM() {
+  if (!me || !activeDMUserId) return;
+  var input = document.getElementById('dm-input');
+  var text  = (input.value || '').trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  var tempId = 'tmp-' + Date.now();
+  var tempMsg = { id: tempId, sender_id: me.id, content: text, created_at: new Date().toISOString() };
+  var msgArea = document.getElementById('dm-messages');
+  // Remove "no messages" placeholder if present
+  if (msgArea.querySelector('div[style*="No messages yet"]')) msgArea.innerHTML = '';
+  msgArea.innerHTML += renderDMBubble(tempMsg);
+  msgArea.scrollTop = msgArea.scrollHeight;
+
+  var _r = await db.from('direct_messages').insert({
+    sender_id:   me.id,
+    receiver_id: activeDMUserId,
+    content:     text
+  }).select('id, sender_id, content, created_at').single();
+
+  if (_r.error) {
+    // Remove temp bubble and show error
+    var tmpEl = msgArea.querySelector('[data-tmp="' + tempId + '"]');
+    if (tmpEl) tmpEl.remove();
+    alert('Failed to send message: ' + _r.error.message);
+    input.value = text;
+  } else {
+    // Replace temp with real id in seen set
+    seenDMMsgIds.add(_r.data.id);
+  }
+}
+
+async function startDMFromOverlay() {
+  var userId   = _dmOverlayUserId;
+  var userName = document.getElementById('po-name').textContent;
+  closeProfileOverlay();
+  if (!userId || userId === me.id) return;
+  currentSection = 'messages';
+  ['home','search','groups','messages','profile'].forEach(function(s) {
+    var el = document.getElementById('bn-' + s);
+    if (el) el.classList.toggle('active', s === 'messages');
+  });
+  await openDMThread(userId, userName);
 }
 
 // ─────────────────────────────────────────────

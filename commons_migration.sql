@@ -4,6 +4,11 @@
 -- Add dark_mode to profiles
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS dark_mode BOOLEAN DEFAULT FALSE;
 
+-- Onboarding personalisation columns
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS offers   TEXT[]  DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS needs    TEXT[]  DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS location TEXT;
+
 -- Communities (create BEFORE adding FK columns to posts/groups)
 CREATE TABLE IF NOT EXISTS communities (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -514,3 +514,36 @@ BEGIN
 END;
 $$;
 -- No GRANT — only callable internally from submit_rating (SECURITY DEFINER context)
+
+
+-- ─────────────────────────────────────────────
+-- DIRECT MESSAGES
+-- Run this section to enable private messaging.
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS direct_messages (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id   UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  receiver_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  content     TEXT NOT NULL CHECK (char_length(content) BETWEEN 1 AND 2000),
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS dm_sender_idx   ON direct_messages (sender_id,   created_at DESC);
+CREATE INDEX IF NOT EXISTS dm_receiver_idx ON direct_messages (receiver_id, created_at DESC);
+
+ALTER TABLE direct_messages ENABLE ROW LEVEL SECURITY;
+
+-- Only the two parties can read a message
+DROP POLICY IF EXISTS "dm_read_parties" ON direct_messages;
+CREATE POLICY "dm_read_parties" ON direct_messages
+  FOR SELECT TO authenticated
+  USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+
+-- Only the sender can insert (and must be the sender)
+DROP POLICY IF EXISTS "dm_insert_sender" ON direct_messages;
+CREATE POLICY "dm_insert_sender" ON direct_messages
+  FOR INSERT TO authenticated
+  WITH CHECK (auth.uid() = sender_id);
+
+-- Nobody can update or delete (immutable log)
+-- (No UPDATE / DELETE policies = blocked by default)

@@ -84,45 +84,26 @@
   @keyframes screenIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
   /* ─── SPLASH ─── */
-  #screen-splash {
-    position:fixed; inset:0; z-index:2000;
-    display:flex; align-items:center; justify-content:center;
-    background:var(--bg);
-    transition:opacity 0.5s ease;
-  }
-  #screen-splash.sp-fade { opacity:0; pointer-events:none; }
-
-  /* Teal fill overlay — expands via clip-path from center */
-  #sp-fill {
-    position:absolute; inset:0;
-    background:var(--accent);
-    clip-path:circle(0px at 50% 50%);
-    transition:clip-path 0.4s cubic-bezier(0.4,0,0.2,1);
-    pointer-events:none; z-index:1;
-  }
-  #sp-fill.expanding { clip-path:circle(120% at 50% 50%); }
-
-  .sp-row {
-    display:flex; align-items:center; gap:8px;
-    position:relative; z-index:2;
-  }
-  .sp-dot {
-    width:13px; height:13px; border-radius:50%;
-    background:var(--accent); opacity:0;
-  }
-  /* Once fill expands, dots become white (fill is already animating) */
-  #sp-fill.expanding ~ .sp-row .sp-dot { background:#fff; transition:background 0.1s 0.2s; }
-  .sp-arr { flex-shrink:0; opacity:0; }
-
-  /* Dot animations — sequential */
-  .sp-d1 { animation: spDot 0.25s ease 0.1s forwards; }
-  .sp-a1 { animation: spArr 0.2s ease 0.38s forwards; }
-  .sp-d2 { animation: spDot 0.25s ease 0.52s forwards; }
-  .sp-a2 { animation: spArr 0.2s ease 0.78s forwards; }
-  .sp-d3 { animation: spDot 0.25s ease 0.92s forwards; }
-
-  @keyframes spDot { to{opacity:1} }
-  @keyframes spArr { to{opacity:1} }
+  #screen-splash { justify-content:center; align-items:center; flex-direction:column; gap:20px; background:var(--bg); }
+  .sp-row { display:flex; align-items:center; gap:6px; }
+  .sp-dot { width:14px; height:14px; border-radius:50%; background:var(--accent); opacity:0; }
+  .sp-arr { opacity:0; flex-shrink:0; }
+  .sp-wordmark { font-family:'Lora',serif; font-size:32px; font-weight:700; color:var(--text); letter-spacing:-0.5px; opacity:0; }
+  .sp-d1 { animation: spFade 0.3s ease 0.2s forwards, spPulse 2s ease 0.8s infinite; }
+  .sp-a1 { animation: spArr1  0.25s ease 0.55s forwards; }
+  .sp-d2 { animation: spFade2 0.3s ease 0.65s forwards; }
+  .sp-a2 { animation: spArr2  0.25s ease 1.0s  forwards; }
+  .sp-d3 { animation: spFade3 0.3s ease 1.1s  forwards; }
+  .sp-wordmark { animation: spWord  0.4s ease 1.5s  forwards; }
+  @keyframes spFade  { to{opacity:1} }
+  @keyframes spFade2 { to{opacity:0.6} }
+  @keyframes spFade3 { to{opacity:0.3} }
+  @keyframes spArr1  { to{opacity:0.8} }
+  @keyframes spArr2  { to{opacity:0.5} }
+  @keyframes spWord  { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes spPulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(42,191,191,0)} 50%{transform:scale(1.18);box-shadow:0 0 12px rgba(42,191,191,0.55)} }
+  .sp-out { animation: spUp 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+  @keyframes spUp { to{transform:translateY(-100%);opacity:0} }
 
   /* ─── ONBOARDING ─── */
   #screen-onboard { justify-content:flex-end; padding-bottom:52px; }
@@ -1128,18 +1109,18 @@
 
 <!-- ═══ SPLASH ═══ -->
 <div id="screen-splash" class="screen active">
-  <div id="sp-fill"></div>
   <div class="sp-row">
     <div class="sp-dot sp-d1"></div>
-    <svg class="sp-arr sp-a1" width="18" height="10" viewBox="0 0 18 10" fill="none">
-      <path d="M0 5h11M9 1.5l4 3.5-4 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="sp-arr sp-a1" width="20" height="10" viewBox="0 0 20 10" fill="none">
+      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>
     <div class="sp-dot sp-d2"></div>
-    <svg class="sp-arr sp-a2" width="18" height="10" viewBox="0 0 18 10" fill="none">
-      <path d="M0 5h11M9 1.5l4 3.5-4 3.5" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <svg class="sp-arr sp-a2" width="20" height="10" viewBox="0 0 20 10" fill="none">
+      <path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
     </svg>
     <div class="sp-dot sp-d3"></div>
   </div>
+  <div class="sp-wordmark">Commons</div>
 </div>
 
 <!-- ═══ SIGN IN (returning users) ═══ -->
@@ -1897,7 +1878,7 @@ var _splashMinUntil = 0; // set on load
 
 window.addEventListener('load', async function() {
   setLogoElements();
-  _splashMinUntil = Date.now() + 1100; // hold until dot sequence completes
+  _splashMinUntil = Date.now() + 2000;
 
   // Single reliable auth check on load
   try {
@@ -1945,27 +1926,14 @@ window.addEventListener('load', async function() {
 function hideSplash() {
   var sp = document.getElementById('screen-splash');
   if (!sp || !sp.classList.contains('active')) return;
-
-  // Wait for dot sequence (dots 1-3 finish at ~1170ms from load)
-  // then trigger fill → then fade out
   var delay = Math.max(0, _splashMinUntil - Date.now());
   setTimeout(function() {
-    // 1. Expand teal fill from center
-    var fill = document.getElementById('sp-fill');
-    if (fill) fill.classList.add('expanding');
-
-    // 2. After fill completes (~400ms), fade the whole splash
+    sp.classList.add('sp-out');
     setTimeout(function() {
-      sp.classList.add('sp-fade');
-
-      // 3. Reveal the app once fully faded
-      setTimeout(function() {
-        sp.classList.remove('active', 'sp-fade');
-        sp.style.display = 'none';
-        if (me) { navTo('home'); }
-        else { showSignIn(); }
-      }, 520);
-    }, 380);
+      sp.classList.remove('active', 'sp-out');
+      if (me) { navTo('home'); }
+      else { showSignIn(); }
+    }, 400);
   }, delay);
 }
 

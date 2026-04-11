@@ -547,3 +547,6 @@ CREATE POLICY "dm_insert_sender" ON direct_messages
 
 -- Nobody can update or delete (immutable log)
 -- (No UPDATE / DELETE policies = blocked by default)
+
+-- Enable realtime for live DM delivery
+ALTER PUBLICATION supabase_realtime ADD TABLE direct_messages;

@@ -2012,6 +2012,14 @@ async function loadProfile(userId) {
   try { localStorage.setItem('commons_theme', me.dark_mode ? 'dark' : 'light'); } catch(e) {}
   updateDarkToggleUI();
   updateBalance();
+
+  // One-time cleanup for exchanges stuck by the now-fixed scoring bug
+  try {
+    if (!localStorage.getItem('commons_stuck_fix_v1')) {
+      localStorage.setItem('commons_stuck_fix_v1', '1');
+      fixStuckExchanges();
+    }
+  } catch(e) {}
 }
 
 // ─────────────────────────────────────────────
@@ -2951,20 +2959,23 @@ async function submitScoring() {
     alert('Please answer all three questions.'); return;
   }
 
+  // !! Capture ID now — closeScoringForm() will null activeScoringExchangeId
+  var exchangeId = activeScoringExchangeId;
+
   var totalScore    = scoreValues.time + scoreValues.effort + scoreValues.cost;
   var tokensAwarded = Math.max(1, Math.round(totalScore / 15 * 10)); // 1–10
 
   // Fetch exchange so we know roles and current status
   var _ex = await db.from('pending_exchanges')
     .select('provider_id, receiver_id, status')
-    .eq('id', activeScoringExchangeId).single();
+    .eq('id', exchangeId).single();
   if (_ex.error || !_ex.data) { closeScoringForm(); return; }
 
   var myRole = _ex.data.provider_id === me.id ? 'provider' : 'receiver';
 
-  // Save this user's rating (ON CONFLICT DO NOTHING keeps it idempotent)
-  var _ri = await db.from('exchange_ratings').insert({
-    exchange_id:    activeScoringExchangeId,
+  // Save this user's rating
+  await db.from('exchange_ratings').insert({
+    exchange_id:    exchangeId,
     user_id:        me.id,
     role:           myRole,
     time_score:     scoreValues.time,
@@ -2974,13 +2985,12 @@ async function submitScoring() {
     tokens_awarded: tokensAwarded
   });
 
-  // Rating insert failed (e.g. already submitted) — still treat as rated
-  closeScoringForm();
+  closeScoringForm(); // closes modal; activeScoringExchangeId is now null — use exchangeId below
 
-  // Check whether both parties have now rated
+  // Check whether both parties have now rated (use local exchangeId, not the nulled global)
   var _allRatings = await db.from('exchange_ratings')
     .select('tokens_awarded')
-    .eq('exchange_id', activeScoringExchangeId);
+    .eq('exchange_id', exchangeId);
 
   var ratings   = _allRatings.data || [];
   var bothRated = ratings.length >= 2;
@@ -2989,37 +2999,85 @@ async function submitScoring() {
     : tokensAwarded;
 
   if (bothRated && _ex.data.status !== 'completed') {
-    // Try the SECURITY DEFINER RPC first
-    var _proc = await db.rpc('process_exchange', {
-      p_exchange_id: activeScoringExchangeId,
-      p_tokens:      avgTokens
-    });
-
-    if (_proc.error) {
-      // Fallback: direct balance updates if RPC not deployed yet
-      var [_provP, _recvP] = await Promise.all([
-        db.from('profiles').select('balance, total_earned, total_helped').eq('id', _ex.data.provider_id).single(),
-        db.from('profiles').select('balance').eq('id', _ex.data.receiver_id).single()
-      ]);
-      await Promise.all([
-        _provP.data && db.from('profiles').update({
-          balance:      (_provP.data.balance      || 0) + avgTokens,
-          total_earned: (_provP.data.total_earned || 0) + avgTokens,
-          total_helped: (_provP.data.total_helped || 0) + 1
-        }).eq('id', _ex.data.provider_id),
-        _recvP.data && db.from('profiles').update({
-          balance: Math.max(0, (_recvP.data.balance || 0) - avgTokens)
-        }).eq('id', _ex.data.receiver_id),
-        db.from('pending_exchanges').update({ status: 'completed' }).eq('id', activeScoringExchangeId)
-      ]);
-    }
-
+    await processExchangeCompletion(exchangeId, _ex.data.provider_id, _ex.data.receiver_id, avgTokens);
     await loadProfile(me.id);
     showSuccess('Exchange complete! 🎉', avgTokens + ' tokens awarded. Thank you for showing up for your community.');
   } else {
+    // First rater: poll until the other party rates and the exchange completes
+    var pollCount = 0;
+    var pollTimer = setInterval(async function() {
+      pollCount++;
+      if (pollCount > 24) { clearInterval(pollTimer); return; } // stop after 2 min
+      var _chk = await db.from('pending_exchanges')
+        .select('status').eq('id', exchangeId).single();
+      if (_chk.data && _chk.data.status === 'completed') {
+        clearInterval(pollTimer);
+        loadPendingConfirmations();
+        updateBalance();
+      }
+    }, 5000);
     await loadProfile(me.id);
     showSuccess('Rated!', 'Your rating is saved. Tokens will be awarded once both parties have rated.');
   }
+}
+
+// Shared completion logic: try RPC, fall back to direct updates
+async function processExchangeCompletion(exchangeId, providerId, receiverId, avgTokens) {
+  var _proc = await db.rpc('process_exchange', {
+    p_exchange_id: exchangeId,
+    p_tokens:      avgTokens
+  });
+  if (!_proc.error) return; // RPC handled it
+
+  // Fallback: direct balance updates
+  var [_provP, _recvP] = await Promise.all([
+    db.from('profiles').select('balance, total_earned, total_helped').eq('id', providerId).single(),
+    db.from('profiles').select('balance').eq('id', receiverId).single()
+  ]);
+  await Promise.all([
+    _provP.data && db.from('profiles').update({
+      balance:      (_provP.data.balance      || 0) + avgTokens,
+      total_earned: (_provP.data.total_earned || 0) + avgTokens,
+      total_helped: (_provP.data.total_helped || 0) + 1
+    }).eq('id', providerId),
+    _recvP.data && db.from('profiles').update({
+      balance: Math.max(0, (_recvP.data.balance || 0) - avgTokens)
+    }).eq('id', receiverId),
+    db.from('pending_exchanges').update({ status: 'completed', token_amount: avgTokens })
+      .eq('id', exchangeId)
+  ]);
+}
+
+// One-time cleanup: find exchanges where both parties have rated but status
+// never got set to 'completed' (caused by the now-fixed activeScoringExchangeId bug).
+// Runs once on startup, guarded by localStorage so it never runs twice.
+async function fixStuckExchanges() {
+  var _ratings = await db.from('exchange_ratings').select('exchange_id, tokens_awarded');
+  if (_ratings.error || !_ratings.data || !_ratings.data.length) return;
+
+  // Group ratings by exchange
+  var groups = {};
+  _ratings.data.forEach(function(r) {
+    if (!groups[r.exchange_id]) groups[r.exchange_id] = [];
+    groups[r.exchange_id].push(r.tokens_awarded);
+  });
+
+  var twoRatedIds = Object.keys(groups).filter(function(id) { return groups[id].length >= 2; });
+  if (!twoRatedIds.length) return;
+
+  var _exch = await db.from('pending_exchanges')
+    .select('id, provider_id, receiver_id, status')
+    .in('id', twoRatedIds);
+  if (_exch.error || !_exch.data) return;
+
+  var stuck = _exch.data.filter(function(ex) { return ex.status !== 'completed'; });
+  for (var i = 0; i < stuck.length; i++) {
+    var ex = stuck[i];
+    var toks = groups[ex.id];
+    var avg  = Math.max(1, Math.round(toks.reduce(function(a, b) { return a + b; }, 0) / toks.length));
+    await processExchangeCompletion(ex.id, ex.provider_id, ex.receiver_id, avg);
+  }
+  if (stuck.length) console.log('[commons] Fixed ' + stuck.length + ' stuck exchange(s).');
 }
 
 function autoResize(el) {

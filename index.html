@@ -1950,6 +1950,7 @@ window.addEventListener('load', async function() {
     var session = _a.data.session;
     if (session) {
       await loadProfile(session.user.id);
+      fixStuckExchanges();
       // Fire data fetches immediately during splash so feed is ready when splash ends
       db.from('posts')
         .select('id, type, title, description, user_id, created_at, photo_url, profiles!user_id(name, handle, avatar_url)')
@@ -2974,13 +2975,16 @@ async function submitScoring() {
     tokens_awarded: tokensAwarded
   });
 
+  // Capture ID before closeScoringForm() nulls it
+  var exchangeId = activeScoringExchangeId;
+
   // Rating insert failed (e.g. already submitted) — still treat as rated
   closeScoringForm();
 
   // Check whether both parties have now rated
   var _allRatings = await db.from('exchange_ratings')
     .select('tokens_awarded')
-    .eq('exchange_id', activeScoringExchangeId);
+    .eq('exchange_id', exchangeId);
 
   var ratings   = _allRatings.data || [];
   var bothRated = ratings.length >= 2;
@@ -2991,7 +2995,7 @@ async function submitScoring() {
   if (bothRated && _ex.data.status !== 'completed') {
     // Try the SECURITY DEFINER RPC first
     var _proc = await db.rpc('process_exchange', {
-      p_exchange_id: activeScoringExchangeId,
+      p_exchange_id: exchangeId,
       p_tokens:      avgTokens
     });
 
@@ -3010,16 +3014,62 @@ async function submitScoring() {
         _recvP.data && db.from('profiles').update({
           balance: Math.max(0, (_recvP.data.balance || 0) - avgTokens)
         }).eq('id', _ex.data.receiver_id),
-        db.from('pending_exchanges').update({ status: 'completed' }).eq('id', activeScoringExchangeId)
+        db.from('pending_exchanges').update({ status: 'completed' }).eq('id', exchangeId)
       ]);
     }
 
     await loadProfile(me.id);
+    await loadPendingConfirmations();
     showSuccess('Exchange complete! 🎉', avgTokens + ' tokens awarded. Thank you for showing up for your community.');
   } else {
     await loadProfile(me.id);
     showSuccess('Rated!', 'Your rating is saved. Tokens will be awarded once both parties have rated.');
   }
+}
+
+// One-time cleanup: find exchanges where both parties rated but status never flipped to completed
+async function fixStuckExchanges() {
+  if (!me || localStorage.getItem('commons_stuck_fix_v1')) return;
+  localStorage.setItem('commons_stuck_fix_v1', '1');
+
+  var _stuck = await db.from('pending_exchanges')
+    .select('id, provider_id, receiver_id, status')
+    .neq('status', 'completed');
+  if (_stuck.error || !_stuck.data || !_stuck.data.length) return;
+
+  for (var ex of _stuck.data) {
+    var _ratings = await db.from('exchange_ratings')
+      .select('tokens_awarded')
+      .eq('exchange_id', ex.id);
+    var ratings = _ratings.data || [];
+    if (ratings.length < 2) continue;
+
+    var avgTokens = Math.max(1, Math.round(
+      ratings.reduce(function(s, r) { return s + r.tokens_awarded; }, 0) / ratings.length
+    ));
+
+    var _proc = await db.rpc('process_exchange', { p_exchange_id: ex.id, p_tokens: avgTokens });
+    if (_proc.error) {
+      var [_prov, _recv] = await Promise.all([
+        db.from('profiles').select('balance, total_earned, total_helped').eq('id', ex.provider_id).single(),
+        db.from('profiles').select('balance').eq('id', ex.receiver_id).single()
+      ]);
+      await Promise.all([
+        _prov.data && db.from('profiles').update({
+          balance:      (_prov.data.balance      || 0) + avgTokens,
+          total_earned: (_prov.data.total_earned || 0) + avgTokens,
+          total_helped: (_prov.data.total_helped || 0) + 1
+        }).eq('id', ex.provider_id),
+        _recv.data && db.from('profiles').update({
+          balance: Math.max(0, (_recv.data.balance || 0) - avgTokens)
+        }).eq('id', ex.receiver_id),
+        db.from('pending_exchanges').update({ status: 'completed' }).eq('id', ex.id)
+      ]);
+    }
+  }
+
+  await loadProfile(me.id);
+  await loadPendingConfirmations();
 }
 
 function autoResize(el) {

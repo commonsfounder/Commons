@@ -4014,7 +4014,8 @@ async function loadDMMessages() {
     return;
   }
   msgs.forEach(function(m) { seenDMMsgIds.add(m.id); });
-  msgArea.innerHTML = msgs.map(function(m) { return renderDMBubble(m); }).join('');
+  msgArea.innerHTML = '';
+  msgs.forEach(function(m) { msgArea.appendChild(renderDMBubble(m)); });
   msgArea.scrollTop = msgArea.scrollHeight;
 }
 
@@ -4023,20 +4024,36 @@ function renderDMBubble(m) {
   var d = new Date(m.created_at);
   var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   var content = m.content || '';
-  var inner;
+
+  var wrap = document.createElement('div');
+  wrap.className = 'dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs');
+  var inner = document.createElement('div');
+  var bubble = document.createElement('div');
+  bubble.className = 'dm-bubble';
+  var time = document.createElement('div');
+  time.className = 'dm-bubble-time';
+  time.textContent = timeStr;
+
   if (content.startsWith('[photo]')) {
-    inner = '<img src="' + esc(content.slice(7)) + '" alt="photo">';
+    var img = document.createElement('img');
+    img.src = content.slice(7);
+    img.alt = 'photo';
+    img.style.cssText = 'max-width:100%;border-radius:12px';
+    bubble.appendChild(img);
   } else if (content.startsWith('[audio]')) {
-    inner = '<audio controls src="' + esc(content.slice(7)) + '"></audio>';
+    var audio = document.createElement('audio');
+    audio.controls = true;
+    audio.src = content.slice(7);
+    audio.style.cssText = 'width:100%;max-width:260px';
+    bubble.appendChild(audio);
   } else {
-    inner = esc(content);
+    bubble.textContent = content;
   }
-  return '<div class="dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs') + '">' +
-    '<div>' +
-      '<div class="dm-bubble">' + inner + '</div>' +
-      '<div class="dm-bubble-time">' + timeStr + '</div>' +
-    '</div>' +
-  '</div>';
+
+  inner.appendChild(bubble);
+  inner.appendChild(time);
+  wrap.appendChild(inner);
+  return wrap;
 }
 
 async function uploadDMMedia(blob, ext) {
@@ -4056,7 +4073,7 @@ async function dmSendPhoto(input) {
     var content = '[photo]' + url;
     await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
     var msgArea = document.getElementById('dm-messages');
-    msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+    msgArea.appendChild(renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch(e) { alert('Failed to send photo: ' + e.message); }
 }
@@ -4085,7 +4102,7 @@ async function dmToggleRecord() {
         var content = '[audio]' + url;
         await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
         var msgArea = document.getElementById('dm-messages');
-        msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+        msgArea.appendChild(renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
         msgArea.scrollTop = msgArea.scrollHeight;
       } catch(e) { alert('Failed to send voice message: ' + e.message); }
     };
@@ -4112,7 +4129,7 @@ function subscribeToDM() {
       var msgArea = document.getElementById('dm-messages');
       if (!msgArea) return;
       var atBottom = msgArea.scrollHeight - msgArea.scrollTop - msgArea.clientHeight < 60;
-      msgArea.innerHTML += renderDMBubble(m);
+      msgArea.appendChild(renderDMBubble(m));
       if (atBottom) msgArea.scrollTop = msgArea.scrollHeight;
     })
     .subscribe();
@@ -4131,7 +4148,7 @@ async function sendDM() {
   var msgArea = document.getElementById('dm-messages');
   // Remove "no messages" placeholder if present
   if (msgArea.querySelector('div[style*="No messages yet"]')) msgArea.innerHTML = '';
-  msgArea.innerHTML += renderDMBubble(tempMsg);
+  msgArea.appendChild(renderDMBubble(tempMsg));
   msgArea.scrollTop = msgArea.scrollHeight;
 
   var _r = await db.from('direct_messages').insert({

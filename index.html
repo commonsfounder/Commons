@@ -432,6 +432,33 @@
   }
   .post-author { font-size:12px; color:var(--muted); }
 
+  /* ─── POST MENU ─── */
+  .post-menu-wrap { position:relative; }
+  .post-menu-btn {
+    width:32px; height:32px; border-radius:50%;
+    background:none; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; line-height:1; color:var(--muted); padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .post-menu-btn:active { background:var(--border); }
+  .post-menu {
+    position:absolute; right:0; bottom:36px;
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:12px; box-shadow:0 4px 20px rgba(28,43,43,0.14);
+    min-width:140px; overflow:hidden;
+    display:none; z-index:150;
+  }
+  .post-menu.open { display:block; }
+  .post-menu-item {
+    padding:13px 16px; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; gap:10px;
+    user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:background 0.12s;
+  }
+  .post-menu-item:active { background:var(--surface); }
+  .post-menu-item.danger { color:#e74040; }
+
   /* ─── GROUP CARD ─── */
   .group-card {
     background:var(--surface);
@@ -1812,6 +1839,19 @@
   </div>
 </div>
 
+<!-- ═══ EDIT POST MODAL ═══ -->
+<div class="modal-overlay" id="edit-post-modal" onclick="closeEditPost(event)">
+  <div class="modal-sheet">
+    <div class="modal-title">Edit post</div>
+    <input class="input-field" id="ep-title" type="text" placeholder="Title" maxlength="120">
+    <textarea class="input-field" id="ep-desc" placeholder="Description (optional)" rows="3" style="height:auto;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" onclick="closeEditPost()" style="flex:1;">Cancel</button>
+      <button class="btn-primary" id="ep-save-btn" onclick="savePostEdit()" style="flex:1;">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─────────────────────────────────────────────
 // SUPABASE CLIENT
@@ -2425,7 +2465,7 @@ function _paintFeed(list, posts, query) {
     var avatarHtml = (p.profiles && p.profiles.avatar_url)
       ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
       : author[0].toUpperCase();
-    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
+    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')" data-post-id="' + p.id + '" data-post-title="' + esc(p.title) + '" data-post-desc="' + esc(p.description || '') + '">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
@@ -2435,7 +2475,7 @@ function _paintFeed(list, posts, query) {
           '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
           '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
         '</div>' +
-        (isOwn ? '<span style="font-size:11px;color:var(--muted);">Your post</span>' : '') +
+        (isOwn ? postMenuHtml(p.id) : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -3661,10 +3701,11 @@ async function renderSpaceFeed() {
   list.innerHTML = posts.map(function(p, i) {
     var col    = av(p.user_id);
     var author = p.profiles ? p.profiles.name : 'Unknown';
+    var isOwn  = me && p.user_id === me.id;
     var avatarHtml = (p.profiles && p.profiles.avatar_url)
       ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
       : author[0].toUpperCase();
-    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
+    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')" data-post-id="' + p.id + '" data-post-title="' + esc(p.title) + '" data-post-desc="' + esc(p.description || '') + '">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
@@ -3672,7 +3713,7 @@ async function renderSpaceFeed() {
       '<div class="post-footer"><div class="post-meta">' +
         '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
         '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
-      '</div></div></div>';
+      '</div>' + (isOwn ? postMenuHtml(p.id) : '') + '</div></div>';
   }).join('');
 }
 
@@ -4047,6 +4088,94 @@ function closeSuccess() {
   document.getElementById('success-screen').classList.remove('open');
   if (activeCommunity) { showScreen('space'); }
   else { navTo(currentSection || 'home'); }
+}
+
+// ── Post edit / delete ────────────────────────────────────────
+var _activePostMenu = null;
+var _editingPostId  = null;
+
+function postMenuHtml(postId) {
+  return '<div class="post-menu-wrap" onclick="event.stopPropagation()">' +
+    '<button class="post-menu-btn" onclick="togglePostMenu(\'' + postId + '\')" aria-label="Post options">⋮</button>' +
+    '<div class="post-menu" id="pmenu-' + postId + '">' +
+      '<div class="post-menu-item" onclick="openEditPost(\'' + postId + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</div>' +
+      '<div class="post-menu-item danger" onclick="deletePost(\'' + postId + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function togglePostMenu(postId) {
+  var menu = document.getElementById('pmenu-' + postId);
+  if (!menu) return;
+  var opening = !menu.classList.contains('open');
+  closePostMenu();
+  if (opening) { menu.classList.add('open'); _activePostMenu = postId; }
+}
+
+function closePostMenu() {
+  if (_activePostMenu) {
+    var m = document.getElementById('pmenu-' + _activePostMenu);
+    if (m) m.classList.remove('open');
+    _activePostMenu = null;
+  }
+}
+
+document.addEventListener('click', closePostMenu);
+
+async function deletePost(postId) {
+  closePostMenu();
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  var cards = document.querySelectorAll('[data-post-id="' + postId + '"]');
+  cards.forEach(function(c) { c.remove(); });
+  await db.from('posts').delete().eq('id', postId).eq('user_id', me.id);
+}
+
+function openEditPost(postId) {
+  closePostMenu();
+  var card = document.querySelector('[data-post-id="' + postId + '"]');
+  if (!card) return;
+  _editingPostId = postId;
+  document.getElementById('ep-title').value = card.dataset.postTitle || '';
+  document.getElementById('ep-desc').value  = card.dataset.postDesc  || '';
+  document.getElementById('ep-save-btn').disabled    = false;
+  document.getElementById('ep-save-btn').textContent = 'Save';
+  document.getElementById('edit-post-modal').classList.add('open');
+}
+
+function closeEditPost(e) {
+  if (e && e.target !== document.getElementById('edit-post-modal')) return;
+  document.getElementById('edit-post-modal').classList.remove('open');
+  _editingPostId = null;
+}
+
+async function savePostEdit() {
+  if (!_editingPostId) return;
+  var title = (document.getElementById('ep-title').value || '').trim();
+  var desc  = (document.getElementById('ep-desc').value  || '').trim();
+  if (!title) { alert('Title is required.'); return; }
+  var btn = document.getElementById('ep-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var _r = await db.from('posts').update({ title: title, description: desc || null })
+    .eq('id', _editingPostId).eq('user_id', me.id);
+  btn.disabled = false; btn.textContent = 'Save';
+  if (_r.error) { alert('Failed to save: ' + _r.error.message); return; }
+  // Update every rendered card with this post id
+  document.querySelectorAll('[data-post-id="' + _editingPostId + '"]').forEach(function(card) {
+    card.dataset.postTitle = title;
+    card.dataset.postDesc  = desc;
+    var titleEl = card.querySelector('.post-title');
+    if (titleEl) titleEl.textContent = title;
+    var descEl = card.querySelector('.post-desc');
+    if (desc) {
+      if (descEl) { descEl.textContent = desc; }
+      else {
+        var t = card.querySelector('.post-title');
+        if (t) t.insertAdjacentHTML('afterend', '<div class="post-desc">' + esc(desc) + '</div>');
+      }
+    } else if (descEl) { descEl.remove(); }
+  });
+  document.getElementById('edit-post-modal').classList.remove('open');
+  _editingPostId = null;
 }
 
 // ── Keep chat inputs above software keyboard ─────────────────

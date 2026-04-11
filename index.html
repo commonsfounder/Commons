@@ -3918,7 +3918,11 @@ async function renderDMList() {
     var avHtml = t.partner.avatar_url
       ? '<img src="' + esc(t.partner.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
       : (t.partner.name || '?')[0].toUpperCase();
-    var preview = (t.lastMsg.sender_id === me.id ? 'You: ' : '') + esc(t.lastMsg.content);
+    var rawContent = t.lastMsg.content || '';
+    var previewText = rawContent.startsWith('[photo]') ? '📷 Photo'
+      : rawContent.startsWith('[audio]') ? '🎤 Voice message'
+      : rawContent;
+    var preview = (t.lastMsg.sender_id === me.id ? 'You: ' : '') + esc(previewText);
     var d = new Date(t.lastMsg.created_at);
     var now = new Date();
     var timeStr = d.toDateString() === now.toDateString()
@@ -4025,7 +4029,7 @@ async function dmSendPhoto(input) {
     var content = '[photo]' + url;
     await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
     var msgArea = document.getElementById('dm-messages');
-    msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+    msgArea.insertAdjacentHTML('beforeend', renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch(e) { alert('Failed to send photo: ' + e.message); }
 }
@@ -4054,7 +4058,7 @@ async function dmToggleRecord() {
         var content = '[audio]' + url;
         await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
         var msgArea = document.getElementById('dm-messages');
-        msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+        msgArea.insertAdjacentHTML('beforeend', renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
         msgArea.scrollTop = msgArea.scrollHeight;
       } catch(e) { alert('Failed to send voice message: ' + e.message); }
     };
@@ -4081,7 +4085,7 @@ function subscribeToDM() {
       var msgArea = document.getElementById('dm-messages');
       if (!msgArea) return;
       var atBottom = msgArea.scrollHeight - msgArea.scrollTop - msgArea.clientHeight < 60;
-      msgArea.innerHTML += renderDMBubble(m);
+      msgArea.insertAdjacentHTML('beforeend', renderDMBubble(m));
       if (atBottom) msgArea.scrollTop = msgArea.scrollHeight;
     })
     .subscribe();
@@ -4100,7 +4104,7 @@ async function sendDM() {
   var msgArea = document.getElementById('dm-messages');
   // Remove "no messages" placeholder if present
   if (msgArea.querySelector('div[style*="No messages yet"]')) msgArea.innerHTML = '';
-  msgArea.innerHTML += renderDMBubble(tempMsg);
+  msgArea.insertAdjacentHTML('beforeend', renderDMBubble(tempMsg));
   msgArea.scrollTop = msgArea.scrollHeight;
 
   var _r = await db.from('direct_messages').insert({

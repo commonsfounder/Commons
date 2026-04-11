@@ -1186,19 +1186,8 @@
     <div class="ob-progress-fill" id="ob-progress-fill" style="width:0%"></div>
   </div>
 
-  <!-- ── Step 0: Landing (emotional moment before questions begin) ── -->
-  <div class="ob-step" id="ob-step-0">
-    <div class="ob-welcome">
-      <div class="ob-welcome-logo" id="ob-step0-logo-wrap" style="display:flex;flex-direction:column;align-items:center;gap:12px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;"></div>
-      <div class="ob-welcome-sub" style="font-size:17px;max-width:280px;line-height:1.75;animation:fadeUp 0.45s ease 0.25s both;">Neighbours helping neighbours.<br>This is Commons.</div>
-    </div>
-    <div class="ob-welcome-ctas" style="animation:fadeUp 0.45s ease 0.38s both;">
-      <button class="btn-primary" onclick="obGoTo(1)">Get Started</button>
-    </div>
-  </div>
-
   <!-- ── Step 1: Welcome ── -->
-  <div class="ob-step" id="ob-step-1">
+  <div class="ob-step active" id="ob-step-1">
     <div class="ob-welcome">
       <div class="ob-welcome-logo" id="ob-logo-wrap"></div>
       <div class="ob-welcome-title">Find your village.</div>
@@ -1317,18 +1306,19 @@
     </div>
   </div>
 
-  <!-- ── Step 7: Arrival ── -->
+  <!-- ── Step 7: You're in! ── -->
   <div class="ob-step" id="ob-step-7">
     <div class="ob-win-wrap">
-      <div id="ob-win-logo-wrap" style="display:flex;align-items:center;margin-bottom:28px;animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.05s both;"></div>
-      <div class="ob-win-title" id="ob-win-title">You're in. Welcome to Commons.</div>
-      <div class="ob-win-sub">You start with 20 tokens. Use them to ask for help — and earn more by giving it.</div>
+      <div class="ob-win-confetti">🎉</div>
+      <div class="ob-win-title" id="ob-win-title">Welcome to Commons!</div>
+      <div class="ob-win-sub">You've been given 10 tokens to get started. Use them to ask for help — and earn more by giving it.</div>
       <div class="ob-token-badge">
-        <div class="ob-token-val">20</div>
+        <div class="ob-token-val">10</div>
         <div class="ob-token-label">Starting tokens</div>
       </div>
       <div class="ob-win-ctas">
-        <button class="btn-primary" onclick="obPostOffer()">Make your first offer</button>
+        <button class="btn-primary" onclick="obPostOffer()">Post your first offer</button>
+        <button class="btn-ghost" onclick="obEnterFeed()" style="margin-top:10px;">Explore the feed</button>
       </div>
     </div>
   </div>
@@ -1943,20 +1933,6 @@ function setLogoElements() {
   if (siEl) siEl.innerHTML = logoSVG();
   var obEl = document.getElementById('ob-logo-wrap');
   if (obEl) obEl.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:22px;font-weight:700;margin-left:4px;">Commons</span>';
-  // Step 0 landing logo — three-dot animated structure (animations complete before user sees this screen)
-  var s0El = document.getElementById('ob-step0-logo-wrap');
-  if (s0El) s0El.innerHTML =
-    '<div class="sp-row" style="transform:scale(1.55);transform-origin:center;">' +
-      '<div class="sp-dot sp-d1"></div>' +
-      '<svg class="sp-arr sp-a1" width="20" height="10" viewBox="0 0 20 10" fill="none"><path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '<div class="sp-dot sp-d2"></div>' +
-      '<svg class="sp-arr sp-a2" width="20" height="10" viewBox="0 0 20 10" fill="none"><path d="M0 5h13M10 1.5l4 3.5-4 3.5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
-      '<div class="sp-dot sp-d3"></div>' +
-    '</div>' +
-    '<div class="sp-wordmark" style="font-size:36px;letter-spacing:-0.8px;margin-top:16px;">Commons</div>';
-  // Arrival screen logo
-  var winEl = document.getElementById('ob-win-logo-wrap');
-  if (winEl) winEl.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:22px;font-weight:700;margin-left:4px;">Commons</span>';
 }
 
 // ─────────────────────────────────────────────
@@ -2108,7 +2084,7 @@ var _obNeeds   = [];
 var _obLocation = '';
 
 function startOnboarding() {
-  _obStep    = 0;
+  _obStep    = 1;
   _obOffers  = [];
   _obNeeds   = [];
   _obLocation = '';
@@ -2119,16 +2095,16 @@ function startOnboarding() {
   document.getElementById('ob-email').value     = '';
   document.getElementById('ob-password').value  = '';
   document.getElementById('ob-handle').value    = '';
-  // Populate logos
+  // Populate logo
   var wrap = document.getElementById('ob-logo-wrap');
   if (wrap) wrap.innerHTML = logoSVG() + '<span style="font-family:\'Lora\',serif;font-size:22px;font-weight:700;margin-left:4px;">Commons</span>';
   document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('screen-onboard').classList.add('active');
   var nav = document.getElementById('bottom-nav');
   if (nav) nav.classList.remove('visible');
-  // Show step 0 (welcome landing) cleanly
+  // Show step 1 cleanly
   document.querySelectorAll('.ob-step').forEach(function(s){ s.classList.remove('active','exit-left'); s.style.opacity=''; s.style.transform=''; });
-  document.getElementById('ob-step-0').classList.add('active');
+  document.getElementById('ob-step-1').classList.add('active');
   document.getElementById('ob-progress-fill').style.width = '0%';
 }
 
@@ -2215,47 +2191,32 @@ var OB_NEED_CONTEXT = {
 };
 
 function obBuildValidation() {
-  // Condense tile labels to readable short names for inline use
-  function shortName(s) {
-    var l = s.toLowerCase();
-    if (l.indexOf('lift') !== -1 || l.indexOf('transport') !== -1) return 'lifts';
-    if (l.indexOf('cook') !== -1 || l.indexOf('food') !== -1) return 'cooking';
-    if (l.indexOf('academic') !== -1) return 'academic help';
-    if (l.indexOf('skill') !== -1 || l.indexOf('diy') !== -1) return 'skills & DIY';
-    if (l.indexOf('errand') !== -1) return 'errands';
-    if (l.indexOf('emotional') !== -1) return 'emotional support';
-    if (l.indexOf('physical') !== -1) return 'physical help';
-    return l;
-  }
+  var title, lines = [];
 
-  function friendlyList(arr) {
-    var items = arr.filter(function(s){ return s !== 'Other'; }).slice(0, 2).map(shortName);
-    if (items.length === 0) return '';
-    if (items.length === 1) return items[0];
-    return items[0] + ' and ' + items[1];
-  }
-
-  var o = _obOffers.filter(function(s){ return s !== 'Other'; });
-  var n = _obNeeds.filter(function(s){ return s !== 'Other'; });
-  var title, msg;
-
-  if (o.length > 0 && n.length > 0) {
-    title = 'You\'re exactly what this community needs.';
-    msg = 'People near you are already offering ' + friendlyList(o) + ' — and someone out there needs exactly what you can give.\n\nYour ' + friendlyList(n) + ' won\'t go unanswered here either. That\'s how this place works.';
-  } else if (o.length > 0) {
-    title = 'Your community is lucky to have you.';
-    msg = 'People near you are already looking for ' + friendlyList(o) + '. Once you\'re in, they\'ll find you.\n\nEvery time you help, you earn tokens you can spend on anything you need. No money changes hands.';
-  } else if (n.length > 0) {
-    title = 'Asking for help is how this starts.';
-    msg = 'Someone near you can already help with ' + friendlyList(n) + '. Post what you need and let them respond.\n\nThe community\'s here for exactly this — and every ask you make earns the person who helps you tokens too.';
+  if (_obOffers.length > 0 && _obNeeds.length > 0) {
+    title = 'Here\'s how Commons works for you';
+    lines.push('You can offer: ' + _obOffers.join(', ') + '.\n' + (OB_OFFER_CONTEXT[_obOffers[0]] || ''));
+    lines.push('You\'re looking for: ' + _obNeeds.join(', ') + '.\n' + (OB_NEED_CONTEXT[_obNeeds[0]] || ''));
+    lines.push('Every exchange earns you tokens. Use them to get what you need — no money involved.');
+  } else if (_obOffers.length > 0) {
+    title = 'Here\'s how to get started';
+    lines.push('You can offer: ' + _obOffers.join(', ') + '.');
+    lines.push(OB_OFFER_CONTEXT[_obOffers[0]] || '');
+    lines.push('Once you post, people in your area can find you and request your help. You\'ll earn tokens for every exchange.');
+  } else if (_obNeeds.length > 0) {
+    title = 'Here\'s how to get started';
+    lines.push('You\'re looking for: ' + _obNeeds.join(', ') + '.');
+    lines.push(OB_NEED_CONTEXT[_obNeeds[0]] || '');
+    lines.push('Post what you need and let people respond. You spend tokens to receive help — and earn them back by helping others.');
   } else {
-    title = 'You\'re exactly what this community needs.';
-    msg = 'Browse what people are offering near you, or post what you need.\n\nEvery exchange uses tokens — no money changes hands. The more you give, the more you can ask for. That\'s the whole idea.';
+    title = 'Here\'s how it works';
+    lines.push('Browse what people are offering near you, or post what you need. Exchanges are paid in tokens — no money changes hands.');
+    lines.push('The more you help, the more you can ask for. It\'s designed to balance itself out.');
   }
 
   document.getElementById('ob-valid-title').textContent = title;
   document.getElementById('ob-valid-msg').style.whiteSpace = 'pre-line';
-  document.getElementById('ob-valid-msg').textContent = msg;
+  document.getElementById('ob-valid-msg').textContent = lines.join('\n\n');
 }
 
 async function obSignUp() {
@@ -2294,7 +2255,7 @@ async function obSignUp() {
       id:       _su.data.user.id,
       name:     name,
       handle:   handle,
-      balance:  20,
+      balance:  10,
       offers:   _obOffers,
       needs:    _obNeeds,
       location: _obLocation || null
@@ -2303,7 +2264,8 @@ async function obSignUp() {
 
     await loadProfile(_su.data.user.id);
 
-    // Show arrival screen
+    // Show "you're in" screen
+    document.getElementById('ob-win-title').textContent = 'Welcome, ' + name.split(' ')[0] + '!';
     obGoTo(7);
 
   } finally {
@@ -2314,7 +2276,6 @@ async function obSignUp() {
 function obPostOffer() {
   enterApp();
   showScreen('post-exchange');
-  selectPostType('offer');
 }
 
 function obEnterFeed() {
@@ -4014,8 +3975,7 @@ async function loadDMMessages() {
     return;
   }
   msgs.forEach(function(m) { seenDMMsgIds.add(m.id); });
-  msgArea.innerHTML = '';
-  msgs.forEach(function(m) { msgArea.appendChild(renderDMBubble(m)); });
+  msgArea.innerHTML = msgs.map(function(m) { return renderDMBubble(m); }).join('');
   msgArea.scrollTop = msgArea.scrollHeight;
 }
 
@@ -4024,36 +3984,20 @@ function renderDMBubble(m) {
   var d = new Date(m.created_at);
   var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
   var content = m.content || '';
-
-  var wrap = document.createElement('div');
-  wrap.className = 'dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs');
-  var inner = document.createElement('div');
-  var bubble = document.createElement('div');
-  bubble.className = 'dm-bubble';
-  var time = document.createElement('div');
-  time.className = 'dm-bubble-time';
-  time.textContent = timeStr;
-
+  var inner;
   if (content.startsWith('[photo]')) {
-    var img = document.createElement('img');
-    img.src = content.slice(7);
-    img.alt = 'photo';
-    img.style.cssText = 'max-width:100%;border-radius:12px';
-    bubble.appendChild(img);
+    inner = '<img src="' + esc(content.slice(7)) + '" alt="photo" style="max-width:100%;border-radius:12px">';
   } else if (content.startsWith('[audio]')) {
-    var audio = document.createElement('audio');
-    audio.controls = true;
-    audio.src = content.slice(7);
-    audio.style.cssText = 'width:100%;max-width:260px';
-    bubble.appendChild(audio);
+    inner = '<audio controls src="' + esc(content.slice(7)) + '" style="width:100%;max-width:260px"></audio>';
   } else {
-    bubble.textContent = content;
+    inner = esc(content);
   }
-
-  inner.appendChild(bubble);
-  inner.appendChild(time);
-  wrap.appendChild(inner);
-  return wrap;
+  return '<div class="dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs') + '">' +
+    '<div>' +
+      '<div class="dm-bubble">' + inner + '</div>' +
+      '<div class="dm-bubble-time">' + timeStr + '</div>' +
+    '</div>' +
+  '</div>';
 }
 
 async function uploadDMMedia(blob, ext) {
@@ -4073,7 +4017,7 @@ async function dmSendPhoto(input) {
     var content = '[photo]' + url;
     await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
     var msgArea = document.getElementById('dm-messages');
-    msgArea.appendChild(renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
+    var _w2 = document.createElement('div'); _w2.innerHTML = renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }); msgArea.appendChild(_w2.firstElementChild);
     msgArea.scrollTop = msgArea.scrollHeight;
   } catch(e) { alert('Failed to send photo: ' + e.message); }
 }
@@ -4102,7 +4046,7 @@ async function dmToggleRecord() {
         var content = '[audio]' + url;
         await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
         var msgArea = document.getElementById('dm-messages');
-        msgArea.appendChild(renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }));
+        var _w3 = document.createElement('div'); _w3.innerHTML = renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }); msgArea.appendChild(_w3.firstElementChild);
         msgArea.scrollTop = msgArea.scrollHeight;
       } catch(e) { alert('Failed to send voice message: ' + e.message); }
     };
@@ -4129,7 +4073,7 @@ function subscribeToDM() {
       var msgArea = document.getElementById('dm-messages');
       if (!msgArea) return;
       var atBottom = msgArea.scrollHeight - msgArea.scrollTop - msgArea.clientHeight < 60;
-      msgArea.appendChild(renderDMBubble(m));
+      var _w1 = document.createElement('div'); _w1.innerHTML = renderDMBubble(m); msgArea.appendChild(_w1.firstElementChild);
       if (atBottom) msgArea.scrollTop = msgArea.scrollHeight;
     })
     .subscribe();
@@ -4148,7 +4092,7 @@ async function sendDM() {
   var msgArea = document.getElementById('dm-messages');
   // Remove "no messages" placeholder if present
   if (msgArea.querySelector('div[style*="No messages yet"]')) msgArea.innerHTML = '';
-  msgArea.appendChild(renderDMBubble(tempMsg));
+  var _w4 = document.createElement('div'); _w4.innerHTML = renderDMBubble(tempMsg); msgArea.appendChild(_w4.firstElementChild);
   msgArea.scrollTop = msgArea.scrollHeight;
 
   var _r = await db.from('direct_messages').insert({

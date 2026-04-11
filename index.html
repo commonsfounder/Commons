@@ -432,6 +432,33 @@
   }
   .post-author { font-size:12px; color:var(--muted); }
 
+  /* ─── POST MENU ─── */
+  .post-menu-wrap { position:relative; }
+  .post-menu-btn {
+    width:32px; height:32px; border-radius:50%;
+    background:none; border:none; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; line-height:1; color:var(--muted); padding:0;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .post-menu-btn:active { background:var(--border); }
+  .post-menu {
+    position:absolute; right:0; bottom:36px;
+    background:var(--bg); border:1px solid var(--border);
+    border-radius:12px; box-shadow:0 4px 20px rgba(28,43,43,0.14);
+    min-width:140px; overflow:hidden;
+    display:none; z-index:150;
+  }
+  .post-menu.open { display:block; }
+  .post-menu-item {
+    padding:13px 16px; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; gap:10px;
+    user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:background 0.12s;
+  }
+  .post-menu-item:active { background:var(--surface); }
+  .post-menu-item.danger { color:#e74040; }
+
   /* ─── GROUP CARD ─── */
   .group-card {
     background:var(--surface);
@@ -783,12 +810,13 @@
   }
 
   /* DM chat bubbles */
-  .dm-bubble-wrap { display:flex; margin-bottom:10px; }
+  .dm-bubble-wrap { display:flex; width:100%; margin-bottom:10px; }
   .dm-bubble-wrap.mine { justify-content:flex-end; }
+  .dm-bubble-wrap > div { max-width:72%; min-width:0; }
   .dm-bubble {
-    max-width:72%; padding:10px 14px;
+    padding:10px 14px;
     border-radius:18px; font-size:14px; line-height:1.45;
-    word-break:break-word;
+    word-break:break-word; white-space:pre-wrap;
   }
   .dm-bubble-wrap.mine .dm-bubble {
     background:var(--accent); color:#fff;
@@ -798,13 +826,20 @@
     background:var(--surface); border:1px solid var(--border);
     color:var(--text); border-bottom-left-radius:4px;
   }
+  .dm-bubble img { max-width:100%; border-radius:10px; display:block; }
+  .dm-bubble audio { width:100%; min-width:180px; margin:2px 0; }
   .dm-bubble-time { font-size:10px; color:var(--muted); margin-top:3px; text-align:right; }
   .dm-bubble-wrap.theirs .dm-bubble-time { text-align:left; }
 
   .dm-compose {
     display:flex; align-items:flex-end; gap:10px;
-    padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));
+    padding:10px 16px 10px;
     border-top:1px solid var(--border); background:var(--bg);
+    position:fixed;
+    bottom:calc(71px + env(safe-area-inset-bottom,0px));
+    left:50%; transform:translateX(-50%);
+    width:100%; max-width:430px;
+    z-index:50; box-sizing:border-box;
   }
   .dm-compose-input {
     flex:1; background:var(--surface); border:1px solid var(--border);
@@ -823,6 +858,15 @@
   }
   .dm-send-btn:active { transform:scale(0.84); }
   .dm-send-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  .dm-icon-btn {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    background:var(--surface); border:1px solid var(--border);
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    color:var(--muted); transition:color 0.15s, background 0.15s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .dm-icon-btn:active { background:var(--border); }
+  .dm-icon-btn.recording { background:#e7404022; color:#e74040; border-color:#e74040; }
 
   /* unread badge on nav */
   .bn-badge {
@@ -1461,7 +1505,7 @@
     <div style="width:40px;"></div>
   </div>
   <div id="group-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
-  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 16px 32px;z-index:80;">
+  <div id="group-chat-input-bar" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 16px 32px;z-index:80;">
     <div style="display:flex;gap:8px;align-items:flex-end;">
       <textarea id="group-chat-input" class="chat-input" placeholder="Message…" rows="1" oninput="autoResize(this)"></textarea>
       <button class="chat-send" onclick="sendGroupMessage()">↑</button>
@@ -1772,14 +1816,39 @@
     </div>
     <div style="width:60px;"></div>
   </div>
-  <div id="dm-messages" style="flex:1;overflow-y:auto;padding:12px 16px 16px;"></div>
+  <div id="dm-messages" style="flex:1;overflow-y:auto;padding:12px 16px calc(130px + env(safe-area-inset-bottom,0px));"></div>
   <div class="dm-compose">
+    <input type="file" id="dm-photo-input" accept="image/*" style="display:none" onchange="dmSendPhoto(this)">
+    <button class="dm-icon-btn" onclick="document.getElementById('dm-photo-input').click()" title="Send photo" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </button>
+    <button class="dm-icon-btn" id="dm-mic-btn" onclick="dmToggleRecord()" title="Voice message" type="button">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="19" x2="12" y2="22"/>
+      </svg>
+    </button>
     <textarea class="dm-compose-input" id="dm-input" placeholder="Message…" rows="1" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px';" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM();}"></textarea>
     <button class="dm-send-btn" onclick="sendDM()" id="dm-send-btn">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
         <path d="M14 2L8 8M14 2L9.5 14L8 8L2 6L14 2Z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
+  </div>
+</div>
+
+<!-- ═══ EDIT POST MODAL ═══ -->
+<div class="modal-overlay" id="edit-post-modal" onclick="closeEditPost(event)">
+  <div class="modal-sheet">
+    <div class="modal-title">Edit post</div>
+    <input class="input-field" id="ep-title" type="text" placeholder="Title" maxlength="120">
+    <textarea class="input-field" id="ep-desc" placeholder="Description (optional)" rows="3" style="height:auto;"></textarea>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn-ghost" onclick="closeEditPost()" style="flex:1;">Cancel</button>
+      <button class="btn-primary" id="ep-save-btn" onclick="savePostEdit()" style="flex:1;">Save</button>
+    </div>
   </div>
 </div>
 
@@ -1873,7 +1942,7 @@ var _splashMinUntil = 0; // set on load
 
 window.addEventListener('load', async function() {
   setLogoElements();
-  _splashMinUntil = Date.now() + 2000; // splash shows for at least 2s
+  _splashMinUntil = Date.now() + 2000;
 
   // Single reliable auth check on load
   try {
@@ -1920,7 +1989,7 @@ window.addEventListener('load', async function() {
 
 function hideSplash() {
   var sp = document.getElementById('screen-splash');
-  if (!sp.classList.contains('active')) return;
+  if (!sp || !sp.classList.contains('active')) return;
   var delay = Math.max(0, _splashMinUntil - Date.now());
   setTimeout(function() {
     sp.classList.add('sp-out');
@@ -2096,35 +2165,57 @@ function obAutoHandle() {
   document.getElementById('ob-handle').value = h;
 }
 
-var OB_OFFER_MSGS = {
-  'Cooking & food':    'There\'s something powerful about feeding your neighbours. That kind of generosity builds real community.',
-  'Lifts & transport': 'Getting people where they need to be is a quiet but essential gift — and you\'re ready to give it.',
-  'Academic help':     'Sharing knowledge is one of the most generous things you can do. Someone out there needs exactly what you know.',
-  'Skills & DIY':      'Practical skills are a superpower. The things you\'ve learned to do can save someone\'s day — or week.',
-  'Emotional support': 'Being there for people takes real presence. That kind of support is rarer and more valuable than you think.',
-  'Errands':           'Small tasks add up to big relief for people who are stretched thin. You\'re the kind of person who makes that difference.',
-  'Physical help':     'Showing up with your hands and energy is a genuine gift — especially for those who can\'t do it themselves.',
-  'Other':             'Whatever you\'re bringing, the community needs it. The best neighbourhoods are built by people like you.'
+// What the platform will show them based on their offer selections
+var OB_OFFER_CONTEXT = {
+  'Cooking & food':    'Post a standing offer — "I make extra portions on Sundays" or "I can show you how to cook X" — and people nearby will find you.',
+  'Lifts & transport': 'Post your availability — direction you travel, days, how far — and let people request a lift when they need one.',
+  'Academic help':     'Post the subjects or levels you can help with. Parents, students and self-learners are always looking for someone who actually knows the material.',
+  'Skills & DIY':      'List what you can do — plumbing, electrics, carpentry, painting — and people who\'d normally pay a tradesperson will reach out.',
+  'Errands':           'Post when you\'re available and what you\'re happy to do. Collecting prescriptions, picking up shopping — small things that make a real difference.',
+  'Emotional support': 'You can post a general offer to talk, or respond when someone posts that they\'re struggling. People need this more than they let on.',
+  'Physical help':     'Moving, heavy lifting, garden work — post what you\'re up for and when. People often just need an extra pair of hands.',
+  'Other':             'Post exactly what you can offer in your own words. The more specific you are, the more likely the right person finds you.'
+};
+
+// What the platform will show them based on their need selections
+var OB_NEED_CONTEXT = {
+  'Cooking & food':    'Post what you\'re looking for — a meal once a week, help learning to cook, someone to share food with. People offer this more than you\'d think.',
+  'Lifts & transport': 'Post where you need to get to and when. Regular appointments, work, school runs — there\'s usually someone heading the same way.',
+  'Academic help':     'Post the subject, the level, and what you\'re trying to do. One-to-one help from someone who knows the material beats most tutoring.',
+  'Skills & DIY':      'Post the job and roughly what\'s needed. You\'ll be surprised how many tradespeople are happy to help a neighbour for tokens instead of cash.',
+  'Errands':           'Post what you need and when. If you\'re stretched for time or mobility, having someone run an errand changes your whole week.',
+  'Emotional support': 'You can post privately or openly. Sometimes you just need someone to talk to — and this community has people who are genuinely willing.',
+  'Physical help':     'Post what you need help with. Moving boxes, getting to a top shelf, garden work — most people are happy to help when asked directly.',
+  'Other':             'Post in your own words. The more honest you are about what you need, the faster someone responds.'
 };
 
 function obBuildValidation() {
-  var title, msg;
+  var title, lines = [];
+
   if (_obOffers.length > 0 && _obNeeds.length > 0) {
-    title = 'You\'re already part of this.';
-    var offerLine = OB_OFFER_MSGS[_obOffers[0]] || 'You\'re already showing up for your community.';
-    msg = offerLine + '\n\nAnd being open about what you need? That takes real courage — and it makes everyone stronger.';
+    title = 'Here\'s how Commons works for you';
+    lines.push('You can offer: ' + _obOffers.join(', ') + '.\n' + (OB_OFFER_CONTEXT[_obOffers[0]] || ''));
+    lines.push('You\'re looking for: ' + _obNeeds.join(', ') + '.\n' + (OB_NEED_CONTEXT[_obNeeds[0]] || ''));
+    lines.push('Every exchange earns you tokens. Use them to get what you need — no money involved.');
   } else if (_obOffers.length > 0) {
-    title = 'The community is lucky to have you.';
-    msg = OB_OFFER_MSGS[_obOffers[0]] || 'Whatever you\'re bringing, it matters more than you know.';
+    title = 'Here\'s how to get started';
+    lines.push('You can offer: ' + _obOffers.join(', ') + '.');
+    lines.push(OB_OFFER_CONTEXT[_obOffers[0]] || '');
+    lines.push('Once you post, people in your area can find you and request your help. You\'ll earn tokens for every exchange.');
   } else if (_obNeeds.length > 0) {
-    title = 'Asking for help is the start of something.';
-    msg = 'Most people find it hard to ask. You\'re already doing the brave thing. Commons is here to make that easier — and to make sure nobody has to go it alone.';
+    title = 'Here\'s how to get started';
+    lines.push('You\'re looking for: ' + _obNeeds.join(', ') + '.');
+    lines.push(OB_NEED_CONTEXT[_obNeeds[0]] || '');
+    lines.push('Post what you need and let people respond. You spend tokens to receive help — and earn them back by helping others.');
   } else {
-    title = 'Everyone belongs here.';
-    msg = 'You don\'t need to have everything figured out. Join Commons, look around, and let the community show you what\'s possible.';
+    title = 'Here\'s how it works';
+    lines.push('Browse what people are offering near you, or post what you need. Exchanges are paid in tokens — no money changes hands.');
+    lines.push('The more you help, the more you can ask for. It\'s designed to balance itself out.');
   }
+
   document.getElementById('ob-valid-title').textContent = title;
-  document.getElementById('ob-valid-msg').textContent   = msg;
+  document.getElementById('ob-valid-msg').style.whiteSpace = 'pre-line';
+  document.getElementById('ob-valid-msg').textContent = lines.join('\n\n');
 }
 
 async function obSignUp() {
@@ -2374,7 +2465,7 @@ function _paintFeed(list, posts, query) {
     var avatarHtml = (p.profiles && p.profiles.avatar_url)
       ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
       : author[0].toUpperCase();
-    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
+    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')" data-post-id="' + p.id + '" data-post-title="' + esc(p.title) + '" data-post-desc="' + esc(p.description || '') + '">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
@@ -2384,7 +2475,7 @@ function _paintFeed(list, posts, query) {
           '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
           '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
         '</div>' +
-        (isOwn ? '<span style="font-size:11px;color:var(--muted);">Your post</span>' : '') +
+        (isOwn ? postMenuHtml(p.id) : '') +
       '</div>' +
     '</div>';
   }).join('');
@@ -3610,10 +3701,11 @@ async function renderSpaceFeed() {
   list.innerHTML = posts.map(function(p, i) {
     var col    = av(p.user_id);
     var author = p.profiles ? p.profiles.name : 'Unknown';
+    var isOwn  = me && p.user_id === me.id;
     var avatarHtml = (p.profiles && p.profiles.avatar_url)
       ? '<img src="' + esc(p.profiles.avatar_url) + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" alt="">'
       : author[0].toUpperCase();
-    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')">' +
+    return '<div class="post-card d' + Math.min(i+1,5) + '" onclick="openChat(\'' + p.id + '\')" data-post-id="' + p.id + '" data-post-title="' + esc(p.title) + '" data-post-desc="' + esc(p.description || '') + '">' +
       '<div class="post-type ' + p.type + '">' + (p.type === 'need' ? 'Looking for help' : 'Offering something') + '</div>' +
       '<div class="post-title">' + esc(p.title) + '</div>' +
       (p.description ? '<div class="post-desc">' + esc(p.description) + '</div>' : '') +
@@ -3621,7 +3713,7 @@ async function renderSpaceFeed() {
       '<div class="post-footer"><div class="post-meta">' +
         '<div class="avatar" style="background:' + col + '22;color:' + col + ';cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + avatarHtml + '</div>' +
         '<span class="post-author" style="cursor:pointer;" onclick="event.stopPropagation();openUserProfile(\'' + p.user_id + '\')">' + esc(author) + '</span>' +
-      '</div></div></div>';
+      '</div>' + (isOwn ? postMenuHtml(p.id) : '') + '</div></div>';
   }).join('');
 }
 
@@ -3841,12 +3933,76 @@ function renderDMBubble(m) {
   var isMine = m.sender_id === me.id;
   var d = new Date(m.created_at);
   var timeStr = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  var content = m.content || '';
+  var inner;
+  if (content.startsWith('[photo]')) {
+    inner = '<img src="' + esc(content.slice(7)) + '" alt="photo">';
+  } else if (content.startsWith('[audio]')) {
+    inner = '<audio controls src="' + esc(content.slice(7)) + '"></audio>';
+  } else {
+    inner = esc(content);
+  }
   return '<div class="dm-bubble-wrap ' + (isMine ? 'mine' : 'theirs') + '">' +
     '<div>' +
-      '<div class="dm-bubble">' + esc(m.content) + '</div>' +
+      '<div class="dm-bubble">' + inner + '</div>' +
       '<div class="dm-bubble-time">' + timeStr + '</div>' +
     '</div>' +
   '</div>';
+}
+
+async function uploadDMMedia(blob, ext) {
+  var path = 'dm/' + me.id + '/' + Date.now() + '.' + ext;
+  var up = await db.storage.from('avatars').upload(path, blob, { contentType: blob.type, upsert: false });
+  if (up.error) throw up.error;
+  return db.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+}
+
+async function dmSendPhoto(input) {
+  var file = input.files[0];
+  input.value = '';
+  if (!file || !me || !activeDMUserId) return;
+  var ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  try {
+    var url = await uploadDMMedia(file, ext);
+    var content = '[photo]' + url;
+    await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
+    var msgArea = document.getElementById('dm-messages');
+    msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+    msgArea.scrollTop = msgArea.scrollHeight;
+  } catch(e) { alert('Failed to send photo: ' + e.message); }
+}
+
+var _dmRecorder = null, _dmChunks = [];
+
+async function dmToggleRecord() {
+  var btn = document.getElementById('dm-mic-btn');
+  if (_dmRecorder && _dmRecorder.state === 'recording') {
+    _dmRecorder.stop();
+    return;
+  }
+  try {
+    var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    _dmChunks = [];
+    var mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    _dmRecorder = new MediaRecorder(stream, { mimeType: mime });
+    _dmRecorder.ondataavailable = function(e) { if (e.data.size > 0) _dmChunks.push(e.data); };
+    _dmRecorder.onstop = async function() {
+      stream.getTracks().forEach(function(t) { t.stop(); });
+      btn.classList.remove('recording');
+      var ext = mime.includes('webm') ? 'webm' : 'm4a';
+      var blob = new Blob(_dmChunks, { type: mime });
+      try {
+        var url = await uploadDMMedia(blob, ext);
+        var content = '[audio]' + url;
+        await db.from('direct_messages').insert({ sender_id: me.id, receiver_id: activeDMUserId, content: content });
+        var msgArea = document.getElementById('dm-messages');
+        msgArea.innerHTML += renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() });
+        msgArea.scrollTop = msgArea.scrollHeight;
+      } catch(e) { alert('Failed to send voice message: ' + e.message); }
+    };
+    _dmRecorder.start();
+    btn.classList.add('recording');
+  } catch(e) { alert('Microphone access denied.'); }
 }
 
 function subscribeToDM() {
@@ -3933,6 +4089,111 @@ function closeSuccess() {
   if (activeCommunity) { showScreen('space'); }
   else { navTo(currentSection || 'home'); }
 }
+
+// ── Post edit / delete ────────────────────────────────────────
+var _activePostMenu = null;
+var _editingPostId  = null;
+
+function postMenuHtml(postId) {
+  return '<div class="post-menu-wrap" onclick="event.stopPropagation()">' +
+    '<button class="post-menu-btn" onclick="togglePostMenu(\'' + postId + '\')" aria-label="Post options">⋮</button>' +
+    '<div class="post-menu" id="pmenu-' + postId + '">' +
+      '<div class="post-menu-item" onclick="openEditPost(\'' + postId + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit</div>' +
+      '<div class="post-menu-item danger" onclick="deletePost(\'' + postId + '\')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Delete</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function togglePostMenu(postId) {
+  var menu = document.getElementById('pmenu-' + postId);
+  if (!menu) return;
+  var opening = !menu.classList.contains('open');
+  closePostMenu();
+  if (opening) { menu.classList.add('open'); _activePostMenu = postId; }
+}
+
+function closePostMenu() {
+  if (_activePostMenu) {
+    var m = document.getElementById('pmenu-' + _activePostMenu);
+    if (m) m.classList.remove('open');
+    _activePostMenu = null;
+  }
+}
+
+document.addEventListener('click', closePostMenu);
+
+async function deletePost(postId) {
+  closePostMenu();
+  if (!confirm('Delete this post? This cannot be undone.')) return;
+  var cards = document.querySelectorAll('[data-post-id="' + postId + '"]');
+  cards.forEach(function(c) { c.remove(); });
+  await db.from('posts').delete().eq('id', postId).eq('user_id', me.id);
+}
+
+function openEditPost(postId) {
+  closePostMenu();
+  var card = document.querySelector('[data-post-id="' + postId + '"]');
+  if (!card) return;
+  _editingPostId = postId;
+  document.getElementById('ep-title').value = card.dataset.postTitle || '';
+  document.getElementById('ep-desc').value  = card.dataset.postDesc  || '';
+  document.getElementById('ep-save-btn').disabled    = false;
+  document.getElementById('ep-save-btn').textContent = 'Save';
+  document.getElementById('edit-post-modal').classList.add('open');
+}
+
+function closeEditPost(e) {
+  if (e && e.target !== document.getElementById('edit-post-modal')) return;
+  document.getElementById('edit-post-modal').classList.remove('open');
+  _editingPostId = null;
+}
+
+async function savePostEdit() {
+  if (!_editingPostId) return;
+  var title = (document.getElementById('ep-title').value || '').trim();
+  var desc  = (document.getElementById('ep-desc').value  || '').trim();
+  if (!title) { alert('Title is required.'); return; }
+  var btn = document.getElementById('ep-save-btn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  var _r = await db.from('posts').update({ title: title, description: desc || null })
+    .eq('id', _editingPostId).eq('user_id', me.id);
+  btn.disabled = false; btn.textContent = 'Save';
+  if (_r.error) { alert('Failed to save: ' + _r.error.message); return; }
+  // Update every rendered card with this post id
+  document.querySelectorAll('[data-post-id="' + _editingPostId + '"]').forEach(function(card) {
+    card.dataset.postTitle = title;
+    card.dataset.postDesc  = desc;
+    var titleEl = card.querySelector('.post-title');
+    if (titleEl) titleEl.textContent = title;
+    var descEl = card.querySelector('.post-desc');
+    if (desc) {
+      if (descEl) { descEl.textContent = desc; }
+      else {
+        var t = card.querySelector('.post-title');
+        if (t) t.insertAdjacentHTML('afterend', '<div class="post-desc">' + esc(desc) + '</div>');
+      }
+    } else if (descEl) { descEl.remove(); }
+  });
+  document.getElementById('edit-post-modal').classList.remove('open');
+  _editingPostId = null;
+}
+
+// ── Keep chat inputs above software keyboard ─────────────────
+(function() {
+  if (!window.visualViewport) return;
+  function onVVChange() {
+    var vv = window.visualViewport;
+    var kbHeight = Math.max(0, window.innerHeight - vv.offsetTop - vv.height);
+    var chatBar       = document.querySelector('.chat-input-bar');
+    var groupBar      = document.getElementById('group-chat-input-bar');
+    var dmCompose     = document.querySelector('.dm-compose');
+    if (chatBar)   chatBar.style.bottom   = kbHeight > 0 ? kbHeight + 'px' : '';
+    if (groupBar)  groupBar.style.bottom  = kbHeight > 0 ? kbHeight + 'px' : '';
+    if (dmCompose) dmCompose.style.bottom = kbHeight > 0 ? kbHeight + 'px' : '';
+  }
+  window.visualViewport.addEventListener('resize', onVVChange);
+  window.visualViewport.addEventListener('scroll', onVVChange);
+})();
 
 // ── Service Worker registration ───────────────────────────────
 if ('serviceWorker' in navigator) {

@@ -265,7 +265,7 @@
   }
   .wallet-title { font-family:'Lora',serif; font-size:19px; font-weight:700; color:var(--text); }
   .wallet-close {
-    width:36px; height:36px; border-radius:50%;
+    width:44px; height:44px; border-radius:50%;
     background:var(--surface2); border:none;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; color:var(--muted);
@@ -389,7 +389,7 @@
   /* ─── SCROLL ─── */
   .scroll-area {
     flex:1; overflow-y:auto;
-    padding:8px 16px 92px;
+    padding:8px 16px calc(84px + env(safe-area-inset-bottom, 0px));
     -webkit-overflow-scrolling:touch;
   }
 
@@ -435,7 +435,7 @@
   /* ─── POST MENU ─── */
   .post-menu-wrap { position:relative; }
   .post-menu-btn {
-    width:32px; height:32px; border-radius:50%;
+    width:44px; height:44px; border-radius:50%;
     background:none; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
     font-size:20px; line-height:1; color:var(--muted); padding:0;
@@ -571,7 +571,7 @@
     width:100%; max-width:430px;
     background:var(--bg);
     border-top:1px solid var(--border);
-    padding:12px 16px 32px;
+    padding:12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
     z-index:80;
   }
   .chat-input-row { display:flex; gap:8px; align-items:flex-end; }
@@ -679,7 +679,7 @@
   /* ─── SUCCESS ─── */
   .success-screen {
     display:none; position:fixed; inset:0;
-    background:var(--bg); z-index:300;
+    background:var(--bg); z-index:400;
     flex-direction:column; align-items:center;
     justify-content:center; text-align:center; padding:40px;
   }
@@ -758,14 +758,14 @@
   /* ─── SCORING MODAL ─── */
   .modal-overlay {
     display:none; position:fixed; inset:0;
-    background:rgba(28,43,43,0.55); z-index:200;
+    background:rgba(28,43,43,0.55); z-index:560;
     align-items:flex-end; justify-content:center;
   }
   .modal-overlay.open { display:flex; }
   .modal-sheet {
     background:var(--bg);
     border-radius:20px 20px 0 0;
-    padding:28px 24px 52px;
+    padding:28px 24px calc(36px + env(safe-area-inset-bottom, 0px));
     width:100%; max-width:430px;
     animation:slideSheet 0.3s ease;
   }
@@ -850,7 +850,7 @@
     bottom:calc(71px + env(safe-area-inset-bottom,0px));
     left:50%; transform:translateX(-50%);
     width:100%; max-width:430px;
-    z-index:50; box-sizing:border-box;
+    z-index:110; box-sizing:border-box;
   }
   .dm-compose-input {
     flex:1; background:var(--surface); border:1px solid var(--border);
@@ -935,7 +935,7 @@
 
   /* ─── SIGN IN SCREEN ─── */
   #screen-signin {
-    justify-content:flex-end; padding-bottom:52px;
+    justify-content:flex-end; padding-bottom:calc(36px + env(safe-area-inset-bottom, 0px));
   }
   .signin-top {
     flex:1; display:flex; flex-direction:column;
@@ -974,6 +974,7 @@
   /* ─── ONBOARDING FLOW ─── */
   #screen-onboard {
     overflow:hidden; /* steps slide inside */
+    padding-bottom:0; /* safe-area handled per-step in ob-body / ob-welcome-ctas */
   }
 
   /* Progress bar */
@@ -1025,7 +1026,7 @@
     animation: fadeUp 0.45s ease 0.42s both;
   }
   .ob-welcome-ctas {
-    width:100%; padding:0 28px 52px; margin-top:auto;
+    width:100%; padding:0 28px calc(36px + env(safe-area-inset-bottom, 0px)); margin-top:auto;
     animation: fadeUp 0.45s ease 0.55s both;
   }
   .ob-signin-link {
@@ -1042,7 +1043,7 @@
     flex-shrink:0;
   }
   .ob-back {
-    width:36px; height:36px; border-radius:50%;
+    width:44px; height:44px; border-radius:50%;
     background:var(--surface2); border:none;
     display:flex; align-items:center; justify-content:center;
     cursor:pointer; color:var(--text); flex-shrink:0;
@@ -1120,7 +1121,7 @@
   .ob-win-wrap {
     flex:1; display:flex; flex-direction:column;
     align-items:center; text-align:center;
-    padding:52px 28px 40px;
+    padding:52px 28px calc(28px + env(safe-area-inset-bottom, 0px));
   }
   .ob-win-confetti {
     font-size:48px; margin-bottom:16px;
@@ -1357,7 +1358,7 @@
   <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:50;box-shadow:0 1px 8px rgba(28,43,43,0.04);">
     <div id="home-topbar-logo" style="display:flex;align-items:center;"><svg width="44" height="12" viewBox="0 0 44 12" fill="none" style="vertical-align:middle;margin-right:8px;"><circle cx="6" cy="6" r="5" fill="var(--accent)"></circle><path d="M12 6h4M14 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path><circle cx="22" cy="6" r="5" fill="var(--accent)" opacity="0.6"></circle><path d="M28 6h4M30 3.5l2.5 2.5-2.5 2.5" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"></path><circle cx="38" cy="6" r="5" fill="var(--accent)" opacity="0.3"></circle></svg><span style="font-family:'Lora',serif;font-size:18px;font-weight:700;">Commons</span></div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="navTo('search')" style="width:36px;height:36px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.15s;">
+      <button onclick="navTo('search')" style="width:44px;height:44px;border-radius:50%;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background 0.15s;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
       <div class="token-chip" onclick="openWallet()">
@@ -1507,7 +1508,7 @@
       <div id="group-view-members"></div>
     </div>
   </div>
-  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px 36px;">
+  <div style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:16px 20px calc(20px + env(safe-area-inset-bottom, 0px));">
     <button class="btn-primary" id="group-join-btn" onclick="joinGroup()">Join Group</button>
     <button class="btn-ghost" id="group-chat-btn" onclick="openGroupChat()" style="margin-top:10px;margin-bottom:0;display:none;">Group Chat</button>
   </div>
@@ -1520,8 +1521,8 @@
     <div class="topbar-title" id="group-chat-title">Group Chat</div>
     <div style="width:40px;"></div>
   </div>
-  <div id="group-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;padding-bottom:100px;"></div>
-  <div id="group-chat-input-bar" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 16px 32px;z-index:80;">
+  <div id="group-chat-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;padding-bottom:calc(90px + env(safe-area-inset-bottom, 0px));"></div>
+  <div id="group-chat-input-bar" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--bg);border-top:1px solid var(--border);padding:12px 16px calc(16px + env(safe-area-inset-bottom, 0px));z-index:80;">
     <div style="display:flex;gap:8px;align-items:flex-end;">
       <textarea id="group-chat-input" class="chat-input" placeholder="Message…" rows="1" oninput="autoResize(this)"></textarea>
       <button class="chat-send" onclick="sendGroupMessage()">↑</button>
@@ -1538,7 +1539,7 @@
     <div class="topbar-title">Profile</div>
     <div class="topbar-back" onclick="signOut()" style="color:var(--spend);">Sign out</div>
   </div>
-  <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
+  <div style="flex:1;overflow-y:auto;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));">
     <div class="profile-head">
       <div class="profile-av" id="profile-av" onclick="document.getElementById(&#39;avatar-input&#39;).click()" title="Tap to change photo"></div>
       <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
@@ -1581,13 +1582,13 @@
       <div class="profile-tab" id="ptab-groups" onclick="switchProfileTab('groups')">Groups</div>
       <div class="profile-tab" id="ptab-blocked" onclick="switchProfileTab('blocked')">Blocked</div>
     </div>
-    <div class="profile-tab-panel" id="ppanel-history" style="padding:16px 20px 80px;">
+    <div class="profile-tab-panel" id="ppanel-history" style="padding:16px 20px calc(72px + env(safe-area-inset-bottom, 0px));">
       <div id="history-list"></div>
     </div>
-    <div class="profile-tab-panel hidden" id="ppanel-groups" style="padding:16px 20px 80px;">
+    <div class="profile-tab-panel hidden" id="ppanel-groups" style="padding:16px 20px calc(72px + env(safe-area-inset-bottom, 0px));">
       <div id="groups-joined-list"></div>
     </div>
-    <div class="profile-tab-panel hidden" id="ppanel-blocked" style="padding:16px 20px 80px;">
+    <div class="profile-tab-panel hidden" id="ppanel-blocked" style="padding:16px 20px calc(72px + env(safe-area-inset-bottom, 0px));">
       <div id="blocked-list"></div>
     </div>
 
@@ -1601,7 +1602,7 @@
     <div class="topbar-title" id="up-title">Profile</div>
     <div style="width:40px;"></div>
   </div>
-  <div style="flex:1;overflow-y:auto;padding-bottom:40px;">
+  <div style="flex:1;overflow-y:auto;padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px));">
     <div class="profile-head">
       <div class="profile-av" id="up-av" style="cursor:default;"></div>
       <div class="profile-name" id="up-name"></div>
@@ -1636,7 +1637,7 @@
     <div id="search-tab-posts" class="nav-tab" style="font-family:&#39;Inter&#39;,sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab(&#39;posts&#39;)">Posts</div>
     <div id="search-tab-groups" class="nav-tab" style="font-family:&#39;Inter&#39;,sans-serif;font-size:13px;font-weight:600;" onclick="switchSearchTab(&#39;groups&#39;)">Groups</div>
   </div>
-  <div style="flex:1;overflow-y:auto;padding:8px 16px 80px;">
+  <div style="flex:1;overflow-y:auto;padding:8px 16px calc(84px + env(safe-area-inset-bottom, 0px));">
     <div id="search-results"></div>
   </div>
 </div>
@@ -1690,15 +1691,15 @@
 
 <!-- ═══ PROFILE OVERLAY ═══ -->
 <div id="profile-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.45);align-items:flex-end;justify-content:center;" onclick="closeProfileOverlay(event)">
-  <div id="profile-overlay-card" style="background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:28px 24px 48px;position:relative;max-height:80vh;overflow-y:auto;">
-    <div id="po-action-menu-wrap" style="position:absolute;top:16px;right:64px;display:none;z-index:10;">
-      <button id="po-action-btn" onclick="toggleUserActionMenu(event)" style="width:36px;height:36px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:20px;color:var(--muted);display:flex;align-items:center;justify-content:center;line-height:1;-webkit-tap-highlight-color:transparent;">⋮</button>
+  <div id="profile-overlay-card" style="background:var(--bg);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:28px 24px calc(32px + env(safe-area-inset-bottom, 0px));position:relative;max-height:80vh;overflow-y:auto;">
+    <div id="po-action-menu-wrap" style="position:absolute;top:10px;right:60px;display:none;z-index:10;">
+      <button id="po-action-btn" onclick="toggleUserActionMenu(event)" style="width:44px;height:44px;border-radius:50%;background:var(--surface2);border:none;cursor:pointer;font-size:20px;color:var(--muted);display:flex;align-items:center;justify-content:center;line-height:1;-webkit-tap-highlight-color:transparent;">⋮</button>
       <div id="po-action-menu" style="display:none;position:absolute;right:0;top:44px;background:var(--bg);border:1px solid var(--border);border-radius:12px;box-shadow:0 4px 20px rgba(28,43,43,0.16);min-width:168px;overflow:hidden;z-index:601;">
         <div id="po-block-item" onclick="blockCurrentUser()" style="padding:13px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background 0.12s;">🚫 Block user</div>
         <div onclick="reportCurrentUser()" style="padding:13px 16px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;color:#e74040;transition:background 0.12s;">⚠️ Report user</div>
       </div>
     </div>
-    <button onclick="closeProfileOverlay()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;">✕</button>
+    <button onclick="closeProfileOverlay()" style="position:absolute;top:10px;right:14px;width:44px;height:44px;background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">✕</button>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;">
       <div id="po-av" style="width:56px;height:56px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:&#39;Lora&#39;,serif;font-size:22px;font-weight:700;flex-shrink:0;overflow:hidden;"></div>
       <div>
@@ -1825,7 +1826,7 @@
     <div class="topbar-title">Messages</div>
     <div style="width:40px;"></div>
   </div>
-  <div style="flex:1;overflow-y:auto;padding-bottom:80px;" id="dm-list-scroll">
+  <div style="flex:1;overflow-y:auto;padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px));" id="dm-list-scroll">
     <div id="dm-thread-list"><div style="padding:20px 20px 0;"></div></div>
   </div>
 </div>

@@ -3988,7 +3988,7 @@ function renderDMBubble(m) {
   if (content.startsWith('[photo]')) {
     inner = '<img src="' + esc(content.slice(7)) + '" alt="photo" style="max-width:100%;border-radius:12px">';
   } else if (content.startsWith('[audio]')) {
-    inner = '<audio controls src="' + esc(content.slice(7)) + '" style="width:100%;max-width:260px"></audio>';
+    inner = '<audio controls crossorigin="anonymous" src="' + esc(content.slice(7)) + '" style="width:100%;max-width:260px"></audio>';
   } else {
     inner = esc(content);
   }
@@ -4002,7 +4002,7 @@ function renderDMBubble(m) {
 
 async function uploadDMMedia(blob, ext) {
   var path = 'dm/' + me.id + '/' + Date.now() + '.' + ext;
-  var up = await db.storage.from('avatars').upload(path, blob, { contentType: blob.type, upsert: false });
+  var up = await db.storage.from('avatars').upload(path, blob, { contentType: blob.type, upsert: true });
   if (up.error) throw up.error;
   return db.storage.from('avatars').getPublicUrl(path).data.publicUrl;
 }
@@ -4033,14 +4033,18 @@ async function dmToggleRecord() {
   try {
     var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     _dmChunks = [];
-    var mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
+    var mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+             : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+             : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus') ? 'audio/ogg;codecs=opus'
+             : 'audio/mp4';
     _dmRecorder = new MediaRecorder(stream, { mimeType: mime });
     _dmRecorder.ondataavailable = function(e) { if (e.data.size > 0) _dmChunks.push(e.data); };
     _dmRecorder.onstop = async function() {
       stream.getTracks().forEach(function(t) { t.stop(); });
       btn.classList.remove('recording');
-      var ext = mime.includes('webm') ? 'webm' : 'm4a';
-      var blob = new Blob(_dmChunks, { type: mime });
+      var actualMime = _dmRecorder.mimeType || mime;
+      var ext = actualMime.includes('ogg') ? 'ogg' : actualMime.includes('webm') ? 'webm' : actualMime.includes('mp4') ? 'm4a' : 'webm';
+      var blob = new Blob(_dmChunks, { type: actualMime });
       try {
         var url = await uploadDMMedia(blob, ext);
         var content = '[audio]' + url;

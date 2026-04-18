@@ -97,23 +97,38 @@ GRANT EXECUTE ON FUNCTION process_exchange(UUID, INT) TO authenticated;
 
 
 -- ─────────────────────────────────────────────
--- 4. Storage: allow post/group photo uploads to the avatars bucket
---    The app uploads post photos to avatars/posts/<user_id>/<timestamp>.<ext>
---    and group photos to avatars/groups/<user_id>/<timestamp>.<ext>.
---    Make sure the avatars bucket is set to PUBLIC in Supabase Storage settings,
---    and that authenticated users can INSERT/UPDATE objects:
+-- 4. Storage: avatars bucket — public reads, authenticated uploads
+--    Paths used:
+--      avatars/posts/<user_id>/<ts>.<ext>   — post photos
+--      avatars/groups/<user_id>/<ts>.<ext>  — group photos
+--      avatars/<user_id>/avatar.<ext>       — profile avatars
+--      avatars/dm/<user_id>/<ts>.<ext>      — DM voice/photo messages
 -- ─────────────────────────────────────────────
--- Run in Storage policies (Dashboard → Storage → avatars → Policies):
---
--- INSERT policy (if not already permissive):
---   CREATE POLICY "authenticated upload avatars"
---   ON storage.objects FOR INSERT TO authenticated
---   WITH CHECK (bucket_id = 'avatars');
---
--- UPDATE policy:
---   CREATE POLICY "authenticated update avatars"
---   ON storage.objects FOR UPDATE TO authenticated
---   USING (bucket_id = 'avatars');
+
+-- Ensure the bucket exists and is flagged public so getPublicUrl URLs work.
+-- Without public=true, all /object/public/... URLs return 403 for recipients.
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('avatars', 'avatars', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Allow anyone (including unauthenticated) to read objects — required for
+-- DM audio/photo recipients who access the file via the public URL.
+DROP POLICY IF EXISTS "public read avatars" ON storage.objects;
+CREATE POLICY "public read avatars"
+  ON storage.objects FOR SELECT TO public
+  USING (bucket_id = 'avatars');
+
+-- INSERT policy for authenticated users:
+DROP POLICY IF EXISTS "authenticated upload avatars" ON storage.objects;
+CREATE POLICY "authenticated upload avatars"
+  ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'avatars');
+
+-- UPDATE policy for authenticated users:
+DROP POLICY IF EXISTS "authenticated update avatars" ON storage.objects;
+CREATE POLICY "authenticated update avatars"
+  ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'avatars');
 
 
 -- ═══════════════════════════════════════════════════════════════

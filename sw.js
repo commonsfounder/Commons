@@ -1,16 +1,15 @@
 // Commons Service Worker
-// Cache-first for static shell; network-first for Supabase API
+// Network-first for HTML; cache-first for static assets
 
-var CACHE = 'commons-v1';
+var CACHE = 'commons-v7';
 var SHELL = [
-  '/index.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/icon.svg'
 ];
 
-// ── Install: cache the app shell ──────────────────────────────
+// ── Install: cache static shell (not index.html — served network-first) ──
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE).then(function(c) { return c.addAll(SHELL); })
@@ -18,7 +17,7 @@ self.addEventListener('install', function(e) {
   self.skipWaiting();
 });
 
-// ── Activate: drop old caches ─────────────────────────────────
+// ── Activate: drop old caches, claim all clients immediately ─────────────
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -31,7 +30,7 @@ self.addEventListener('activate', function(e) {
   self.clients.claim();
 });
 
-// ── Fetch: strategy per request type ─────────────────────────
+// ── Fetch: strategy per request type ─────────────────────────────────────
 self.addEventListener('fetch', function(e) {
   var url = new URL(e.request.url);
 
@@ -42,19 +41,37 @@ self.addEventListener('fetch', function(e) {
     return;
   }
 
-  // For everything else: cache-first, fall back to network
+  // Network-first for HTML (navigation requests + index.html)
+  // This ensures users always get fresh HTML with latest code changes
+  if (e.request.mode === 'navigate' ||
+      url.pathname === '/index.html' ||
+      url.pathname === '/') {
+    e.respondWith(
+      fetch(e.request).then(function(response) {
+        if (response.status === 200) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        }
+        return response;
+      }).catch(function() {
+        // Offline fallback: serve cached index.html
+        return caches.match('/index.html');
+      })
+    );
+    return;
+  }
+
+  // Cache-first for static assets (JS, CSS, images, fonts)
   e.respondWith(
     caches.match(e.request).then(function(cached) {
       if (cached) return cached;
       return fetch(e.request).then(function(response) {
-        // Cache successful GET responses for shell assets
         if (e.request.method === 'GET' && response.status === 200) {
           var clone = response.clone();
           caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
         }
         return response;
       }).catch(function() {
-        // Offline fallback: serve index.html for navigation requests
         if (e.request.mode === 'navigate') {
           return caches.match('/index.html');
         }

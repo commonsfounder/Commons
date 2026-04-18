@@ -4269,7 +4269,20 @@ async function savePostEdit() {
 // ── Service Worker registration ───────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      // When a new SW version is found, wait for it to install then reload
+      reg.addEventListener('updatefound', function() {
+        var newWorker = reg.installing;
+        newWorker.addEventListener('statechange', function() {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            // New version installed — reload silently to pick up latest code
+            window.location.reload();
+          }
+        });
+      });
+      // Poll for updates every 60 seconds
+      setInterval(function() { reg.update(); }, 60000);
+    }).catch(function(err) {
       console.warn('SW registration failed:', err);
     });
   });

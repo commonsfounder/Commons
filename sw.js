@@ -30,6 +30,24 @@ self.addEventListener('activate', function(e) {
   self.clients.claim();
 });
 
+// ── Push notifications ────────────────────────────────────────────────────
+self.addEventListener('push', function(event) {
+  var data = event.data ? event.data.json() : { title: 'Commons', body: 'You have a new notification' };
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      data: { url: data.url || '/' }
+    })
+  );
+});
+
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  event.waitUntil(clients.openWindow(event.notification.data.url));
+});
+
 // ── Fetch: strategy per request type ─────────────────────────────────────
 self.addEventListener('fetch', function(e) {
   var url = new URL(e.request.url);

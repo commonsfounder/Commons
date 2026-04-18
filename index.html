@@ -1975,6 +1975,7 @@ window.addEventListener('load', async function() {
       if (!me) {
         await loadProfile(session.user.id);
       }
+      navigator.serviceWorker.ready.then(subscribeToPush);
       // Only navigate if splash is already gone (fresh login, not page reload)
       var sp = document.getElementById('screen-splash');
       if (!sp.classList.contains('active')) {
@@ -3026,9 +3027,13 @@ async function submitScoring() {
     await loadProfile(me.id);
     await loadPendingConfirmations();
     showSuccess('Exchange complete! 🎉', avgTokens + ' tokens awarded. Thank you for showing up for your community.');
+    var _otherUserId = me.id === _ex.data.provider_id ? _ex.data.receiver_id : _ex.data.provider_id;
+    sendPushToUser(_otherUserId, 'Exchange complete', 'Your exchange has been rated and ' + avgTokens + ' tokens awarded');
   } else {
     await loadProfile(me.id);
     showSuccess('Rated!', 'Your rating is saved. Tokens will be awarded once both parties have rated.');
+    var _otherUserId2 = me.id === _ex.data.provider_id ? _ex.data.receiver_id : _ex.data.provider_id;
+    sendPushToUser(_otherUserId2, 'Exchange update', 'Your exchange has been rated');
   }
 }
 
@@ -4040,6 +4045,7 @@ async function dmSendPhoto(input) {
     var msgArea = document.getElementById('dm-messages');
     var _w2 = document.createElement('div'); _w2.innerHTML = renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }); msgArea.appendChild(_w2.firstElementChild);
     msgArea.scrollTop = msgArea.scrollHeight;
+    sendPushToUser(activeDMUserId, 'New message from ' + me.name, 'Sent you a photo');
   } catch(e) { alert('Failed to send photo: ' + e.message); }
 }
 
@@ -4069,6 +4075,7 @@ async function dmToggleRecord() {
         var msgArea = document.getElementById('dm-messages');
         var _w3 = document.createElement('div'); _w3.innerHTML = renderDMBubble({ id: 'tmp-' + Date.now(), sender_id: me.id, content: content, created_at: new Date().toISOString() }); msgArea.appendChild(_w3.firstElementChild);
         msgArea.scrollTop = msgArea.scrollHeight;
+        sendPushToUser(activeDMUserId, 'New message from ' + me.name, 'Sent you a voice message');
       } catch(e) { alert('Failed to send voice message: ' + e.message); }
     };
     _dmRecorder.start();
@@ -4131,6 +4138,7 @@ async function sendDM() {
   } else {
     // Replace temp with real id in seen set
     seenDMMsgIds.add(_r.data.id);
+    sendPushToUser(activeDMUserId, 'New message from ' + me.name, text.slice(0, 80));
   }
 }
 
@@ -4266,6 +4274,47 @@ async function savePostEdit() {
   window.visualViewport.addEventListener('scroll', onVVChange);
 })();
 
+// ── Web Push helpers ──────────────────────────────────────────
+var VAPID_PUBLIC_KEY = 'BFZiF1nUis6OxEtdPMqsXhhCede9KJuVObfN5Vt1AlNsj1OuJfo-GNEfu09hGx56I1Z3ng8jqWM9xfkcrAA_C3s';
+
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var rawData = atob(base64);
+  return new Uint8Array(Array.from(rawData).map(function(c) { return c.charCodeAt(0); }));
+}
+
+async function subscribeToPush(registration) {
+  try {
+    var existing = await registration.pushManager.getSubscription();
+    if (existing) { await savePushSubscription(existing); return; }
+    var permission = await Notification.requestPermission();
+    if (permission !== 'granted') return;
+    var subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    await savePushSubscription(subscription);
+  } catch(e) { console.warn('Push subscription failed:', e); }
+}
+
+async function savePushSubscription(subscription) {
+  if (!me) return;
+  await db.from('push_subscriptions').upsert({
+    user_id: me.id,
+    subscription: JSON.stringify(subscription),
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id' });
+}
+
+async function sendPushToUser(targetUserId, title, body) {
+  fetch('https://46.62.169.137/push', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ user_id: targetUserId, title: title, body: body })
+  }).catch(function() {});
+}
+
 // ── Service Worker registration ───────────────────────────────
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
@@ -4282,6 +4331,7 @@ if ('serviceWorker' in navigator) {
       });
       // Poll for updates every 60 seconds
       setInterval(function() { reg.update(); }, 60000);
+      subscribeToPush(reg);
     }).catch(function(err) {
       console.warn('SW registration failed:', err);
     });

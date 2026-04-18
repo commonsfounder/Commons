@@ -2628,6 +2628,22 @@ async function submitExchangePost() {
   }
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
 
+  // Notify users who have exchanged with the poster (closest proxy for "connections")
+  (async function() {
+    var { data: _exchanges } = await db.from('pending_exchanges')
+      .select('provider_id, receiver_id')
+      .or('provider_id.eq.' + me.id + ',receiver_id.eq.' + me.id);
+    if (_exchanges) {
+      var _notified = new Set();
+      var _posterName = me.name || 'Someone';
+      var _postSnippet = (title || desc || '').slice(0, 80);
+      _exchanges.forEach(function(ex) {
+        var uid = ex.provider_id === me.id ? ex.receiver_id : ex.provider_id;
+        if (!_notified.has(uid)) { _notified.add(uid); sendPushToUser(uid, _posterName + ' posted something', _postSnippet); }
+      });
+    }
+  })();
+
   document.getElementById('post-title').value = '';
   document.getElementById('post-desc').value  = '';
   clearPostPhoto();
@@ -2804,6 +2820,8 @@ async function requestConfirmation() {
   btn.textContent = 'Request Confirmation';
 
   if (_r.error) { alert('Error: ' + _r.error.message); return; }
+
+  sendPushToUser(activePost.user_id, (me.name || 'Someone') + ' wants to exchange with you', activePost.title || '');
 
   var otherName = activePost.profiles ? activePost.profiles.name : 'the other person';
   showSuccess('Confirmation requested', 'Both you and ' + otherName + ' need to confirm in your profiles. Tokens only move after both sides confirm and rate the exchange.');
@@ -3245,6 +3263,18 @@ async function sendGroupMessage() {
   if (_r.data && _r.data.id) {
     seenGroupMsgIds.add(_r.data.id);
   }
+
+  // Notify other group members
+  (async function() {
+    var { data: _members } = await db.from('group_members')
+      .select('user_id')
+      .eq('group_id', activeGroupChat.id)
+      .neq('user_id', me.id);
+    if (_members) {
+      var _groupTitle = activeGroupChat.title || 'Group';
+      _members.forEach(function(m) { sendPushToUser(m.user_id, _groupTitle + ': ' + (me.name || 'Someone'), text.slice(0, 80)); });
+    }
+  })();
 }
 
 // ─────────────────────────────────────────────

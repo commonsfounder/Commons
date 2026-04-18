@@ -2004,9 +2004,14 @@ function hideSplash() {
 
 async function loadProfile(userId) {
   var results = await Promise.all([
-    db.from('profiles').select('*').eq('id', userId).single(),
+    db.from('profiles').select('*').eq('id', userId).maybeSingle(),
     db.from('group_members').select('*', { count: 'exact', head: true }).eq('user_id', userId)
   ]);
+  if (!results[0].data) {
+    // Profile row not yet created (trigger may be delayed) — retry after 2s
+    setTimeout(function() { loadProfile(userId); }, 2000);
+    return;
+  }
   me = Object.assign({}, results[0].data, { groups_count: results[1].count || 0 });
   document.body.classList.toggle('dark', !!me.dark_mode);
   document.documentElement.classList.remove('dark-pre'); // real pref applied
@@ -2250,8 +2255,8 @@ async function obSignUp() {
       return;
     }
 
-    // Insert profile with onboarding data
-    var _p = await db.from('profiles').insert({
+    // Upsert profile — safe if Supabase trigger already created the row
+    var _p = await db.from('profiles').upsert({
       id:       _su.data.user.id,
       name:     name,
       handle:   handle,
@@ -2259,7 +2264,7 @@ async function obSignUp() {
       offers:   _obOffers,
       needs:    _obNeeds,
       location: _obLocation || null
-    });
+    }, { onConflict: 'id', ignoreDuplicates: false });
     if (_p.error) { alert('Profile error: ' + _p.error.message); return; }
 
     await loadProfile(_su.data.user.id);
@@ -3878,7 +3883,13 @@ async function renderDMList() {
     .limit(100);
 
   if (_r.error) {
-    list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;">Couldn\'t load messages.</div>';
+    var isProfileMissing = _r.error.code === 'PGRST116' || (_r.error.message && _r.error.message.toLowerCase().includes('profile'));
+    if (isProfileMissing) {
+      list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;">Setting up your account…</div>';
+      setTimeout(renderDMList, 2000);
+    } else {
+      list.innerHTML = '<div style="padding:40px 20px;text-align:center;color:var(--muted);font-size:14px;">Couldn\'t load messages. <span style="color:var(--accent);cursor:pointer;" onclick="renderDMList()">Tap to retry</span></div>';
+    }
     return;
   }
 
@@ -3968,8 +3979,18 @@ async function loadDMMessages() {
     .order('created_at', { ascending: true })
     .limit(100);
 
-  var msgs = _r.data || [];
   var msgArea = document.getElementById('dm-messages');
+  if (_r.error) {
+    var isProfileMissing = _r.error.code === 'PGRST116' || (_r.error.message && _r.error.message.toLowerCase().includes('profile'));
+    if (isProfileMissing) {
+      msgArea.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">Setting up your account…</div>';
+      setTimeout(loadDMMessages, 2000);
+    } else {
+      msgArea.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">Couldn\'t load messages. <span style="color:var(--accent);cursor:pointer;" onclick="loadDMMessages()">Tap to retry</span></div>';
+    }
+    return;
+  }
+  var msgs = _r.data || [];
   if (!msgs.length) {
     msgArea.innerHTML = '<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px;">No messages yet. Say hello!</div>';
     return;

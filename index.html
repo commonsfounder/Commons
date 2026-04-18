@@ -4308,7 +4308,7 @@ async function savePushSubscription(subscription) {
 }
 
 async function sendPushToUser(targetUserId, title, body) {
-  fetch('https://46.62.169.137/push', {
+  fetch('https://ytkdhtuxzumplvpygrvi.supabase.co/functions/v1/send-push', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ user_id: targetUserId, title: title, body: body })

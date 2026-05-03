@@ -172,7 +172,6 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
     res.status(200).json({ text: spoken, actions });
 
   } catch (err) {
-    console.error('/api/chat error:', err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, rawBody: rawBody });
   }
 };

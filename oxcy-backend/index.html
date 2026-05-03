@@ -1293,23 +1293,14 @@ function ChatPage({ settings, memory, people, initialQuery }) {
               <div className="msg-actions-bar">
                 {msg.actions.map((a, i) => {
                   const text = a.type === 'shortcut' ? a.name : a.type;
+                  const input = JSON.stringify({ name: a.name, input: a.input || {} });
+                  const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(input)}`;
                   return (
                     <button
                       key={i}
                       className="msg-run-link"
                       onClick={() => {
-                        const payload = `OXY:${a.type}:${a.name}:${JSON.stringify(a.input || {})}`;
-                        navigator.clipboard.writeText(payload).then(() => {
-                          window.location.href = 'shortcuts://run-shortcut?name=Oxy';
-                        }).catch(() => {
-                          const ta = document.createElement('textarea');
-                          ta.value = payload;
-                          document.body.appendChild(ta);
-                          ta.select();
-                          document.execCommand('copy');
-                          document.body.removeChild(ta);
-                          window.location.href = 'shortcuts://run-shortcut?name=Oxy';
-                        });
+                        window.open(shortcutUrl, '_blank');
                       }}
                     >
                       ▶ {text}

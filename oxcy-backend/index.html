@@ -929,32 +929,29 @@ function formatTime(date) {
   return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
-function ActionCard({ actions }) {
-  const [executed, setExecuted] = useState({});
+function AutoRunActions({ actions }) {
+  useEffect(() => {
+    if (!actions || actions.length === 0) return;
+    
+    actions.forEach((action, i) => {
+      setTimeout(() => {
+        const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(JSON.stringify(action))}`;
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = shortcutUrl;
+        document.body.appendChild(iframe);
+        setTimeout(() => document.body.removeChild(iframe), 1000);
+        
+        fetch('/action-log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: USER_ID, action, status: 'executed' })
+        }).catch(() => {});
+      }, i * 500);
+    });
+  }, [actions]);
 
-  const runAction = (action, index) => {
-    const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(JSON.stringify(action))}`;
-    window.location.href = shortcutUrl;
-    setExecuted(prev => ({ ...prev, [index]: true }));
-  };
-
-  return (
-    <div className="action-card">
-      <div className="action-card-header">⚡ Actions</div>
-      {actions.map((action, i) => (
-        <div key={i} className="action-item">
-          <span>{action.type === 'shortcut' ? action.name : action.type}</span>
-          <button
-            className={`action-run-btn ${executed[i] ? 'executed' : ''}`}
-            onClick={() => !executed[i] && runAction(action, i)}
-            disabled={executed[i]}
-          >
-            {executed[i] ? 'Done' : 'Run'}
-          </button>
-        </div>
-      ))}
-    </div>
-  );
+  return null;
 }
 
 function ChatPage({ settings, memory, people }) {
@@ -1226,7 +1223,7 @@ function ChatPage({ settings, memory, people }) {
               )}
             </div>
             {msg.actions && msg.actions.length > 0 && (
-              <ActionCard actions={msg.actions} />
+              <AutoRunActions actions={msg.actions} />
             )}
             <div className="msg-time">{formatTime(msg.time)}</div>
           </div>
@@ -1672,11 +1669,7 @@ function App() {
                 <div className="briefing-label">☀️ Morning Briefing</div>
                 <div className="briefing-text">{briefing.text}</div>
                 {briefing.actions.length > 0 && (
-                  <div className="briefing-actions">
-                    {briefing.actions.map((a, i) => (
-                      <ActionCard key={i} action={a} />
-                    ))}
-                  </div>
+                  <AutoRunActions actions={briefing.actions} />
                 )}
                 <button className="briefing-dismiss" onClick={() => setBriefing(null)}>Dismiss</button>
               </div>

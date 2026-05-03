@@ -266,7 +266,7 @@ app.post('/process-audio', upload.single('audio'), async (req, res) => {
 WHAT YOU KNOW ABOUT THIS PERSON:
 ${memory || 'Nothing yet.'}
 
-Current time: ${new Date().toLocaleString('en-GB')}`;
+Current time: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}`;
 
     const claudeRes = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -447,7 +447,7 @@ ${history.slice(-5).map(m => `${m.role}: ${m.content}`).join('\n') || 'No recent
 
 Give a brief morning-style update. Keep it natural and friendly — not a corporate briefing. If there's nothing interesting, just say hi and check in. Don't make stuff up. Be brief — under 100 words.
 
-The current time is: ${now.toLocaleString('en-GB')}`;
+The current time is: ${now.toLocaleString('en-GB', { timeZone: 'Europe/London' })}`;
 
     const claudeRes = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -496,7 +496,9 @@ app.post('/chat', async (req, res) => {
 
     const cleanHistory = history.filter(m => m.role !== 'system');
 
-    const systemPrompt = `${OXCY_SYSTEM_PROMPT}
+    const now = new Date();
+const timeStr = now.toLocaleString('en-GB', { timeZone: 'Europe/London' });
+const systemPrompt = `${OXCY_SYSTEM_PROMPT}
 
 WHAT YOU KNOW ABOUT THIS PERSON:
 ${memory || 'Nothing yet.'}
@@ -507,7 +509,7 @@ ${preferences || 'Still learning.'}
 CONNECTED APPS:
 ${availableActions}
 
-Current time: ${new Date().toLocaleString('en-GB')}`;
+Current time: ${timeStr}`;
 
     const claudeRes = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',

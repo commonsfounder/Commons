@@ -126,16 +126,8 @@ module.exports = async function handler(req, res) {
 
   let rawBody = '';
   try {
-    await new Promise((resolve, reject) => {
-      req.on('data', chunk => { rawBody += chunk; });
-      req.on('end', resolve);
-      req.on('error', reject);
-    });
-
-    if (rawBody.length < 5) {
-      return res.status(400).json({ error: 'empty body' });
-    }
-    const body = JSON.parse(rawBody);
+    // Vercel auto-parses JSON bodies
+    const body = req.body || {};
     const { message, userId = 'default' } = body;
 
     if (!message?.trim()) {

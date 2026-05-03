@@ -419,6 +419,8 @@ app.post('/chat', async (req, res) => {
     ]);
     await saveMessage(userId, 'user', message);
 
+    const cleanHistory = history.filter(m => m.role !== 'system');
+
     const systemPrompt = `${OXCY_SYSTEM_PROMPT}
 
 WHAT YOU KNOW ABOUT THIS PERSON:
@@ -430,7 +432,7 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 600,
       system: systemPrompt,
-      messages: [...history, { role: 'user', content: message }]
+      messages: [...cleanHistory, { role: 'user', content: message }]
     });
 
     const { spoken, actions } = parseActions(claudeRes.content[0].text);

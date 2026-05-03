@@ -171,6 +171,38 @@ async function getPreferences(userId) {
   return data.map(p => `${p.key}: ${p.value}`).join('\n');
 }
 
+async function getEnabledConnectors(userId) {
+  const { data, error } = await supabase
+    .from('connectors')
+    .select('connector_id')
+    .eq('user_id', userId)
+    .eq('enabled', true);
+  if (error || !data) return [];
+  return data.map(c => c.connector_id);
+}
+
+function buildAvailableActions(enabled) {
+  const actionMap = {
+    imessage: 'SendMessage via iMessage',
+    whatsapp: 'SendMessage via WhatsApp',
+    reminders: 'SetReminder',
+    spotify: 'PlayMusic',
+    homekit: 'HomeKit',
+    gmail: 'SendEmail via Gmail',
+    calendar: 'CreateCalendarEvent',
+    maps: 'GetDirections via Google Maps',
+    uber: 'BookUber',
+    deliveroo: 'OrderFood via Deliveroo',
+    monzo: 'CheckBalance via Monzo',
+    betfair: 'PlaceBet via Betfair',
+    notion: 'CreateNote in Notion',
+    trainline: 'SearchTrains via Trainline'
+  };
+  if (enabled.length === 0) return 'No connectors enabled. Only return the action block when asked — the user will handle it manually.';
+  const active = enabled.map(id => actionMap[id] || id).filter(Boolean);
+  return `Available actions: ${active.join(', ')}. Only use these — don't suggest actions for connectors that aren't enabled.`;
+}
+
 async function savePreference(userId, key, value) {
   await supabase
     .from('preferences')
@@ -458,6 +490,8 @@ app.post('/chat', async (req, res) => {
       getHistory(userId),
       getPreferences(userId)
     ]);
+    const enabledConnectors = await getEnabledConnectors(userId);
+    const availableActions = buildAvailableActions(enabledConnectors);
     await saveMessage(userId, 'user', message);
 
     const cleanHistory = history.filter(m => m.role !== 'system');
@@ -469,6 +503,9 @@ ${memory || 'Nothing yet.'}
 
 HOW THE USER LIKES THINGS (learned over time):
 ${preferences || 'Still learning.'}
+
+CONNECTED APPS:
+${availableActions}
 
 Current time: ${new Date().toLocaleString('en-GB')}`;
 

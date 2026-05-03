@@ -778,6 +778,22 @@
   }
   .msg-run-link:hover { background: rgba(244,162,97,0.2); }
 
+  .install-btn {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--teal);
+    background: var(--teal-dim);
+    border: 1px solid rgba(42,191,191,0.3);
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .install-btn:hover { background: var(--teal-mid); }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -1645,6 +1661,19 @@ function SettingsPage({ settings, setSettings }) {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="section">
+        <div className="section-title">Shortcut</div>
+        <div className="settings-group">
+          <div className="setting-row">
+            <div className="setting-info">
+              <div className="setting-label">Install iOS Shortcut</div>
+              <div className="setting-desc">Required for actions (messages, reminders, calls, music)</div>
+            </div>
+            <a href="/install-shortcut" className="install-btn">Download</a>
           </div>
         </div>
       </div>

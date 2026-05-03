@@ -128,6 +128,8 @@ module.exports = async function handler(req, res) {
     let body;
     if (typeof req.body === 'string') {
       body = JSON.parse(req.body);
+    } else if (req.body instanceof Buffer) {
+      body = JSON.parse(req.body.toString());
     } else {
       body = req.body;
     }

@@ -1,0 +1,28 @@
+{
+  "rewrites": [
+    {
+      "source": "/chat",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/process-audio",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/memory",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/health",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/memory/:path",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/history/:userId",
+      "destination": "/api/index.js"
+    }
+  ]
+}

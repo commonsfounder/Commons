@@ -758,6 +758,26 @@
   }
   .stop-btn:hover { background: var(--teal-dim); }
 
+  .msg-actions-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .msg-run-link {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: rgba(244,162,97,0.12);
+    border: 1px solid rgba(244,162,97,0.3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .msg-run-link:hover { background: rgba(244,162,97,0.2); }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
@@ -930,27 +950,50 @@ function formatTime(date) {
 }
 
 function AutoRunActions({ actions }) {
+  const [ran, setRan] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+
   useEffect(() => {
     if (!actions || actions.length === 0) return;
-    
-    actions.forEach((action, i) => {
-      setTimeout(() => {
-        const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(JSON.stringify(action))}`;
-        const iframe = document.createElement('iframe');
-        iframe.style.display = 'none';
-        iframe.src = shortcutUrl;
-        document.body.appendChild(iframe);
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-        
-        fetch('/action-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: USER_ID, action, status: 'executed' })
-        }).catch(() => {});
-      }, i * 500);
-    });
+
+    const run = () => {
+      actions.forEach((action, i) => {
+        setTimeout(() => {
+          const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(JSON.stringify(action))}`;
+          const link = document.createElement('a');
+          link.href = shortcutUrl;
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          const result = link.click();
+          document.body.removeChild(link);
+          
+          fetch('/action-log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: USER_ID, action, status: 'executed' })
+          }).catch(() => {});
+        }, i * 800);
+      });
+      setRan(true);
+    };
+
+    run();
+
+    setTimeout(() => {
+      if (document.hidden) {
+        setRan(true);
+      } else {
+        setBlocked(true);
+      }
+    }, 5000);
   }, [actions]);
 
+  if (ran) return null;
+  if (blocked) return (
+    <div className="action-hint" style={{ fontSize:'11px', color:'var(--muted)', padding:'4px 0', fontStyle:'italic' }}>
+      If the shortcut didn't run, tap the "Run" link below to approve it once. After that, it'll work automatically.
+    </div>
+  );
   return null;
 }
 
@@ -1232,6 +1275,19 @@ function ChatPage({ settings, memory, people, initialQuery }) {
             </div>
             {msg.actions && msg.actions.length > 0 && (
               <AutoRunActions actions={msg.actions} />
+            )}
+            {msg.actions && msg.actions.length > 0 && (
+              <div className="msg-actions-bar">
+                {msg.actions.map((a, i) => (
+                  <a
+                    key={i}
+                    href={`shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(JSON.stringify(a))}`}
+                    className="msg-run-link"
+                  >
+                    {a.type === 'shortcut' ? a.name : a.type}
+                  </a>
+                ))}
+              </div>
             )}
             <div className="msg-time">{formatTime(msg.time)}</div>
           </div>

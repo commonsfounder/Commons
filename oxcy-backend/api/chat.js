@@ -124,8 +124,8 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
+  let rawBody = '';
   try {
-    let rawBody = '';
     await new Promise((resolve, reject) => {
       req.on('data', chunk => { rawBody += chunk; });
       req.on('end', resolve);
@@ -133,7 +133,7 @@ module.exports = async function handler(req, res) {
     });
 
     if (rawBody.length < 5) {
-      return res.status(400).json({ error: 'empty body', rawBody: rawBody });
+      return res.status(400).json({ error: 'empty body' });
     }
     const body = JSON.parse(rawBody);
     const { message, userId = 'default' } = body;
@@ -172,6 +172,7 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
     res.status(200).json({ text: spoken, actions });
 
   } catch (err) {
-    res.status(500).json({ error: err.message, rawBody: rawBody });
+    console.error('chat error:', err.message, '| body:', rawBody);
+    res.status(500).json({ error: err.message });
   }
 };

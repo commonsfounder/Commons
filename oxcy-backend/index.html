@@ -760,23 +760,26 @@
 
   .msg-actions-bar {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-top: 8px;
   }
-  .msg-run-link {
+  .msg-action-status {
     font-size: 11px;
     letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: var(--amber);
-    background: rgba(244,162,97,0.12);
-    border: 1px solid rgba(244,162,97,0.3);
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 6px;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.15s;
   }
-  .msg-run-link:hover { background: rgba(244,162,97,0.2); }
+  .msg-action-status.ok {
+    color: #4ade80;
+    background: rgba(74,222,128,0.12);
+    border: 1px solid rgba(74,222,128,0.3);
+  }
+  .msg-action-status.fail {
+    color: #f87171;
+    background: rgba(248,113,113,0.12);
+    border: 1px solid rgba(248,113,113,0.3);
+  }
 
   .install-btn {
     display: inline-block;
@@ -1292,19 +1295,11 @@ function ChatPage({ settings, memory, people, initialQuery }) {
             {msg.actions && msg.actions.length > 0 && (
               <div className="msg-actions-bar">
                 {msg.actions.map((a, i) => {
-                  const text = a.type === 'shortcut' ? a.name : a.type;
-                  const input = JSON.stringify({ name: a.name, input: a.input || {} });
-                  const shortcutUrl = `shortcuts://run-shortcut?name=Oxy&input=${encodeURIComponent(input)}`;
+                  const ok = a.result?.success;
                   return (
-                    <button
-                      key={i}
-                      className="msg-run-link"
-                      onClick={() => {
-                        window.open(shortcutUrl, '_blank');
-                      }}
-                    >
-                      ▶ {text}
-                    </button>
+                    <span key={i} className={`msg-action-status ${ok ? 'ok' : 'fail'}`}>
+                      {ok ? '✓' : '✗'} {a.action} {ok ? 'done' : 'failed'}
+                    </span>
                   );
                 })}
               </div>

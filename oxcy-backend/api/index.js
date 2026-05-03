@@ -27,6 +27,25 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+const MCP_SERVER_URL = process.env.MCP_SERVER_URL;
+
+async function callMcpTool(tool, args) {
+  if (!MCP_SERVER_URL) {
+    return { success: false, error: 'MCP server not configured' };
+  }
+  try {
+    const resp = await axios.post(MCP_SERVER_URL, {
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: 'tools/call',
+      params: { name: tool, arguments: args }
+    }, { timeout: 15000 });
+    return resp.data?.result || { success: false, error: 'No result from MCP' };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 const OXCY_SYSTEM_PROMPT = `You are Oxcy. Intelligent personal assistant.
 
 CORE BEHAVIOR:
@@ -45,15 +64,15 @@ When you need current information (news, sports, prices, events, weather, etc.) 
 </action>
 
 PHYSICAL ACTIONS:
-When the user asks you to send a message, set a reminder, call someone, play music, or control HomeKit — return the action block:
+When the user asks you to send a message, set a reminder, call someone, play music, or control HomeKit — return the action block. I will execute it directly:
 <action>
 {
   "actions": [
-    {"type": "shortcut", "name": "SendMessage", "input": {"contact": "name", "message": "text"}},
-    {"type": "shortcut", "name": "SetReminder", "input": {"text": "reminder", "time": "HH:MM"}},
-    {"type": "shortcut", "name": "PlayMusic", "input": {"query": "search term"}},
-    {"type": "shortcut", "name": "MakeCall", "input": {"contact": "name"}},
-    {"type": "shortcut", "name": "HomeKit", "input": {"scene": "scene name"}}
+    {"type": "send_message", "input": {"contact": "name", "message": "text"}},
+    {"type": "create_reminder", "input": {"title": "reminder", "due_date": "ISO date"}},
+    {"type": "play_music", "input": {"query": "search term"}},
+    {"type": "make_call", "input": {"contact": "name"}},
+    {"type": "create_calendar_event", "input": {"title": "event", "start_date": "ISO date", "end_date": "ISO date"}}
   ]
 }
 </action>
@@ -183,20 +202,20 @@ async function getEnabledConnectors(userId) {
 
 function buildAvailableActions(enabled) {
   const actionMap = {
-    imessage: 'SendMessage via iMessage',
-    whatsapp: 'SendMessage via WhatsApp',
-    reminders: 'SetReminder',
-    spotify: 'PlayMusic',
-    homekit: 'HomeKit',
-    gmail: 'SendEmail via Gmail',
-    calendar: 'CreateCalendarEvent',
-    maps: 'GetDirections via Google Maps',
-    uber: 'BookUber',
-    deliveroo: 'OrderFood via Deliveroo',
-    monzo: 'CheckBalance via Monzo',
-    betfair: 'PlaceBet via Betfair',
-    notion: 'CreateNote in Notion',
-    trainline: 'SearchTrains via Trainline'
+    imessage: 'send_message via iMessage',
+    whatsapp: 'send_message via WhatsApp',
+    reminders: 'create_reminder',
+    spotify: 'play_music',
+    homekit: 'homekit_control',
+    gmail: 'send_email via Gmail',
+    calendar: 'create_calendar_event',
+    maps: 'get_directions',
+    uber: 'book_uber',
+    deliveroo: 'order_food',
+    monzo: 'check_balance',
+    betfair: 'place_bet',
+    notion: 'create_note',
+    trainline: 'search_trains'
   };
   if (enabled.length === 0) return 'No connectors enabled. Only return the action block when asked — the user will handle it manually.';
   const active = enabled.map(id => actionMap[id] || id).filter(Boolean);
@@ -282,6 +301,20 @@ Current time: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' }
       await saveMemory(userId, `User: ${userText}`);
     }
 
+    // Execute physical actions via MCP
+    const actionResults = [];
+    for (const action of actions) {
+      console.log('[mcp] executing:', action.type, action.input);
+      const result = await callMcpTool(action.type, action.input || {});
+      actionResults.push({ action: action.type, result });
+      await supabase.from('action_log').insert({
+        user_id: userId,
+        action: JSON.stringify(action),
+        status: result.success ? 'executed' : 'failed',
+        created_at: new Date().toISOString()
+      });
+    }
+
     console.log('[3/4] Generating voice...');
     const audioBase64 = await generateSpeech(spoken, 'British Warm');
 
@@ -291,7 +324,7 @@ Current time: ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' }
       text: spoken,
       audio: audioBase64,
       audioFormat: 'mp3',
-      actions
+      actions: actionResults
     });
 
   } catch (err) {
@@ -547,6 +580,21 @@ Current time: ${timeStr}`;
       actions = followParsed.actions;
     }
 
+    // Execute physical actions via MCP
+    const actionResults = [];
+    const physicalActions = actions.filter(a => a.type !== 'search');
+    for (const action of physicalActions) {
+      console.log('[mcp] executing:', action.type, action.input);
+      const result = await callMcpTool(action.type, action.input || {});
+      actionResults.push({ action: action.type, result });
+      await supabase.from('action_log').insert({
+        user_id: userId,
+        action: JSON.stringify(action),
+        status: result.success ? 'executed' : 'failed',
+        created_at: new Date().toISOString()
+      });
+    }
+
     await saveMessage(userId, 'assistant', spoken);
 
     if (shouldSaveMemory(message)) {
@@ -565,7 +613,7 @@ Current time: ${timeStr}`;
       }
     }
 
-    const result = { text: spoken, actions };
+    const result = { text: spoken, actions: actionResults };
 
     if (wantsTTS) {
       result.audio = await generateSpeech(spoken, settings.voice);

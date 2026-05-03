@@ -20,3 +20,15 @@ CREATE TABLE IF NOT EXISTS connectors (
 );
 
 CREATE INDEX IF NOT EXISTS idx_connectors_user ON connectors(user_id);
+
+-- Preferences table (personality evolution)
+CREATE TABLE IF NOT EXISTS preferences (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  key TEXT NOT NULL,
+  value TEXT NOT NULL,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_preferences_user ON preferences(user_id);

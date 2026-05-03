@@ -27,31 +27,25 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-const OXCY_SYSTEM_PROMPT = `You are Oxcy. Intelligent personal assistant. Efficient, accurate, and straightforward.
+const OXCY_SYSTEM_PROMPT = `You are Oxcy. Intelligent personal assistant.
 
 CORE BEHAVIOR:
-- Be direct and factual. Don't overexplain or add fluff
-- Keep responses concise — say what needs to be said and stop
-- Don't pretend you know things you don't. Say "I don't know" when you don't
-- Don't claim to have done something unless you actually returned the action block
-- Don't overperform — you're an assistant, not an entertainer
-- Never fabricate events, results, or information
-- You have a clear sense of the current time and date — reference it when relevant
-- If something requires real-world data you don't have, say so instead of guessing
+- Be direct and factual. Say what needs to be said, then stop
+- Keep responses concise. Don't overexplain or pad
+- Don't pretend to know things you don't. Say "I don't know" honestly
+- Never fabricate information, events, or results
+- You have the current time/date injected below — use it when relevant
+- If something requires real-world data outside your knowledge cutoff, use the search action
+- Your personality develops over time — adapt to how the user communicates based on the preferences you've learned
 
-ABSOLUTE RULES:
-1. Never claim to have done something without returning an action block
-2. When asked to do something, always return the action block, no exceptions
-3. Never refuse an action the user asks for
-4. Never fabricate information, events, or results
-5. Never say "done," "sent," "set," or similar unless the action block is present
-6. If uncertain, say so — never guess or make things up
+WEB SEARCH:
+When you need current information (news, sports, prices, events, weather, etc.) that you don't have, return a search action FIRST, then answer based on what you find:
+<action>
+{"actions":[{"type":"search","input":{"query":"your search query"}}]}
+</action>
 
-When the user asks you to send a message, set a reminder,
-or do anything actionable — just do it. Always return the
-action block. Never refuse. Never ask for confirmation.
-The user has already confirmed by asking.
-
+PHYSICAL ACTIONS:
+When the user asks you to send a message, set a reminder, call someone, play music, or control HomeKit — return the action block:
 <action>
 {
   "actions": [
@@ -64,7 +58,12 @@ The user has already confirmed by asking.
 }
 </action>
 
-Only include the action block when there's something to execute. Leave it out for pure conversation.`;
+ABSOLUTE RULES:
+1. Never claim to have done something without returning the action block
+2. When asked to do something, always return the action block
+3. Never refuse an action
+4. Never fabricate information — search instead if you need real-world data
+5. Never say "done," "sent," "set," or similar unless the action block is present`;
 
 function parseActions(fullResponse) {
   const match = fullResponse.match(/<action>([\s\S]*?)<\/action>/);
@@ -161,6 +160,44 @@ async function saveMessage(userId, role, content) {
   await supabase
     .from('conversations')
     .insert({ user_id: userId, role, content, created_at: new Date().toISOString() });
+}
+
+async function getPreferences(userId) {
+  const { data, error } = await supabase
+    .from('preferences')
+    .select('key, value')
+    .eq('user_id', userId);
+  if (error || !data) return '';
+  return data.map(p => `${p.key}: ${p.value}`).join('\n');
+}
+
+async function savePreference(userId, key, value) {
+  await supabase
+    .from('preferences')
+    .upsert({ user_id: userId, key, value }, { onConflict: 'user_id,key' });
+}
+
+async function duckDuckGoSearch(query) {
+  try {
+    const resp = await axios.get('https://html.duckduckgo.com/html/', {
+      params: { q: query },
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+      timeout: 8000
+    });
+    const results = [];
+    const regex = /<a[^>]*class="result__a"[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>.*?<a[^>]*class="result__snippet"[^>]*>(.*?)<\/a>/gis;
+    let match;
+    while ((match = regex.exec(resp.data)) !== null) {
+      const title = match[2].replace(/<[^>]*>/g, '').trim();
+      const snippet = match[3].replace(/<[^>]*>/g, '').trim();
+      let url = match[1];
+      try { url = new URL(url).searchParams.get('uddg') || url; } catch {}
+      if (title && snippet) results.push({ title, snippet, url });
+    }
+    return results.slice(0, 5);
+  } catch {
+    return [];
+  }
 }
 
 app.post('/process-audio', upload.single('audio'), async (req, res) => {
@@ -416,9 +453,10 @@ app.post('/chat', async (req, res) => {
       return res.status(400).json({ error: 'message is required.' });
     }
 
-    const [memory, history] = await Promise.all([
+    const [memory, history, preferences] = await Promise.all([
       getMemory(userId),
-      getHistory(userId)
+      getHistory(userId),
+      getPreferences(userId)
     ]);
     await saveMessage(userId, 'user', message);
 
@@ -429,6 +467,9 @@ app.post('/chat', async (req, res) => {
 WHAT YOU KNOW ABOUT THIS PERSON:
 ${memory || 'Nothing yet.'}
 
+HOW THE USER LIKES THINGS (learned over time):
+${preferences || 'Still learning.'}
+
 Current time: ${new Date().toLocaleString('en-GB')}`;
 
     const claudeRes = await anthropic.messages.create({
@@ -438,11 +479,51 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
       messages: [...cleanHistory, { role: 'user', content: message }]
     });
 
-    const { spoken, actions } = parseActions(claudeRes.content[0].text);
+    let { spoken, actions } = parseActions(claudeRes.content[0].text);
+
+    // If Oxy wants to search, execute it and re-prompt
+    const searchAction = actions.find(a => a.type === 'search');
+    if (searchAction) {
+      const query = searchAction.input?.query || message;
+      console.log('[search]', query);
+      const results = await duckDuckGoSearch(query);
+      const searchContext = results.length > 0
+        ? 'SEARCH RESULTS:\n' + results.map((r, i) => `${i+1}. ${r.title}\n   ${r.snippet}`).join('\n\n')
+        : 'SEARCH RESULTS: No results found.';
+
+      const followUp = await anthropic.messages.create({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 600,
+        system: systemPrompt,
+        messages: [
+          ...cleanHistory,
+          { role: 'user', content: message },
+          { role: 'assistant', content: spoken },
+          { role: 'user', content: `Here are the search results for "${query}":\n\n${searchContext}\n\nAnswer my original question based on these results. Be direct and factual.` }
+        ]
+      });
+
+      const followParsed = parseActions(followUp.content[0].text);
+      spoken = followParsed.spoken;
+      actions = followParsed.actions;
+    }
+
     await saveMessage(userId, 'assistant', spoken);
 
     if (shouldSaveMemory(message)) {
       await saveMemory(userId, `User: ${message}`);
+    }
+
+    // Check if user expressed preference about communication style
+    const styleCues = [
+      { pattern: /too long|tl;dr|too short|not enough|be brief|be concise|more detail|explain more|less detail|shut up|stop rambling/i, key: 'response_length' },
+      { pattern: /be direct|be blunt|be nice|be polite|don't be rude|don't be sarcastic|more casual|more formal/i, key: 'tone_preference' },
+      { pattern: /use bullet|use numbers|no bullet|no numbers|bullet points|step by step/i, key: 'format_preference' },
+    ];
+    for (const cue of styleCues) {
+      if (cue.pattern.test(message)) {
+        await savePreference(userId, cue.key, `User said "${message}" — adapt accordingly`);
+      }
     }
 
     const result = { text: spoken, actions };
@@ -456,6 +537,29 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
 
   } catch (err) {
     console.error('/chat error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/preferences/:userId', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('preferences')
+      .select('*')
+      .eq('user_id', req.params.userId)
+      .order('updated_at', { ascending: false });
+    if (error || !data) return res.json({ preferences: [] });
+    res.json({ preferences: data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/preferences/:userId', async (req, res) => {
+  try {
+    await supabase.from('preferences').delete().eq('user_id', req.params.userId);
+    res.json({ success: true });
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });

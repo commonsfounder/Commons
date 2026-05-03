@@ -164,7 +164,11 @@ Current time: ${new Date().toLocaleString('en-GB')}`;
     res.status(200).json({ text: spoken, actions });
 
   } catch (err) {
-    console.error('chat error:', err.message, '| body:', rawBody);
-    res.status(500).json({ error: err.message });
+    const debug = {
+      error: err.message,
+      bodyType: typeof req.body,
+      bodyLength: req.body ? (typeof req.body === 'string' ? req.body.length : req.body.toString ? req.body.toString().length : 'unknown') : 'undefined'
+    };
+    res.status(500).json(debug);
   }
 };

@@ -125,19 +125,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    let body;
-    console.log('req.body type:', typeof req.body, 'isBuffer:', req.body instanceof Buffer);
-    if (typeof req.body === 'string') {
-      body = JSON.parse(req.body);
-    } else if (req.body instanceof Buffer) {
-      body = JSON.parse(req.body.toString());
-    } else if (req.body) {
-      body = req.body;
-    } else {
-      body = {};
-    }
-    console.log('Parsed body:', JSON.stringify(body).substring(0, 200));
-
+    const body = req.body || {};
     const { message, userId = 'default' } = body;
 
     if (!message?.trim()) {

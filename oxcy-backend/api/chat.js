@@ -132,7 +132,10 @@ module.exports = async function handler(req, res) {
       req.on('error', reject);
     });
 
-    const body = rawBody ? JSON.parse(rawBody) : {};
+    if (rawBody.length < 5) {
+      return res.status(400).json({ error: 'empty body', rawBody: rawBody });
+    }
+    const body = JSON.parse(rawBody);
     const { message, userId = 'default' } = body;
 
     if (!message?.trim()) {

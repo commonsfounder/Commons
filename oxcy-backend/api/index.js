@@ -35,12 +35,10 @@ async function callMcpTool(tool, args) {
   }
   try {
     const resp = await axios.post(MCP_SERVER_URL, {
-      jsonrpc: '2.0',
-      id: Date.now(),
-      method: 'tools/call',
-      params: { name: tool, arguments: args }
+      name: tool,
+      arguments: args
     }, { timeout: 15000 });
-    return resp.data?.result || { success: false, error: 'No result from MCP' };
+    return resp.data;
   } catch (e) {
     return { success: false, error: e.message };
   }

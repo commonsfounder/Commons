@@ -954,7 +954,7 @@ function AutoRunActions({ actions }) {
   return null;
 }
 
-function ChatPage({ settings, memory, people }) {
+function ChatPage({ settings, memory, people, initialQuery }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -985,6 +985,14 @@ function ChatPage({ settings, memory, people }) {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  const autoSend = useRef(false);
+  useEffect(() => {
+    if (initialQuery && !autoSend.current && messages.length === 0) {
+      autoSend.current = true;
+      sendMessage(initialQuery);
+    }
+  }, [initialQuery]);
 
   const stopSpeaking = () => {
     if (audioRef.current) {
@@ -1131,13 +1139,13 @@ function ChatPage({ settings, memory, people }) {
     setLoading(false);
   };
 
-  const sendMessage = useCallback(async () => {
-    const text = input.trim();
+  const sendMessage = useCallback(async (overrideText) => {
+    const text = (overrideText || input).trim();
     if (!text || loading) return;
 
     const userMsg = { role: 'user', content: text, time: new Date() };
     setMessages(prev => [...prev, userMsg]);
-    setInput('');
+    if (!overrideText) setInput('');
     setLoading(true);
     stopSpeaking();
 
@@ -1604,6 +1612,15 @@ function App() {
     autonomy: 'Medium'
   });
   const [briefing, setBriefing] = useState(null);
+  const [initialQuery, setInitialQuery] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) {
+      setInitialQuery(decodeURIComponent(q));
+    }
+  }, []);
 
   const pages = [
     { id: 'chat', label: 'Chat', icon: '💬' },
@@ -1678,6 +1695,7 @@ function App() {
               settings={settings}
               memory={memory}
               people={people}
+              initialQuery={initialQuery}
             />
           </>
         )}

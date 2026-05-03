@@ -23,6 +23,26 @@
     {
       "source": "/history/:userId",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/action-log",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/action-log/:userId",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/connectors",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/connectors/:userId",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/briefing/:userId",
+      "destination": "/api/index.js"
     }
   ]
 }

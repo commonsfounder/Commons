@@ -125,7 +125,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const body = req.body || {};
+    let rawBody = '';
+    await new Promise((resolve, reject) => {
+      req.on('data', chunk => { rawBody += chunk; });
+      req.on('end', resolve);
+      req.on('error', reject);
+    });
+
+    const body = rawBody ? JSON.parse(rawBody) : {};
     const { message, userId = 'default' } = body;
 
     if (!message?.trim()) {
